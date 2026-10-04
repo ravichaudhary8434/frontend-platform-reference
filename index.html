@@ -1,0 +1,2832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frontend Platform Engineering — A Working Reference</title>
+<style>
+:root{
+  --bg:#fbfbfa; --card:#ffffff; --ink:#1a1a18; --muted:#6b6b66;
+  --line:#c9c9c2; --grid:#e6e6e0; --rule:#e8e8e2;
+  --accent:#2563eb; --accent-tint:#dbeafe;
+  --good:#15803d; --good-tint:#dcfce7;
+  --warn:#b45309; --warn-tint:#fef3c7;
+  --bad:#b91c1c;  --bad-tint:#fee2e2;
+  --tint:#f1f1ec; --code-bg:#f4f4ef;
+  --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#16161a; --card:#1d1d22; --ink:#e8e8e3; --muted:#9a9a93;
+    --line:#4a4a52; --grid:#2e2e35; --rule:#2e2e35;
+    --accent:#60a5fa; --accent-tint:#1e3a5f;
+    --good:#4ade80; --good-tint:#14532d;
+    --warn:#fbbf24; --warn-tint:#4a3410;
+    --bad:#f87171;  --bad-tint:#4c1d1d;
+    --tint:#24242b; --code-bg:#23232a;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.6 var(--sans); -webkit-font-smoothing:antialiased;
+}
+.layout{display:grid; grid-template-columns:300px minmax(0,1fr); gap:0; align-items:start}
+
+/* ---------- sidebar ---------- */
+aside{
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  border-right:1px solid var(--rule); padding:20px 14px 60px; background:var(--card);
+}
+aside h1{font-size:14px; line-height:1.35; margin:0 0 4px; letter-spacing:-.01em}
+aside .sub{font-size:11.5px; color:var(--muted); margin:0 0 14px}
+#filter{
+  width:100%; padding:7px 9px; margin-bottom:12px; font:13px var(--sans);
+  background:var(--bg); color:var(--ink);
+  border:1px solid var(--line); border-radius:7px;
+}
+#filter:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent)}
+aside a{display:block; text-decoration:none; color:var(--ink); border-radius:6px}
+.nav-h2{font-weight:650; font-size:13px; padding:6px 8px; margin-top:8px}
+.nav-sub{margin:0 0 2px 8px; border-left:1px solid var(--rule); padding-left:6px}
+.nav-h3{font-size:12.5px; color:var(--muted); padding:3.5px 8px}
+aside a:hover{background:var(--tint)}
+aside a.active{background:var(--accent-tint); color:var(--ink)}
+.nav-h3 code{font-size:11.5px; background:none; padding:0}
+
+/* ---------- content ---------- */
+main{padding:44px 56px 140px; max-width:1040px}
+main > h1{
+  font-size:34px; line-height:1.15; letter-spacing:-.025em; margin:0 0 6px; font-weight:700;
+}
+h2{
+  font-size:25px; letter-spacing:-.02em; margin:72px 0 18px; padding-top:18px;
+  border-top:2px solid var(--ink); font-weight:700; scroll-margin-top:16px;
+}
+h2:first-of-type{margin-top:40px}
+h3{
+  font-size:18.5px; letter-spacing:-.01em; margin:38px 0 10px; font-weight:650;
+  scroll-margin-top:16px;
+}
+p{margin:0 0 13px}
+strong{font-weight:650}
+a{color:var(--accent)}
+ul,ol{margin:0 0 14px; padding-left:24px}
+li{margin:5px 0}
+li>ul,li>ol{margin:5px 0}
+hr{border:0; border-top:1px solid var(--rule); margin:28px 0}
+
+/* paragraph lead-ins: What it is / Example / Trade-offs / Follow-ups */
+p > strong:first-child{
+  color:var(--muted); font-size:11.5px; letter-spacing:.07em; text-transform:uppercase;
+  font-weight:700;
+}
+
+code{
+  font:0.875em var(--mono); background:var(--code-bg);
+  padding:1.5px 5px; border-radius:4px; border:1px solid var(--rule);
+}
+pre{
+  background:var(--code-bg); border:1px solid var(--rule); border-radius:10px;
+  padding:14px 16px; overflow-x:auto; margin:0 0 16px; line-height:1.52;
+}
+pre code{background:none; border:0; padding:0; font-size:13px}
+
+table{
+  border-collapse:collapse; width:100%; margin:4px 0 18px; font-size:14px;
+  display:block; overflow-x:auto;
+}
+th,td{border:1px solid var(--rule); padding:8px 11px; text-align:left; vertical-align:top}
+th{background:var(--tint); font-weight:650; font-size:12.5px; letter-spacing:.01em}
+tbody tr:nth-child(even){background:color-mix(in srgb, var(--tint) 45%, transparent)}
+
+/* ---------- diagrams ---------- */
+.dgw{margin:18px 0 22px; padding:16px 18px 12px; background:var(--card);
+     border:1px solid var(--rule); border-radius:12px}
+.dgw figcaption{margin-top:8px; font-size:12.5px; color:var(--muted); line-height:1.45}
+svg.dg{display:block; width:100%; height:auto; font-family:var(--sans); font-size:13px}
+svg.dg text{fill:var(--ink)}
+svg.dg .title{font-size:15.5px; font-weight:700}
+svg.dg .t{font-weight:650}
+svg.dg .s{font-size:11.5px; fill:var(--muted)}
+svg.dg .xs{font-size:10.5px; fill:var(--muted)}
+svg.dg .box{fill:var(--card); stroke:var(--line); stroke-width:1.25}
+svg.dg .box.hl{fill:var(--accent-tint); stroke:var(--accent); stroke-width:2}
+svg.dg .box.good{fill:var(--good-tint); stroke:var(--good)}
+svg.dg .box.warn{fill:var(--warn-tint); stroke:var(--warn)}
+svg.dg .box.bad{fill:var(--bad-tint); stroke:var(--bad)}
+svg.dg .lane{fill:var(--tint); stroke:var(--rule); stroke-width:1}
+svg.dg .edge{fill:none; stroke:var(--line); stroke-width:1.25; marker-end:url(#arw)}
+svg.dg .edge.accent{stroke:var(--accent); marker-end:url(#arwA)}
+svg.dg .dash{stroke-dasharray:4 4}
+svg.dg .grid{stroke:var(--grid); stroke-width:1}
+svg.dg .lifeline{stroke:var(--line); stroke-width:1; stroke-dasharray:3 4}
+svg.dg .seg-a{fill:var(--muted); opacity:.35}
+svg.dg .seg-b{fill:var(--accent); opacity:.55}
+svg.dg .seg-c{fill:var(--warn); opacity:.55}
+svg.dg .seg-d{fill:var(--bad); opacity:.5}
+svg.dg .fill-accent{fill:var(--accent)}
+svg.dg .fill-good{fill:var(--good)}
+svg.dg .fill-bad{fill:var(--bad)}
+svg.dg .arw{fill:var(--line)}
+svg.dg .arwA{fill:var(--accent)}
+
+/* ---------- print ---------- */
+@media print{
+  :root{--bg:#fff;--card:#fff;--ink:#000;--muted:#444;--line:#888;--rule:#ccc;--tint:#f2f2f2;--code-bg:#f6f6f6}
+  aside,#top{display:none}
+  .layout{display:block}
+  main{padding:0; max-width:none}
+  h2{break-before:page; border-top:1.5px solid #000}
+  h2:first-of-type{break-before:avoid}
+  h3,table,pre,.dgw{break-inside:avoid}
+  a{color:#000; text-decoration:none}
+}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  aside{position:static; height:auto; border-right:0; border-bottom:1px solid var(--rule)}
+  main{padding:28px 20px 100px}
+}
+
+#top{
+  position:fixed; right:22px; bottom:22px; padding:9px 14px; font-size:12.5px;
+  background:var(--card); color:var(--ink); border:1px solid var(--line);
+  border-radius:999px; cursor:pointer; opacity:0; pointer-events:none; transition:opacity .2s;
+}
+#top.show{opacity:1; pointer-events:auto}
+</style>
+</head>
+<body>
+<svg class="dg" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arw"/></marker>
+  <marker id="arwA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arwA"/></marker>
+</defs></svg>
+<div class="layout">
+<aside>
+  <h1>Frontend Platform Engineering</h1>
+  <p class="sub">A working reference · ◆ = has diagram</p>
+  <input id="filter" type="search" placeholder="Filter topics…" aria-label="Filter topics">
+  <nav id="nav"><a class="nav-h2" href="#1-how-to-use-this-reference">1. How to use this reference</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#11-the-areas-this-covers">1.1 The areas this covers</a>
+<a class="nav-h3" href="#12-how-each-topic-is-laid-out">1.2 How each topic is laid out</a>
+</div>
+<a class="nav-h2" href="#2-javascript-core">2. JavaScript core</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#21-execution-context-and-the-call-stack">2.1 Execution context and the call stack</a>
+<a class="nav-h3" href="#22-hoisting-and-the-temporal-dead-zone">2.2 Hoisting and the temporal dead zone</a>
+<a class="nav-h3" href="#23-scope-closures-and-the-scope-chain">2.3 Scope, closures and the scope chain</a>
+<a class="nav-h3" href="#24-the-event-loop">◆ 2.4 The event loop</a>
+<a class="nav-h3" href="#25-promises-and-asyncawait">2.5 Promises and async/await</a>
+<a class="nav-h3" href="#26-this-callapplybind-arrow-functions">2.6 this, call/apply/bind, arrow functions</a>
+<a class="nav-h3" href="#27-prototypes-and-classes">2.7 Prototypes and classes</a>
+<a class="nav-h3" href="#28-memory-and-garbage-collection">2.8 Memory and garbage collection</a>
+<a class="nav-h3" href="#29-the-patterns-asked-by-name">2.9 The patterns asked by name</a>
+</div>
+<a class="nav-h2" href="#3-typescript">3. TypeScript</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#31-structural-typing-and-branded-types">3.1 Structural typing and branded types</a>
+<a class="nav-h3" href="#32-any-vs-unknown-vs-never">3.2 any vs unknown vs never</a>
+<a class="nav-h3" href="#33-discriminated-unions">3.3 Discriminated unions</a>
+<a class="nav-h3" href="#34-generics-conditional-and-mapped-types">3.4 Generics, conditional and mapped types</a>
+<a class="nav-h3" href="#35-variance-and-where-typescript-is-unsound">3.5 Variance and where TypeScript is unsound</a>
+<a class="nav-h3" href="#36-runtime-validation-at-the-boundary">3.6 Runtime validation at the boundary</a>
+<a class="nav-h3" href="#37-declaration-merging-and-module-augmentation">3.7 Declaration merging and module augmentation</a>
+<a class="nav-h3" href="#38-typescript-at-monorepo-scale">3.8 TypeScript at monorepo scale</a>
+</div>
+<a class="nav-h2" href="#4-browser-internals">4. Browser internals</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#41-the-critical-rendering-path">◆ 4.1 The critical rendering path</a>
+<a class="nav-h3" href="#42-layout-paint-composite-what-each-change-costs">4.2 Layout, paint, composite — what each change costs</a>
+<a class="nav-h3" href="#43-reflow-and-layout-thrashing">4.3 Reflow and layout thrashing</a>
+<a class="nav-h3" href="#44-main-thread-vs-compositor-thread">4.4 Main thread vs compositor thread</a>
+<a class="nav-h3" href="#45-observers-and-platform-apis">4.5 Observers and platform APIs</a>
+<a class="nav-h3" href="#46-the-browser-as-a-security-boundary">4.6 The browser as a security boundary</a>
+</div>
+<a class="nav-h2" href="#5-rendering-architectures-and-react">5. Rendering architectures and React</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#51-csr-ssr-ssg-isr-streaming-islands-edge">◆ 5.1 CSR, SSR, SSG, ISR, streaming, islands, edge</a>
+<a class="nav-h3" href="#52-hydration">5.2 Hydration</a>
+<a class="nav-h3" href="#53-fiber-and-reconciliation">◆ 5.3 Fiber and reconciliation</a>
+<a class="nav-h3" href="#54-hooks">5.4 Hooks</a>
+<a class="nav-h3" href="#55-concurrent-rendering">5.5 Concurrent rendering</a>
+<a class="nav-h3" href="#56-server-components">5.6 Server Components</a>
+<a class="nav-h3" href="#57-state-management">5.7 State management</a>
+<a class="nav-h3" href="#58-react-vs-signals">5.8 React vs signals</a>
+</div>
+<a class="nav-h2" href="#6-web-protocols">6. Web protocols</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#61-what-happens-when-you-type-a-url">◆ 6.1 What happens when you type a URL</a>
+<a class="nav-h3" href="#62-dns">6.2 DNS</a>
+<a class="nav-h3" href="#63-tcp-vs-quic">6.3 TCP vs QUIC</a>
+<a class="nav-h3" href="#64-tls">6.4 TLS</a>
+<a class="nav-h3" href="#65-http-versions">◆ 6.5 HTTP versions</a>
+<a class="nav-h3" href="#66-http-methods-and-idempotency">6.6 HTTP methods and idempotency</a>
+<a class="nav-h3" href="#67-realtime-transports">6.7 Realtime transports</a>
+<a class="nav-h3" href="#68-api-shapes-rest-graphql-bff">6.8 API shapes: REST, GraphQL, BFF</a>
+</div>
+<a class="nav-h2" href="#7-caching-storage-and-offline">7. Caching, storage and offline</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#71-http-cache-headers">7.1 HTTP cache headers</a>
+<a class="nav-h3" href="#72-the-cache-busting-pattern">7.2 The cache-busting pattern</a>
+<a class="nav-h3" href="#73-cdn-and-the-cache-layer-stack">◆ 7.3 CDN and the cache layer stack</a>
+<a class="nav-h3" href="#74-browser-storage">7.4 Browser storage</a>
+<a class="nav-h3" href="#75-cookie-attributes">7.5 Cookie attributes</a>
+<a class="nav-h3" href="#76-service-workers-and-offline">7.6 Service Workers and offline</a>
+</div>
+<a class="nav-h2" href="#8-security">8. Security</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#81-same-origin-policy-and-cors">◆ 8.1 Same-origin policy and CORS</a>
+<a class="nav-h3" href="#82-xss">8.2 XSS</a>
+<a class="nav-h3" href="#83-content-security-policy">8.3 Content Security Policy</a>
+<a class="nav-h3" href="#84-csrf">8.4 CSRF</a>
+<a class="nav-h3" href="#85-security-headers">8.5 Security headers</a>
+<a class="nav-h3" href="#86-authentication-vs-authorization">8.6 Authentication vs authorization</a>
+<a class="nav-h3" href="#87-oauth-oidc-and-jwt">◆ 8.7 OAuth, OIDC and JWT</a>
+<a class="nav-h3" href="#88-token-storage">8.8 Token storage</a>
+<a class="nav-h3" href="#89-supply-chain-and-third-parties">8.9 Supply chain and third parties</a>
+<a class="nav-h3" href="#810-privacy-and-compliance-on-the-frontend">◆ 8.10 Privacy and compliance on the frontend</a>
+</div>
+<a class="nav-h2" href="#9-performance">9. Performance</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#91-core-web-vitals">◆ 9.1 Core Web Vitals</a>
+<a class="nav-h3" href="#92-measurement">9.2 Measurement</a>
+<a class="nav-h3" href="#93-loading-optimisation">9.3 Loading optimisation</a>
+<a class="nav-h3" href="#94-compression">9.4 Compression</a>
+<a class="nav-h3" href="#95-runtime-performance">9.5 Runtime performance</a>
+<a class="nav-h3" href="#96-budgets-and-enforcement">9.6 Budgets and enforcement</a>
+<a class="nav-h3" href="#97-a-performance-debugging-workflow">9.7 A performance debugging workflow</a>
+</div>
+<a class="nav-h2" href="#10-bundling-and-build-systems">10. Bundling and build systems</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#101-module-formats">10.1 Module formats</a>
+<a class="nav-h3" href="#102-what-a-bundler-does">10.2 What a bundler does</a>
+<a class="nav-h3" href="#103-tree-shaking">10.3 Tree shaking</a>
+<a class="nav-h3" href="#104-code-splitting-and-chunking">◆ 10.4 Code splitting and chunking</a>
+<a class="nav-h3" href="#105-tool-comparison">10.5 Tool comparison</a>
+<a class="nav-h3" href="#106-hmr">10.6 HMR</a>
+<a class="nav-h3" href="#107-build-speed-at-scale">10.7 Build speed at scale</a>
+</div>
+<a class="nav-h2" href="#11-platform-architecture">11. Platform architecture</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#111-styling-approaches">11.1 Styling approaches</a>
+<a class="nav-h3" href="#112-design-tokens">11.2 Design tokens</a>
+<a class="nav-h3" href="#113-component-api-design">11.3 Component API design</a>
+<a class="nav-h3" href="#114-publishing-shared-packages">11.4 Publishing shared packages</a>
+<a class="nav-h3" href="#115-monorepo-vs-polyrepo">11.5 Monorepo vs polyrepo</a>
+<a class="nav-h3" href="#116-micro-frontends">◆ 11.6 Micro-frontends</a>
+<a class="nav-h3" href="#117-many-apps-one-domain">11.7 Many apps, one domain</a>
+<a class="nav-h3" href="#118-the-frontend-data-layer">11.8 The frontend data layer</a>
+<a class="nav-h3" href="#119-developer-experience">11.9 Developer experience</a>
+</div>
+<a class="nav-h2" href="#12-testing">12. Testing</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#121-the-shape-trophy-not-pyramid">◆ 12.1 The shape: trophy, not pyramid</a>
+<a class="nav-h3" href="#122-testing-behaviour-not-implementation">12.2 Testing behaviour, not implementation</a>
+<a class="nav-h3" href="#123-mocking-and-msw">12.3 Mocking and MSW</a>
+<a class="nav-h3" href="#124-contract-testing">12.4 Contract testing</a>
+<a class="nav-h3" href="#125-visual-regression-and-accessibility-testing">12.5 Visual regression and accessibility testing</a>
+<a class="nav-h3" href="#126-flaky-tests">12.6 Flaky tests</a>
+<a class="nav-h3" href="#127-coverage">12.7 Coverage</a>
+<a class="nav-h3" href="#128-a-testing-strategy-for-a-large-frontend">12.8 A testing strategy for a large frontend</a>
+</div>
+<a class="nav-h2" href="#13-operations">13. Operations</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#131-pipeline-shape">◆ 13.1 Pipeline shape</a>
+<a class="nav-h3" href="#132-progressive-delivery">13.2 Progressive delivery</a>
+<a class="nav-h3" href="#133-frontend-rollback">13.3 Frontend rollback</a>
+<a class="nav-h3" href="#134-observability">13.4 Observability</a>
+<a class="nav-h3" href="#135-slos-and-error-budgets">13.5 SLOs and error budgets</a>
+<a class="nav-h3" href="#136-incident-handling">13.6 Incident handling</a>
+</div>
+<a class="nav-h2" href="#14-accessibility-and-internationalization">14. Accessibility and internationalization</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#141-wcag-essentials">14.1 WCAG essentials</a>
+<a class="nav-h3" href="#142-semantic-html-and-aria">14.2 Semantic HTML and ARIA</a>
+<a class="nav-h3" href="#143-keyboard-and-focus-management">14.3 Keyboard and focus management</a>
+<a class="nav-h3" href="#144-testing-accessibility">14.4 Testing accessibility</a>
+<a class="nav-h3" href="#145-internationalization-architecture">14.5 Internationalization architecture</a>
+</div>
+<a class="nav-h2" href="#15-applying-it">15. Applying it</a>
+<div class="nav-sub">
+<a class="nav-h3" href="#151-a-system-design-framework">15.1 A system-design framework</a>
+<a class="nav-h3" href="#152-worked-scenarios">15.2 Worked scenarios</a>
+<a class="nav-h3" href="#153-sources-and-further-reading">15.3 Sources and further reading</a>
+</div></nav>
+</aside>
+<main><h1 id="frontend-platform-engineering-a-working-reference">Frontend Platform Engineering — A Working Reference</h1>
+<p>A reference for the areas a frontend platform engineer is expected to reason about: <strong>web protocols and security</strong>, <strong>core web platform concepts</strong>, <strong>performance and bundling</strong>, and <strong>testing</strong>. Every topic follows the same shape — <em>What it is · Example · Trade-offs · Follow-ups</em> — so it can be used for lookup and revision rather than read front to back.</p>
+<h2 id="1-how-to-use-this-reference">1. How to use this reference</h2>
+<p>Each topic is short on purpose. The definitions are written to survive a follow-up question, and the trade-off line is the part worth memorising — knowing <em>that</em> a technique exists is cheap, knowing <em>what it costs</em> is the part that transfers.</p>
+<p><strong>Three passes.</strong> First pass: read the definitions and examples without memorising. Second pass: explain each topic aloud without looking. Third pass: answer the follow-up questions — they are where the real understanding shows.</p>
+<h3 id="11-the-areas-this-covers">1.1 The areas this covers</h3>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>What it spans</th>
+<th>Sections</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web protocol and security</td>
+<td>Browser interactions, security layers, data flow, resource delivery and persistence</td>
+<td>6, 7, 8</td>
+</tr>
+<tr>
+<td>Core web platform concepts</td>
+<td>Rendering strategies, component models, modern JS, build tools, styling</td>
+<td>2, 3, 4, 5, 11</td>
+</tr>
+<tr>
+<td>Performance and bundling</td>
+<td>DevTools fluency, root-cause diagnosis, systemic fixes at scale</td>
+<td>9, 10</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>Designing strategies and frameworks, raising quality across teams</td>
+<td>12, 13</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-how-each-topic-is-laid-out">1.2 How each topic is laid out</h3>
+<ul>
+<li><strong>What it is</strong> — the definition, stated precisely enough to survive a follow-up.</li>
+<li><strong>Example</strong> — code, a header, or a config fragment. Concrete, not illustrative prose.</li>
+<li><strong>Trade-offs</strong> — what you give up, and the condition under which you'd choose otherwise.</li>
+<li><strong>Follow-ups</strong> — the questions that come next. If you can answer these, you know the topic.</li>
+</ul>
+<h2 id="2-javascript-core">2. JavaScript core</h2>
+<h3 id="21-execution-context-and-the-call-stack">2.1 Execution context and the call stack</h3>
+<p><strong>What it is.</strong> Before code runs the engine creates an execution context holding a variable environment, a lexical environment and a <code>this</code> binding. Contexts stack on the call stack; the engine runs one at a time, LIFO.</p>
+<p><strong>Example.</strong> A stack trace is the call stack printed. <code>RangeError: Maximum call stack size exceeded</code> is that stack overflowing — typically unbounded recursion.</p>
+<p><strong>Trade-offs.</strong> The stack is synchronous and single-threaded. Anything long-running on it blocks rendering and input, which is the root of every INP problem.</p>
+<p><strong>Follow-ups.</strong> What's on the stack when a promise resolves? Why does a stack trace lose frames across an <code>await</code>?</p>
+<h3 id="22-hoisting-and-the-temporal-dead-zone">2.2 Hoisting and the temporal dead zone</h3>
+<p><strong>What it is.</strong> Declarations are registered during the creation phase. <code>var</code> is initialised to <code>undefined</code>; function declarations are initialised fully; <code>let</code>, <code>const</code> and <code>class</code> are registered but uninitialised — reading them before the declaration throws. That window is the temporal dead zone.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-javascript">console.log(a); // undefined
+console.log(b); // ReferenceError — TDZ
+var a = 1;
+let b = 2;
+
+foo();          // works — declaration hoisted whole
+bar();          // TypeError: bar is not a function
+function foo() {}
+var bar = function () {};
+</code></pre>
+<p><strong>Trade-offs.</strong> The TDZ turns a class of silent <code>undefined</code> bugs into loud errors, at the cost of ordering discipline.</p>
+<p><strong>Follow-ups.</strong> Why does the TDZ exist? Are function declarations hoisted inside blocks? What does <code>typeof b</code> do in the TDZ? (It throws — the one case where <code>typeof</code> is not safe.)</p>
+<h3 id="23-scope-closures-and-the-scope-chain">2.3 Scope, closures and the scope chain</h3>
+<p><strong>What it is.</strong> A closure is a function plus a reference to the lexical environment it was created in. Lookup walks the scope chain outward to the global scope.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-javascript">for (var i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 3 3 3 — one binding
+for (let i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 0 1 2 — per-iteration binding
+</code></pre>
+<p><strong>Trade-offs.</strong> Closures are the most common memory leak in long-lived SPAs: a listener closing over a DOM subtree keeps it alive after unmount. Guard with cleanup functions and <code>AbortController</code>.</p>
+<p><strong>Follow-ups.</strong> How would you implement <code>once</code>, memoise, or a private counter with a closure? How do closures cause detached-DOM leaks?</p>
+<h3 id="24-the-event-loop">2.4 The event loop</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 348" role="img" aria-label="One turn of the event loop: one macrotask, then all microtasks, then rendering">
+  <text class="title" x="16" y="24">Microtasks drain completely before the browser is allowed to paint</text>
+  <text class="s" x="16" y="44">One turn of the event loop</text>
+
+  <!-- cycle -->
+  <g>
+    <rect class="box" x="16"  y="68" width="196" height="52" rx="8"/>
+    <text class="t" x="114" y="92"  text-anchor="middle">1 · Run ONE macrotask</text>
+    <text class="s" x="114" y="110" text-anchor="middle">to completion</text>
+
+    <rect class="box hl" x="236" y="68" width="196" height="52" rx="8"/>
+    <text class="t" x="334" y="92"  text-anchor="middle">2 · Drain ALL microtasks</text>
+    <text class="s" x="334" y="110" text-anchor="middle">including newly queued ones</text>
+
+    <rect class="box" x="456" y="68" width="186" height="52" rx="8"/>
+    <text class="t" x="549" y="92"  text-anchor="middle">3 · rAF callbacks</text>
+    <text class="s" x="549" y="110" text-anchor="middle">requestAnimationFrame</text>
+
+    <rect class="box" x="666" y="68" width="198" height="52" rx="8"/>
+    <text class="t" x="765" y="92"  text-anchor="middle">4 · Style → Layout → Paint</text>
+    <text class="s" x="765" y="110" text-anchor="middle">the frame reaches the screen</text>
+  </g>
+
+  <path class="edge" d="M212 94H236"/>
+  <path class="edge" d="M432 94H456"/>
+  <path class="edge" d="M642 94H666"/>
+  <path class="edge" d="M765 120V146H114V120"/>
+  <text class="s" x="440" y="140" text-anchor="middle">next turn · idle time left over goes to requestIdleCallback</text>
+
+  <!-- queues -->
+  <rect class="box" x="16" y="176" width="416" height="118" rx="10"/>
+  <text class="t" x="34" y="200">Macrotask queue — one taken per turn</text>
+  <text class="s" x="34" y="222">setTimeout · setInterval · setImmediate</text>
+  <text class="s" x="34" y="242">DOM events (click, scroll, input)</text>
+  <text class="s" x="34" y="262">I/O · postMessage · MessageChannel</text>
+  <text class="s" x="34" y="282">Nested setTimeout clamps to 4 ms after 5 levels</text>
+
+  <rect class="box hl" x="448" y="176" width="416" height="118" rx="10"/>
+  <text class="t" x="466" y="200">Microtask queue — drained entirely</text>
+  <text class="s" x="466" y="222">promise .then / .catch / .finally</text>
+  <text class="s" x="466" y="242">everything after an await</text>
+  <text class="s" x="466" y="262">queueMicrotask · MutationObserver</text>
+  <text class="s" x="466" y="282">A microtask that queues a microtask never yields</text>
+
+  <rect class="box bad" x="16" y="308" width="848" height="30" rx="8"/>
+  <text class="s" x="34" y="328">Starvation: Promise.resolve().then(spin) freezes the tab · setTimeout(spin, 0) does not — it yields at step 4 every turn.</text>
+</svg><figcaption>One turn of the event loop. Microtasks drain completely before the browser may paint.</figcaption></figure>
+<p><strong>What it is.</strong> One turn: take one macrotask → run it to completion → drain the <strong>entire</strong> microtask queue → run <code>requestAnimationFrame</code> callbacks → style, layout, paint → <code>requestIdleCallback</code> if time remains.</p>
+<ul>
+<li>Macrotasks: <code>setTimeout</code>, <code>setInterval</code>, I/O, DOM events, <code>postMessage</code>, <code>MessageChannel</code>.</li>
+<li>Microtasks: promise continuations, <code>queueMicrotask</code>, <code>MutationObserver</code>.</li>
+</ul>
+<p><strong>Example.</strong></p>
+<pre><code class="language-javascript">console.log('1 sync');
+setTimeout(() =&gt; console.log('5 macrotask'), 0);
+Promise.resolve().then(() =&gt; console.log('3 microtask'));
+queueMicrotask(() =&gt; console.log('4 microtask'));
+console.log('2 sync');
+// 1 sync, 2 sync, 3 microtask, 4 microtask, 5 macrotask
+</code></pre>
+<p><strong>Trade-offs.</strong> A microtask that queues another microtask starves rendering forever; a <code>setTimeout</code> loop does not (nested timeouts clamp to 4ms after five levels). Microtasks give ordering guarantees at the cost of being unyielding.</p>
+<p><strong>Follow-ups.</strong> Predict the output of a mixed <code>setTimeout</code>/promise/<code>async</code> snippet. Why does <code>Promise.resolve().then(spin)</code> freeze the tab? Where does <code>requestAnimationFrame</code> run relative to microtasks?</p>
+<h3 id="25-promises-and-asyncawait">2.5 Promises and async/await</h3>
+<p><strong>What it is.</strong> <code>await x</code> splits the function: everything after it becomes a microtask continuation. <code>async</code> functions always return a promise.</p>
+<p><strong>Example.</strong> Serial vs parallel vs bounded concurrency:</p>
+<pre><code class="language-javascript">for (const id of ids) out.push(await fetch(url(id)));        // N × latency
+const out = await Promise.all(ids.map(id =&gt; fetch(url(id)))); // 1 × latency, N sockets
+
+async function mapLimit(items, limit, fn) {                   // bounded
+  const out = [], running = new Set();
+  for (const [i, item] of items.entries()) {
+    const p = Promise.resolve(fn(item, i)).then(r =&gt; { running.delete(p); return r; });
+    out.push(p); running.add(p);
+    if (running.size &gt;= limit) await Promise.race(running);
+  }
+  return Promise.all(out);
+}
+</code></pre>
+<p><strong>Trade-offs.</strong> <code>all</code> fails fast (one rejection discards the rest); <code>allSettled</code> never rejects, right for dashboards and telemetry; <code>any</code> returns the first fulfilled and rejects with <code>AggregateError</code>; <code>race</code> returns the first settled and is the timeout idiom. Unbounded <code>Promise.all</code> over a large list floods the server and the browser's connection pool.</p>
+<p><strong>Follow-ups.</strong> How do you add a timeout to a fetch? How do you cancel in-flight work? What is an unhandled rejection and how do you report it?</p>
+<h3 id="26-this-callapplybind-arrow-functions">2.6 <code>this</code>, call/apply/bind, arrow functions</h3>
+<p><strong>What it is.</strong> <code>this</code> is resolved at call time by four rules in priority order: <code>new</code> → explicit <code>call</code>/<code>apply</code>/<code>bind</code> → method receiver → default (<code>undefined</code> in strict mode and modules, <code>globalThis</code> otherwise). Arrow functions have no <code>this</code> binding and close over the enclosing scope.</p>
+<p><strong>Example.</strong> <code>const f = obj.method; f()</code> loses the receiver; <code>obj.method.bind(obj)</code> or <code>() =&gt; obj.method()</code> keeps it.</p>
+<p><strong>Trade-offs.</strong> Class-field arrows bind per instance — convenient but they cost memory per instance and are not on the prototype, so they cannot be overridden or spied on easily.</p>
+<p><strong>Follow-ups.</strong> What is <code>this</code> in a standalone function in a module? In a <code>setTimeout</code> callback? In an event handler? Implement <code>bind</code> yourself.</p>
+<h3 id="27-prototypes-and-classes">2.7 Prototypes and classes</h3>
+<p><strong>What it is.</strong> Every object has an internal prototype link (<code>Object.getPrototypeOf(obj) === Ctor.prototype</code>). Property lookup walks that chain. <code>class</code> is syntax over it: methods land on the prototype, class fields on the instance.</p>
+<p><strong>Example.</strong> <code>Array.prototype.map</code> is found by walking from the array instance to <code>Array.prototype</code>. <code>obj.hasOwnProperty('x')</code> checks only the own object; <code>'x' in obj</code> walks the chain.</p>
+<p><strong>Trade-offs.</strong> Prototype sharing saves memory; prototype mutation at runtime deoptimises V8's hidden classes and should be avoided in hot paths. Monkey-patching built-in prototypes breaks other libraries.</p>
+<p><strong>Follow-ups.</strong> Difference between <code>__proto__</code> and <code>prototype</code>? How does <code>instanceof</code> work? How would you implement inheritance without <code>class</code>?</p>
+<h3 id="28-memory-and-garbage-collection">2.8 Memory and garbage collection</h3>
+<p><strong>What it is.</strong> V8 uses generational mark-and-sweep: a scavenged young space plus a mark-compact old space. Objects surviving two scavenges are promoted. Anything reachable from a root is retained.</p>
+<p><strong>Example.</strong> Leak taxonomy: detached DOM nodes, forgotten timers and listeners, unbounded module-level caches, closures over large objects. <code>WeakMap</code>/<code>WeakSet</code> keys do not retain; <code>WeakRef</code> + <code>FinalizationRegistry</code> for caches; <code>AbortController</code> for listener and fetch lifecycle.</p>
+<p><strong>Trade-offs.</strong> Weak collections prevent leaks but make eviction non-deterministic — you cannot rely on a finalizer running.</p>
+<p><strong>Follow-ups.</strong> How do you find a leak in DevTools? (Heap snapshot → interact → second snapshot → "objects allocated between 1 and 2" → sort by retained size → follow the retainer path.) What does a sawtooth memory graph that never returns to baseline mean?</p>
+<h3 id="29-the-patterns-asked-by-name">2.9 The patterns asked by name</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>What it is</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Debounce</td>
+<td>Run after a quiet period</td>
+<td>Search-as-you-type</td>
+</tr>
+<tr>
+<td>Throttle</td>
+<td>At most once per interval</td>
+<td>Scroll, resize, mousemove</td>
+</tr>
+<tr>
+<td>Event delegation</td>
+<td>One listener on a container, dispatch via <code>event.target</code></td>
+<td>1,000-row tables</td>
+</tr>
+<tr>
+<td>Capture vs bubble</td>
+<td>Root→target, then target→root; <code>{capture: true}</code></td>
+<td>Intercepting before a child handles it</td>
+</tr>
+<tr>
+<td><code>passive: true</code></td>
+<td>Promises not to <code>preventDefault</code></td>
+<td>Lets scroll run on the compositor</td>
+</tr>
+<tr>
+<td><code>structuredClone</code></td>
+<td>Deep clone with cycles, <code>Map</code>, <code>Date</code></td>
+<td>Replaces <code>JSON.parse(JSON.stringify())</code></td>
+</tr>
+<tr>
+<td>Generators</td>
+<td>Lazy sequences via <code>Symbol.iterator</code></td>
+<td>Pagination, async streams</td>
+</tr>
+<tr>
+<td><code>Proxy</code>/<code>Reflect</code></td>
+<td>Intercept property access</td>
+<td>Vue 3 reactivity, MobX</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Follow-ups.</strong> Implement debounce with a leading edge and <code>cancel()</code>. Why does <code>JSON.parse(JSON.stringify(x))</code> lose <code>undefined</code>, <code>Date</code> and cycles? When is <code>stopImmediatePropagation</code> needed over <code>stopPropagation</code>?</p>
+<h2 id="3-typescript">3. TypeScript</h2>
+<h3 id="31-structural-typing-and-branded-types">3.1 Structural typing and branded types</h3>
+<p><strong>What it is.</strong> TypeScript compares types by shape, not by name. Two unrelated types with the same members are interchangeable.</p>
+<p><strong>Example.</strong> To get nominal behaviour for identifiers:</p>
+<pre><code class="language-typescript">type HotelId = string &amp; { readonly __brand: 'HotelId' };
+type CityId  = string &amp; { readonly __brand: 'CityId' };
+const asHotelId = (s: string) =&gt; s as HotelId;
+// passing a CityId where a HotelId is expected is now a compile error
+</code></pre>
+<p><strong>Trade-offs.</strong> Branding costs a cast at the boundary and slightly noisier types, and buys you a whole class of ID-mixup bugs caught at compile time.</p>
+<p><strong>Follow-ups.</strong> Why does TypeScript use structural typing? Where does structural typing surprise people? (Excess property checks apply to object literals only.)</p>
+<h3 id="32-any-vs-unknown-vs-never">3.2 <code>any</code> vs <code>unknown</code> vs <code>never</code></h3>
+<p><strong>What it is.</strong> <code>any</code> disables checking and propagates silently. <code>unknown</code> is the safe top type — assignable from anything, assignable to nothing without narrowing. <code>never</code> is the bottom type: no value inhabits it.</p>
+<p><strong>Example.</strong> <code>never</code> gives exhaustiveness for free:</p>
+<pre><code class="language-typescript">function render(s: FetchState) {
+  switch (s.status) {
+    case 'loading': return spinner();
+    case 'error':   return alert(s.error.message);
+    case 'success': return list(s.data);
+    default: { const _never: never = s; return _never; } // errors if a variant is added
+  }
+}
+</code></pre>
+<p><strong>Trade-offs.</strong> Banning <code>any</code> outright creates friction at untyped third-party boundaries; the usual policy is <code>unknown</code> plus a parse, with <code>any</code> allowed only behind an explicit lint suppression and a comment.</p>
+<p><strong>Follow-ups.</strong> Why is <code>unknown</code> safer than <code>any</code>? What does <code>never</code> mean as a return type? How do you type a function that always throws?</p>
+<h3 id="33-discriminated-unions">3.3 Discriminated unions</h3>
+<p><strong>What it is.</strong> A union of object types sharing a literal-typed discriminant field, which lets the compiler narrow by checking that field.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-typescript">type FetchState&lt;T&gt; =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'error'; error: Error }
+  | { status: 'success'; data: T };
+</code></pre>
+<p><strong>Trade-offs.</strong> More verbose than <code>{ loading: boolean; error?: Error; data?: T }</code>, but it makes impossible states unrepresentable — you can never have <code>loading: true</code> with <code>data</code> present.</p>
+<p><strong>Follow-ups.</strong> Model a booking flow's states. How does narrowing work with <code>in</code>, <code>typeof</code> and custom type guards (<code>x is Foo</code>)?</p>
+<h3 id="34-generics-conditional-and-mapped-types">3.4 Generics, conditional and mapped types</h3>
+<p><strong>What it is.</strong> Generics parameterise types; conditional types branch on assignability with <code>infer</code>; mapped types transform every key of a type, optionally remapping keys with <code>as</code>.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-typescript">type Unwrap&lt;T&gt; = T extends Promise&lt;infer U&gt; ? Unwrap&lt;U&gt; : T;
+type Getters&lt;T&gt; = { [K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K] };
+// Getters&lt;{ name: string }&gt; === { getName: () =&gt; string }
+
+type PolymorphicProps&lt;E extends React.ElementType&gt; =
+  { as?: E } &amp; Omit&lt;React.ComponentPropsWithoutRef&lt;E&gt;, 'as'&gt;;
+</code></pre>
+<p><strong>Trade-offs.</strong> Deep recursive conditional types are expressive but slow the compiler and produce unreadable errors. A platform rule of thumb: if the type needs a comment to explain it, prefer an explicit overload.</p>
+<p><strong>Follow-ups.</strong> Implement <code>DeepPartial</code>. What are <code>Partial</code>, <code>Required</code>, <code>Pick</code>, <code>Omit</code>, <code>Record</code>, <code>ReturnType</code> built from? Why do large unions blow up compile time?</p>
+<h3 id="35-variance-and-where-typescript-is-unsound">3.5 Variance and where TypeScript is unsound</h3>
+<p><strong>What it is.</strong> Function parameters are contravariant and returns covariant. TypeScript deliberately accepts some unsound patterns for ergonomics.</p>
+<p><strong>Example.</strong> Known unsound spots: arrays are covariant (<code>Dog[]</code> assignable to <code>Animal[]</code>, then you can push a <code>Cat</code>); method parameters are bivariant unless <code>strictFunctionTypes</code> applies; index access without <code>noUncheckedIndexedAccess</code> claims <code>T</code> where <code>T | undefined</code> is true; <code>as</code> assertions bypass everything.</p>
+<p><strong>Trade-offs.</strong> Full soundness would reject large amounts of idiomatic JavaScript. Enabling <code>noUncheckedIndexedAccess</code> is correct but noisy on existing code.</p>
+<p><strong>Follow-ups.</strong> Where is TypeScript deliberately unsound, and why? What does <code>strictFunctionTypes</code> change?</p>
+<h3 id="36-runtime-validation-at-the-boundary">3.6 Runtime validation at the boundary</h3>
+<p><strong>What it is.</strong> Types are erased at compile time, so anything crossing a boundary — API responses, URL params, <code>localStorage</code>, <code>postMessage</code>, feature flags — must be parsed, not asserted.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-typescript">const Hotel = z.object({ id: z.string(), price: z.number(), currency: z.string().length(3) });
+type Hotel = z.infer&lt;typeof Hotel&gt;;          // one source of truth
+const hotel = Hotel.parse(await res.json()); // throws on drift, at the edge
+</code></pre>
+<p><strong>Trade-offs.</strong> Zod adds bundle weight (Valibot is lighter, ArkType faster) and runtime cost per parse. Validate at boundaries only, not on every internal call.</p>
+<p><strong>Follow-ups.</strong> Where exactly do you validate? How do you keep frontend types in sync with the backend? (Generate from OpenAPI/GraphQL/protobuf in CI so a breaking change fails the build.)</p>
+<h3 id="37-declaration-merging-and-module-augmentation">3.7 Declaration merging and module augmentation</h3>
+<p><strong>What it is.</strong> Interfaces with the same name in the same scope merge; <code>declare module</code> extends a third-party library's types.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-typescript">declare module 'styled-components' {
+  export interface DefaultTheme extends AppTheme {}
+}
+</code></pre>
+<p><strong>Trade-offs.</strong> Powerful for design-system theming, but global augmentation is invisible action-at-a-distance and can conflict between packages.</p>
+<p><strong>Follow-ups.</strong> How do you type a library that ships no types? What goes in <code>exports</code> conditions (<code>import</code>, <code>require</code>, <code>types</code>, <code>browser</code>) when publishing a package?</p>
+<h3 id="38-typescript-at-monorepo-scale">3.8 TypeScript at monorepo scale</h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Lever</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slow <code>tsc</code></td>
+<td>Project references + <code>composite</code> + <code>incremental</code>; build only changed projects</td>
+</tr>
+<tr>
+<td>Editor lag</td>
+<td><code>skipLibCheck</code>, shallower conditional types, smaller unions</td>
+</tr>
+<tr>
+<td>Slow CI</td>
+<td>Type-check per package in parallel; transpile with esbuild/SWC separately from <code>tsc --noEmit</code></td>
+</tr>
+<tr>
+<td>Published types drift</td>
+<td>Generate <code>.d.ts</code> from source; run <code>publint</code> and <code>arethetypeswrong</code> in CI</td>
+</tr>
+<tr>
+<td>Breaking a shared type</td>
+<td><code>@deprecated</code> JSDoc, a codemod, an overload kept for one minor</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Strictness ratchet.</strong> You cannot flip <code>strict: true</code> on a legacy codebase in one PR. Enable one flag at a time (<code>noImplicitAny</code>, then <code>strictNullChecks</code>), write existing failures to a baseline file, fail CI only on new violations, and burn the baseline down.</p>
+<p><strong>Follow-ups.</strong> How would you migrate a 500k-line JS codebase to TypeScript? What do you do about the long tail of <code>@ts-expect-error</code>?</p>
+<h2 id="4-browser-internals">4. Browser internals</h2>
+<h3 id="41-the-critical-rendering-path">4.1 The critical rendering path</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 316" role="img" aria-label="Critical rendering path from bytes to pixels, main thread versus compositor">
+  <text class="title" x="16" y="24">Only transform and opacity skip the main thread</text>
+  <text class="s" x="16" y="44">Critical rendering path · and where each kind of change re-enters it</text>
+
+  <rect class="lane" x="12" y="60" width="700" height="150" rx="10"/>
+  <text class="xs" x="26" y="78">MAIN THREAD</text>
+  <rect class="lane" x="724" y="60" width="144" height="150" rx="10"/>
+  <text class="xs" x="738" y="78">COMPOSITOR + GPU</text>
+
+  <rect class="box" x="30" y="92" width="166" height="46" rx="8"/>
+  <text class="t" x="113" y="113" text-anchor="middle">HTML → DOM</text>
+  <text class="s" x="113" y="130" text-anchor="middle">streaming parser</text>
+
+  <rect class="box" x="30" y="150" width="166" height="46" rx="8"/>
+  <text class="t" x="113" y="171" text-anchor="middle">CSS → CSSOM</text>
+  <text class="s" x="113" y="188" text-anchor="middle">render-blocking</text>
+
+  <rect class="box" x="236" y="121" width="150" height="46" rx="8"/>
+  <text class="t" x="311" y="142" text-anchor="middle">Render tree</text>
+  <text class="s" x="311" y="159" text-anchor="middle">minus display:none</text>
+
+  <rect class="box" x="422" y="121" width="124" height="46" rx="8"/>
+  <text class="t" x="484" y="142" text-anchor="middle">Layout</text>
+  <text class="s" x="484" y="159" text-anchor="middle">geometry</text>
+
+  <rect class="box" x="578" y="121" width="116" height="46" rx="8"/>
+  <text class="t" x="636" y="142" text-anchor="middle">Paint</text>
+  <text class="s" x="636" y="159" text-anchor="middle">into layers</text>
+
+  <rect class="box hl" x="742" y="121" width="112" height="46" rx="8"/>
+  <text class="t" x="798" y="142" text-anchor="middle">Composite</text>
+  <text class="s" x="798" y="159" text-anchor="middle">GPU</text>
+
+  <path class="edge" d="M196 115H216V144H236"/>
+  <path class="edge" d="M196 173H216V144H236"/>
+  <path class="edge" d="M386 144H422"/>
+  <path class="edge" d="M546 144H578"/>
+  <path class="edge" d="M694 144H742"/>
+
+  <path class="grid" d="M486 167V232"/>
+  <path class="grid" d="M651 167V232"/>
+  <path class="grid" d="M790 167V232"/>
+
+  <rect class="box warn" x="392" y="232" width="188" height="48" rx="8"/>
+  <text class="s" x="486" y="252" text-anchor="middle">width · height · top · margin</text>
+  <text class="s" x="486" y="270" text-anchor="middle">font-size · display</text>
+
+  <rect class="box" x="596" y="232" width="110" height="48" rx="8"/>
+  <text class="s" x="651" y="252" text-anchor="middle">color</text>
+  <text class="s" x="651" y="270" text-anchor="middle">shadow · radius</text>
+
+
+  <rect class="box good" x="712" y="232" width="156" height="48" rx="8"/>
+  <text class="s" x="790" y="252" text-anchor="middle">transform · opacity</text>
+  <text class="s" x="790" y="270" text-anchor="middle">filter on a layer</text>
+
+  <text class="xs" x="486" y="300" text-anchor="middle">re-enters at LAYOUT — most expensive</text>
+  <text class="xs" x="651" y="300" text-anchor="middle">PAINT only</text>
+  <text class="xs" x="790" y="300" text-anchor="middle">COMPOSITE only — 60 fps safe</text>
+</svg><figcaption>The critical rendering path. Only composite-stage changes stay off the main thread.</figcaption></figure>
+<p><strong>What it is.</strong> The sequence from bytes to pixels: network → HTML parse to DOM → CSS parse to CSSOM → render tree → layout → paint → composite.</p>
+<p><strong>Example.</strong> Script loading changes the path: a classic <code>&lt;script&gt;</code> blocks the parser; <code>defer</code> runs after parsing, before <code>DOMContentLoaded</code>, in document order; <code>async</code> runs whenever it arrives, out of order. CSS is render-blocking by default — the browser will not paint without the CSSOM.</p>
+<p><strong>Trade-offs.</strong> Inlining critical CSS removes a round trip but bloats the HTML and loses caching. Inlining a script can <em>hurt</em>, because the preload scanner can no longer discover and fetch subresources ahead of the blocked parser.</p>
+<p><strong>Follow-ups.</strong> What blocks first paint? Where should <code>&lt;script&gt;</code> go and why? What is the preload scanner? What's the difference between <code>DOMContentLoaded</code> and <code>load</code>?</p>
+<h3 id="42-layout-paint-composite-what-each-change-costs">4.2 Layout, paint, composite — what each change costs</h3>
+<p><strong>What it is.</strong> A style change re-enters the pipeline at a stage determined by the property changed.</p>
+<table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Triggers</th>
+<th>Properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Layout</td>
+<td>layout + paint + composite</td>
+<td><code>width</code>, <code>height</code>, <code>top</code>, <code>margin</code>, <code>font-size</code>, <code>display</code></td>
+</tr>
+<tr>
+<td>Paint</td>
+<td>paint + composite</td>
+<td><code>color</code>, <code>background-color</code>, <code>box-shadow</code>, <code>border-radius</code></td>
+</tr>
+<tr>
+<td>Composite</td>
+<td>composite only</td>
+<td><code>transform</code>, <code>opacity</code>, <code>filter</code> (on a promoted layer)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> Animate <code>transform: translateX()</code> rather than <code>left</code>, and <code>opacity</code> rather than <code>visibility</code>. Promote with <code>will-change: transform</code> immediately before the animation and remove it after.</p>
+<p><strong>Trade-offs.</strong> Each promoted layer costs GPU memory; leaving <code>will-change</code> on many elements causes layer explosion and can make things slower than not promoting at all.</p>
+<p><strong>Follow-ups.</strong> Which properties are cheap to animate and why? What does promoting a layer actually do? How would you debug a janky animation in DevTools? (Rendering panel → paint flashing, layer borders, FPS meter.)</p>
+<h3 id="43-reflow-and-layout-thrashing">4.3 Reflow and layout thrashing</h3>
+<p><strong>What it is.</strong> Reading a geometry property while style is dirty forces a synchronous layout. Interleaving reads and writes in a loop produces O(n) forced reflows.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-javascript">// BAD — read/write/read/write, n forced synchronous layouts
+boxes.forEach(b =&gt; { b.style.width = b.offsetWidth + 10 + 'px'; });
+
+// GOOD — batch reads, then batch writes
+const widths = boxes.map(b =&gt; b.offsetWidth);
+boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
+</code></pre>
+<p>Forcing properties: <code>offsetTop/Left/Width/Height</code>, <code>scrollTop/Height</code>, <code>clientWidth/Height</code>, <code>getComputedStyle()</code>, <code>getBoundingClientRect()</code>, <code>focus()</code>, <code>scrollIntoView()</code>.</p>
+<p><strong>Trade-offs.</strong> A read/write scheduler (FastDOM-style) fixes it generically but adds a frame of latency and indirection. <code>ResizeObserver</code>/<code>IntersectionObserver</code> deliver measurements off the critical path and are usually the better answer.</p>
+<p><strong>Follow-ups.</strong> Why is <code>getBoundingClientRect()</code> expensive? How does DevTools surface a forced reflow? Where would you put the fix — the component or the framework?</p>
+<h3 id="44-main-thread-vs-compositor-thread">4.4 Main thread vs compositor thread</h3>
+<p><strong>What it is.</strong> The main thread runs JavaScript, style, layout and paint. The compositor thread assembles layers, often on the GPU, and can scroll and animate independently.</p>
+<p><strong>Example.</strong> Escape hatches from the main thread:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web Worker</td>
+<td>Parsing large JSON, search indexing, image processing. No DOM access; <code>postMessage</code> structured clone, or zero-copy via <code>Transferable</code>/<code>SharedArrayBuffer</code></td>
+</tr>
+<tr>
+<td><code>requestIdleCallback</code></td>
+<td>Non-urgent work in spare frame time</td>
+</tr>
+<tr>
+<td><code>scheduler.postTask</code></td>
+<td>Explicit priorities: <code>user-blocking</code>, <code>user-visible</code>, <code>background</code></td>
+</tr>
+<tr>
+<td>Yielding</td>
+<td>Chunk work and <code>await scheduler.yield()</code> between chunks so input is handled</td>
+</tr>
+<tr>
+<td><code>content-visibility: auto</code></td>
+<td>Skip layout and paint for offscreen subtrees — large win on long lists</td>
+</tr>
+<tr>
+<td><code>contain: layout paint size</code></td>
+<td>Bound reflow scope inside a widget</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> Workers buy parallelism at the cost of serialisation and a more complex API (Comlink helps). <code>content-visibility</code> can break find-in-page and anchor scrolling if <code>contain-intrinsic-size</code> is wrong.</p>
+<p><strong>Follow-ups.</strong> What is a long task and why does 50ms matter? What can't a worker do? How do you move a 300ms JSON parse off the main thread?</p>
+<h3 id="45-observers-and-platform-apis">4.5 Observers and platform APIs</h3>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IntersectionObserver</code></td>
+<td>Lazy loading, infinite scroll, impression tracking — no scroll listeners</td>
+</tr>
+<tr>
+<td><code>ResizeObserver</code></td>
+<td>Element-level resize, chart sizing — no <code>window.resize</code></td>
+</tr>
+<tr>
+<td><code>MutationObserver</code></td>
+<td>Watching third-party DOM; delivered as a microtask</td>
+</tr>
+<tr>
+<td><code>PerformanceObserver</code></td>
+<td>LCP, CLS, INP, long tasks, resource timing — the basis of RUM</td>
+</tr>
+<tr>
+<td><code>BroadcastChannel</code></td>
+<td>Cross-tab sync: logout everywhere, cart updates</td>
+</tr>
+<tr>
+<td><code>AbortController</code></td>
+<td>One cancellation token for fetch, listeners and subscriptions</td>
+</tr>
+<tr>
+<td>View Transitions / Navigation API</td>
+<td>Native SPA transitions and routing</td>
+</tr>
+<tr>
+<td><code>OffscreenCanvas</code></td>
+<td>Canvas rendering inside a worker</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> Observers are asynchronous and batched — better for performance, but you cannot read a value synchronously right after a change.</p>
+<p><strong>Follow-ups.</strong> Implement infinite scroll without a scroll listener. How does <code>AbortController</code> clean up both a fetch and its listeners? What are the <code>rootMargin</code> and <code>threshold</code> options for?</p>
+<h3 id="46-the-browser-as-a-security-boundary">4.6 The browser as a security boundary</h3>
+<p><strong>What it is.</strong> Site isolation puts each site in its own renderer process, so a compromised renderer cannot read another site's memory.</p>
+<p><strong>Example.</strong> This is why <code>SharedArrayBuffer</code> requires COOP and COEP headers, and why <code>window.opener</code> access from <code>target="_blank"</code> links is restricted (<code>rel="noopener"</code>).</p>
+<p><strong>Trade-offs.</strong> Process-per-site costs memory — a visible issue on low-end devices, which matters for emerging-market traffic.</p>
+<p><strong>Follow-ups.</strong> Why do Spectre mitigations require COOP/COEP? What is the same-origin policy and what does "origin" mean exactly? (scheme + host + port.)</p>
+<h2 id="5-rendering-architectures-and-react">5. Rendering architectures and React</h2>
+<h3 id="51-csr-ssr-ssg-isr-streaming-islands-edge">5.1 CSR, SSR, SSG, ISR, streaming, islands, edge</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 360" role="img" aria-label="Order of events for each rendering strategy">
+  <text class="title" x="16" y="24">Where the work happens decides when the page is usable</text>
+  <text class="s" x="16" y="44">Schematic — relative order of events, not measured timings</text>
+
+  <g>
+    <rect class="seg-a" x="180" y="58" width="14" height="11" rx="2"/><text class="xs" x="200" y="68">server / build work</text>
+    <rect class="seg-b" x="318" y="58" width="14" height="11" rx="2"/><text class="xs" x="338" y="68">HTML transfer</text>
+    <rect class="seg-c" x="440" y="58" width="14" height="11" rx="2"/><text class="xs" x="460" y="68">JS transfer</text>
+    <rect class="seg-d" x="542" y="58" width="14" height="11" rx="2"/><text class="xs" x="562" y="68">hydration</text>
+    <circle class="fill-accent" cx="648" cy="63" r="5"/><text class="xs" x="660" y="68">first paint</text>
+    <path class="fill-good" d="M752 69l6-11l6 11z"/><text class="xs" x="770" y="68">interactive</text>
+  </g>
+
+  <!-- CSR -->
+  <text class="t" x="16" y="114">CSR</text><text class="xs" x="16" y="130">empty shell</text>
+  <rect class="seg-a" x="180" y="99" width="27" height="22" rx="3"/>
+  <rect class="seg-b" x="207" y="99" width="27" height="22" rx="3"/>
+  <rect class="seg-c" x="234" y="99" width="230" height="22" rx="3"/>
+  <rect class="seg-d" x="464" y="99" width="54" height="22" rx="3"/>
+  <circle class="fill-accent" cx="518" cy="110" r="5"/>
+  <path class="fill-good" d="M518 134l6-11l6 11z"/>
+  <text class="xs" x="536" y="133">nothing visible until JS runs</text>
+
+  <!-- SSR -->
+  <text class="t" x="16" y="162">SSR</text><text class="xs" x="16" y="178">per request</text>
+  <rect class="seg-a" x="180" y="147" width="135" height="22" rx="3"/>
+  <rect class="seg-b" x="315" y="147" width="54" height="22" rx="3"/>
+  <rect class="seg-c" x="369" y="147" width="203" height="22" rx="3"/>
+  <rect class="seg-d" x="572" y="147" width="108" height="22" rx="3"/>
+  <circle class="fill-accent" cx="369" cy="158" r="5"/>
+  <path class="fill-good" d="M680 182l6-11l6 11z"/>
+  <text class="xs" x="190" y="182">visible early, but not interactive — the uncanny valley</text>
+
+  <!-- SSG -->
+  <text class="t" x="16" y="210">SSG / ISR</text><text class="xs" x="16" y="226">prebuilt</text>
+  <rect class="seg-a" x="180" y="195" width="20" height="22" rx="3"/>
+  <rect class="seg-b" x="200" y="195" width="54" height="22" rx="3"/>
+  <rect class="seg-c" x="254" y="195" width="203" height="22" rx="3"/>
+  <rect class="seg-d" x="457" y="195" width="108" height="22" rx="3"/>
+  <circle class="fill-accent" cx="254" cy="206" r="5"/>
+  <path class="fill-good" d="M565 230l6-11l6 11z"/>
+  <text class="xs" x="266" y="230">best first paint — but cannot personalise</text>
+
+  <!-- Streaming -->
+  <text class="t" x="16" y="258">Streaming</text><text class="xs" x="16" y="274">SSR + Suspense</text>
+  <rect class="seg-a" x="180" y="243" width="47" height="22" rx="3"/>
+  <rect class="seg-b" x="227" y="243" width="41" height="22" rx="3"/>
+  <rect class="seg-c" x="268" y="243" width="162" height="22" rx="3"/>
+  <rect class="seg-d" x="430" y="243" width="81" height="22" rx="3"/>
+  <circle class="fill-accent" cx="268" cy="254" r="5"/>
+  <path class="fill-good" d="M511 278l6-11l6 11z"/>
+  <text class="xs" x="540" y="278">shell first, slow data later, hydration in chunks</text>
+
+  <!-- Islands -->
+  <text class="t" x="16" y="306">Islands</text><text class="xs" x="16" y="322">partial hydration</text>
+  <rect class="seg-a" x="180" y="291" width="20" height="22" rx="3"/>
+  <rect class="seg-b" x="200" y="291" width="54" height="22" rx="3"/>
+  <rect class="seg-c" x="254" y="291" width="47" height="22" rx="3"/>
+  <rect class="seg-d" x="301" y="291" width="20" height="22" rx="3"/>
+  <circle class="fill-accent" cx="254" cy="302" r="5"/>
+  <path class="fill-good" d="M321 326l6-11l6 11z"/>
+  <text class="xs" x="339" y="325">only the interactive bits ship JS — lowest INP risk, most framework lock-in</text>
+
+  <path class="grid" d="M180 340H856"/>
+  <text class="xs" x="856" y="354" text-anchor="end">time →</text>
+</svg><figcaption>Schematic order of events per rendering strategy — relative sequence, not measured timings.</figcaption></figure>
+<p><strong>What it is.</strong> Where the HTML comes from, and when.</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>HTML from</th>
+<th>Best for</th>
+<th>LCP</th>
+<th>INP risk</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CSR</td>
+<td>Empty shell + JS</td>
+<td>Logged-in dashboards, internal tools</td>
+<td>Poor</td>
+<td>Medium</td>
+<td>Cheapest infra, worst first load, SEO workarounds</td>
+</tr>
+<tr>
+<td>SSR per request</td>
+<td>Server, per request</td>
+<td>Personalised, price-sensitive, SEO pages</td>
+<td>TTFB-dependent</td>
+<td>High (hydration)</td>
+<td>Server CPU per request</td>
+</tr>
+<tr>
+<td>SSG</td>
+<td>Build time</td>
+<td>Marketing, city landing pages, docs</td>
+<td>Excellent</td>
+<td>Low</td>
+<td>Build time grows with page count</td>
+</tr>
+<tr>
+<td>ISR / on-demand revalidate</td>
+<td>Build + background refresh</td>
+<td>Large slow-changing catalogues</td>
+<td>Excellent</td>
+<td>Low</td>
+<td>Needs a revalidation and purge story</td>
+</tr>
+<tr>
+<td>Streaming SSR + Suspense</td>
+<td>Server, in chunks</td>
+<td>Fast shell, slow data</td>
+<td>Best perceived</td>
+<td>Medium</td>
+<td>Streaming-capable runtime</td>
+</tr>
+<tr>
+<td>Islands / partial hydration</td>
+<td>Server HTML + selective JS</td>
+<td>Content pages with a few interactive bits</td>
+<td>Excellent</td>
+<td>Lowest</td>
+<td>Framework lock-in (Astro, Qwik)</td>
+</tr>
+<tr>
+<td>Edge SSR</td>
+<td>CDN edge node</td>
+<td>Geo-personalised, low TTFB</td>
+<td>Excellent</td>
+<td>Medium</td>
+<td>Limited runtime, cold starts, DB distance</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> A hotel search page is best <strong>segmented by volatility</strong>: static marketing pages SSG; hotel detail ISR; search shell streamed from the edge; prices client-fetched because they must never be cached.</p>
+<p><strong>Trade-offs.</strong> One global strategy is almost always wrong for a marketplace. SSR improves LCP and SEO but shifts cost to servers and adds hydration cost; SSG is fastest but cannot personalise.</p>
+<p><strong>Follow-ups.</strong> How would you render a hotel search page and why? What breaks if you cache an SSR page at the CDN? When is CSR the right answer?</p>
+<h3 id="52-hydration">5.2 Hydration</h3>
+<p><strong>What it is.</strong> The client re-runs the component tree over server-rendered HTML to attach event listeners and rebuild state.</p>
+<p><strong>Example.</strong> The ladder of fixes, cheapest first:</p>
+<ol>
+<li>Ship less — server-render static parts and don't hydrate them.</li>
+<li>Selective/progressive hydration — hydrate above-the-fold and interactive islands first, the rest on <code>IntersectionObserver</code> or on interaction.</li>
+<li>Streaming + Suspense boundaries, so hydration happens in chunks rather than one long task.</li>
+<li>Resumability (Qwik) — serialise listener state into HTML, no hydration pass at all.</li>
+<li>Server Components — whole subtrees never reach the client.</li>
+</ol>
+<p><strong>Trade-offs.</strong> Hydration is why a server-rendered page can <em>look</em> ready and not respond — the "uncanny valley" that wrecks INP. Avoiding it entirely usually means framework lock-in.</p>
+<p><strong>Follow-ups.</strong> What causes a hydration mismatch? (<code>Date.now()</code>, locale formatting, <code>window</code> access during render, random ids, UA-dependent markup.) How do you fix a genuinely client-only value? What does React do when markup doesn't match?</p>
+<h3 id="53-fiber-and-reconciliation">5.3 Fiber and reconciliation</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 334" role="img" aria-label="React render phase versus commit phase across two fiber trees">
+  <text class="title" x="16" y="24">Render can be thrown away. Commit cannot.</text>
+  <text class="s" x="16" y="44">That is why render must be pure, and why StrictMode double-invokes it in dev</text>
+
+  <rect class="lane" x="12" y="60" width="300" height="164" rx="10"/>
+  <text class="xs" x="28" y="80">CURRENT TREE — what is on screen</text>
+  <rect class="box" x="130" y="92" width="64" height="26" rx="6"/><text class="xs" x="162" y="109" text-anchor="middle">App</text>
+  <rect class="box" x="56" y="138" width="78" height="26" rx="6"/><text class="xs" x="95" y="155" text-anchor="middle">Filters</text>
+  <rect class="box" x="190" y="138" width="78" height="26" rx="6"/><text class="xs" x="229" y="155" text-anchor="middle">Results</text>
+  <rect class="box" x="190" y="184" width="78" height="26" rx="6"/><text class="xs" x="229" y="201" text-anchor="middle">Card</text>
+  <path class="edge" d="M162 118V131H95V138"/>
+  <path class="edge" d="M162 118V131H229V138"/>
+  <path class="edge" d="M229 164V184"/>
+
+  <rect class="lane" x="568" y="60" width="300" height="164" rx="10"/>
+  <text class="xs" x="584" y="80">WORK-IN-PROGRESS TREE</text>
+  <rect class="box" x="686" y="92" width="64" height="26" rx="6"/><text class="xs" x="718" y="109" text-anchor="middle">App</text>
+  <rect class="box" x="612" y="138" width="78" height="26" rx="6"/><text class="xs" x="651" y="155" text-anchor="middle">Filters</text>
+  <rect class="box hl" x="746" y="138" width="78" height="26" rx="6"/><text class="xs" x="785" y="155" text-anchor="middle">Results</text>
+  <rect class="box hl" x="746" y="184" width="78" height="26" rx="6"/><text class="xs" x="785" y="201" text-anchor="middle">Card ×24</text>
+  <path class="edge" d="M718 118V131H651V138"/>
+  <path class="edge" d="M718 118V131H785V138"/>
+  <path class="edge" d="M785 164V184"/>
+  <text class="xs" x="651" y="222" text-anchor="middle">reused as-is</text>
+  <text class="xs" x="785" y="222" text-anchor="middle">rebuilt</text>
+
+  <path class="edge accent" d="M312 128H568"/>
+  <text class="t" x="440" y="122" text-anchor="middle">RENDER PHASE — interruptible</text>
+  <text class="xs" x="440" y="146" text-anchor="middle">call components, diff, mark effects</text>
+  <text class="xs" x="440" y="164" text-anchor="middle">can be paused, aborted or restarted</text>
+  <text class="xs" x="440" y="182" text-anchor="middle">keys decide what is reused — index keys</text>
+  <text class="xs" x="440" y="200" text-anchor="middle">attach state to position, not identity</text>
+
+  <path class="edge accent" d="M718 224V246H440"/>
+  <text class="xs" x="736" y="240">then swap current ↔ WIP</text>
+
+  <rect class="box bad" x="12" y="256" width="856" height="30" rx="7"/>
+  <text class="t" x="28" y="276">COMMIT PHASE — one synchronous, uninterruptible pass</text>
+
+  <rect class="box" x="12" y="294" width="206" height="32" rx="7"/>
+  <text class="xs" x="115" y="314" text-anchor="middle">1 · mutate the DOM</text>
+  <rect class="box" x="228" y="294" width="206" height="32" rx="7"/>
+  <text class="xs" x="331" y="314" text-anchor="middle">2 · useLayoutEffect (blocks paint)</text>
+  <rect class="box good" x="444" y="294" width="206" height="32" rx="7"/>
+  <text class="xs" x="547" y="314" text-anchor="middle">3 · browser paints</text>
+  <rect class="box" x="660" y="294" width="208" height="32" rx="7"/>
+  <text class="xs" x="764" y="314" text-anchor="middle">4 · useEffect (after paint)</text>
+</svg><figcaption>React&#x27;s two trees. The render phase is interruptible; commit is one synchronous pass.</figcaption></figure>
+<p><strong>What it is.</strong> A fiber is a plain object describing a unit of work with <code>child</code>, <code>sibling</code> and <code>return</code> pointers. React keeps two trees — current and work-in-progress. The render phase is interruptible; the commit phase is one synchronous pass.</p>
+<p><strong>Example.</strong> Diffing heuristics: different element type → unmount the whole subtree; same type → update props in place; list children matched by <code>key</code>. So index-as-key breaks on reorder — a sorted list of checkboxes keeps the wrong checked state because state attaches to position, not identity.</p>
+<p><strong>Trade-offs.</strong> O(n) heuristic diffing instead of an optimal O(n³) tree diff: fast, but it relies on you giving stable keys and not changing component types.</p>
+<p><strong>Follow-ups.</strong> Why must render be pure? Why does StrictMode double-invoke in dev? What happens in commit vs render? When is <code>useLayoutEffect</code> correct over <code>useEffect</code>?</p>
+<h3 id="54-hooks">5.4 Hooks</h3>
+<p><strong>What it is.</strong> Hooks are a linked list on the fiber, resolved by call order — which is why they cannot be called conditionally.</p>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>The nuance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>useState</code></td>
+<td>Updates are queued and batched; <code>setX(x =&gt; x+1)</code> avoids stale closures</td>
+</tr>
+<tr>
+<td><code>useEffect</code></td>
+<td>A synchronisation primitive, not a lifecycle. Cleanup runs before every re-run and on unmount</td>
+</tr>
+<tr>
+<td><code>useLayoutEffect</code></td>
+<td>Runs before paint — only to measure and correct; warns in SSR</td>
+</tr>
+<tr>
+<td><code>useMemo</code> / <code>useCallback</code></td>
+<td>A hint, not a guarantee; has its own cost. Largely unnecessary with React Compiler</td>
+</tr>
+<tr>
+<td><code>useRef</code></td>
+<td>Mutable box that doesn't trigger renders; the latest-value escape hatch</td>
+</tr>
+<tr>
+<td><code>useReducer</code></td>
+<td>State machines, and when next state depends on prior state</td>
+</tr>
+<tr>
+<td><code>useSyncExternalStore</code></td>
+<td>Keeps external stores tear-free under concurrent rendering</td>
+</tr>
+<tr>
+<td><code>useTransition</code> / <code>useDeferredValue</code></td>
+<td>Mark updates interruptible so typing stays responsive</td>
+</tr>
+<tr>
+<td><code>useId</code></td>
+<td>SSR-safe ids — required for accessible design-system components</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> Most <code>useEffect</code>s that derive state should be plain computation during render; effects that sync to external systems are the legitimate use.</p>
+<p><strong>Follow-ups.</strong> Why can't hooks be conditional? When does <code>useEffect</code> run relative to paint? Write a <code>useDebounce</code>. What is a stale closure and how do you avoid it?</p>
+<h3 id="55-concurrent-rendering">5.5 Concurrent rendering</h3>
+<p><strong>What it is.</strong> React 18+ assigns lanes/priorities: discrete input is urgent, transitions are not. Automatic batching now covers promises and timeouts, not just event handlers.</p>
+<p><strong>Example.</strong> <code>startTransition(() =&gt; setFilters(next))</code> keeps the input responsive while a large result list re-filters.</p>
+<p><strong>Trade-offs.</strong> A component can render without committing, so side effects in render became actively dangerous; and <strong>tearing</strong> becomes possible with external mutable stores, which is why <code>useSyncExternalStore</code> exists.</p>
+<p><strong>Follow-ups.</strong> What is tearing? What's the difference between <code>useTransition</code> and <code>useDeferredValue</code>? What does Suspense actually suspend on?</p>
+<h3 id="56-server-components">5.6 Server Components</h3>
+<p><strong>What it is.</strong> Components that run only on the server, never ship their code to the client, can read data directly, and serialise their output into an RSC payload (a stream, not HTML). Client Components are marked <code>'use client'</code> and form the boundary.</p>
+<p><strong>Example.</strong> A hotel detail page can fetch and render description, amenities and policies as RSC, with only the date picker and booking widget as Client Components.</p>
+<p><strong>Trade-offs.</strong> Smaller client bundles and no client-side data waterfall, versus a new mental model, a server runtime requirement, harder incremental adoption, and payload size for deeply nested trees.</p>
+<p><strong>Follow-ups.</strong> What can't a Server Component do? How do props cross the boundary? (They must be serialisable.) How does this differ from SSR?</p>
+<h3 id="57-state-management">5.7 State management</h3>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Tool</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server data</td>
+<td>TanStack Query / SWR / RTK Query</td>
+<td>Caching, dedup, stale-while-revalidate, retries, cancellation. Most "global state" is this</td>
+</tr>
+<tr>
+<td>URL-shaped state</td>
+<td>The URL</td>
+<td>Filters, dates, occupancy must be shareable and back-button safe</td>
+</tr>
+<tr>
+<td>Small client state</td>
+<td>Zustand / Jotai / Context</td>
+<td>Context re-renders all consumers — split by concern or use selectors</td>
+</tr>
+<tr>
+<td>Complex workflows</td>
+<td>Redux Toolkit / XState</td>
+<td>Middleware, devtools, explicit state machines for a booking funnel</td>
+</tr>
+<tr>
+<td>Form state</td>
+<td>React Hook Form</td>
+<td>Uncontrolled inputs avoid a render per keystroke</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> Keep server cache separate from client state; pick the narrowest tool; give teams one blessed default so twelve squads don't ship twelve patterns.</p>
+<p><strong>Follow-ups.</strong> Why is Context not a state manager? Where does search-filter state belong and why? How do you prevent a context change re-rendering the whole tree?</p>
+<h3 id="58-react-vs-signals">5.8 React vs signals</h3>
+<p><strong>What it is.</strong> React re-renders subtrees and diffs a virtual DOM. Vue 3, Svelte 5 and Solid use fine-grained reactivity (signals) that updates only the bound DOM nodes.</p>
+<p><strong>Example.</strong> In Solid, a component function runs once; the signal read inside a JSX expression creates a direct subscription to that text node.</p>
+<p><strong>Trade-offs.</strong> Signals do less work at runtime but need a compiler or proxy layer and have a smaller ecosystem. React Compiler attacks the same problem from the other direction by auto-memoising. Web Components remain the interop layer when you must ship a widget into partner sites you don't control.</p>
+<p><strong>Follow-ups.</strong> When would you not choose React? What does React Compiler change about how you write components? Why is the virtual DOM not inherently fast?</p>
+<h2 id="6-web-protocols">6. Web protocols</h2>
+<h3 id="61-what-happens-when-you-type-a-url">6.1 What happens when you type a URL</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 300" role="img" aria-label="Round trips before the first byte of HTML">
+  <text class="title" x="16" y="24">Every round trip before the first byte is latency you can remove</text>
+  <text class="s" x="16" y="44">One block = one round trip · the win grows with distance and mobile latency</text>
+
+  <path class="grid" d="M180 62V248"/>
+  <path class="grid" d="M280 62V248"/>
+  <path class="grid" d="M380 62V248"/>
+  <path class="grid" d="M480 62V248"/>
+  <path class="grid" d="M580 62V248"/>
+  <text class="xs" x="180" y="76">0</text>
+  <text class="xs" x="280" y="76">1 RTT</text>
+  <text class="xs" x="380" y="76">2</text>
+  <text class="xs" x="480" y="76">3</text>
+  <text class="xs" x="580" y="76">4</text>
+
+  <text class="t" x="16" y="108">Cold · TCP</text>
+  <text class="xs" x="16" y="124">+ TLS 1.3</text>
+  <rect class="seg-a" x="180" y="92" width="100" height="26" rx="3"/>
+  <text class="xs" x="230" y="109" text-anchor="middle">DNS</text>
+  <rect class="seg-a" x="280" y="92" width="100" height="26" rx="3"/>
+  <text class="xs" x="330" y="109" text-anchor="middle">TCP handshake</text>
+  <rect class="seg-c" x="380" y="92" width="100" height="26" rx="3"/>
+  <text class="xs" x="430" y="109" text-anchor="middle">TLS 1.3</text>
+  <rect class="seg-b" x="480" y="92" width="100" height="26" rx="3"/>
+  <text class="xs" x="530" y="109" text-anchor="middle">request → HTML</text>
+  <path class="fill-good" d="M580 132l6-11l6 11z"/>
+  <text class="xs" x="598" y="131">first byte after 4 round trips</text>
+
+  <text class="t" x="16" y="166">HTTP/3</text>
+  <text class="xs" x="16" y="182">QUIC over UDP</text>
+  <rect class="seg-a" x="180" y="150" width="100" height="26" rx="3"/>
+  <text class="xs" x="230" y="167" text-anchor="middle">DNS</text>
+  <rect class="seg-c" x="280" y="150" width="100" height="26" rx="3"/>
+  <text class="xs" x="330" y="167" text-anchor="middle">QUIC + TLS together</text>
+  <rect class="seg-b" x="380" y="150" width="100" height="26" rx="3"/>
+  <text class="xs" x="430" y="167" text-anchor="middle">request → HTML</text>
+  <path class="fill-good" d="M480 190l6-11l6 11z"/>
+  <text class="xs" x="498" y="189">transport and crypto handshake collapse into one</text>
+
+  <text class="t" x="16" y="224">Resumed</text>
+  <text class="xs" x="16" y="240">0-RTT</text>
+  <rect class="seg-b" x="180" y="208" width="100" height="26" rx="3"/>
+  <text class="xs" x="230" y="225" text-anchor="middle">request → HTML</text>
+  <path class="fill-good" d="M280 248l6-11l6 11z"/>
+  <text class="xs" x="298" y="247">0-RTT data is replayable — idempotent requests only</text>
+
+  <rect class="box hl" x="180" y="262" width="676" height="28" rx="7"/>
+  <text class="s" x="196" y="281">preconnect performs DNS + TCP + TLS early, so the first request starts at block 1 instead of block 4.</text>
+</svg><figcaption>Round trips before the first byte of HTML, cold vs QUIC vs resumed.</figcaption></figure>
+<p><strong>What it is.</strong> URL parse → HSTS check → DNS resolution → TCP handshake (or QUIC's single round trip) → TLS handshake, ALPN negotiating h2/h3 → HTTP request → CDN or origin response → parse and render.</p>
+<p><strong>Example.</strong> Counting round trips is the point: a cold cross-origin image host costs DNS + TCP + TLS before the first byte, which is exactly what <code>preconnect</code> removes.</p>
+<p><strong>Trade-offs.</strong> Every extra origin costs a connection setup; that's why domain sharding stopped being an optimisation and became a cost.</p>
+<p><strong>Follow-ups.</strong> Where does the browser cache fit in this sequence? What does HSTS preload change? Why does <code>preconnect</code> help more on mobile?</p>
+<h3 id="62-dns">6.2 DNS</h3>
+<p><strong>What it is.</strong> Hierarchical name resolution: browser cache → OS cache → resolver → root → TLD → authoritative, each hop honouring a TTL.</p>
+<p><strong>Example.</strong> <code>dns-prefetch</code> resolves a third-party hostname early; <code>preconnect</code> goes further and completes TCP + TLS too.</p>
+<p><strong>Trade-offs.</strong> A low TTL buys fast failover and costs more lookups. A CNAME chain to your CDN adds a lookup on cold connections.</p>
+<p><strong>Follow-ups.</strong> What's the difference between <code>dns-prefetch</code> and <code>preconnect</code>? How many <code>preconnect</code> hints should a page have? (A handful — they compete for bandwidth.)</p>
+<h3 id="63-tcp-vs-quic">6.3 TCP vs QUIC</h3>
+<p><strong>What it is.</strong> TCP is a reliable, ordered, connection-oriented byte stream with a three-way handshake. QUIC runs over UDP, builds in TLS 1.3, and multiplexes independent streams.</p>
+<p><strong>Example.</strong> On a lossy mobile network, one lost TCP segment stalls <em>every</em> HTTP/2 stream on that connection; with QUIC only the affected stream stalls.</p>
+<p><strong>Trade-offs.</strong> QUIC moves congestion control into userspace (more CPU, faster iteration) and some corporate networks block or throttle UDP.</p>
+<p><strong>Follow-ups.</strong> What is head-of-line blocking, at which layer? Why does connection migration matter when a phone switches from Wi-Fi to cellular?</p>
+<h3 id="64-tls">6.4 TLS</h3>
+<p><strong>What it is.</strong> The handshake negotiates cipher and protocol version, ALPN selects h2/h3, the server presents a certificate chain validated against a trust store, and session keys are derived.</p>
+<p><strong>Example.</strong> TLS 1.3 completes in one round trip; session resumption and 0-RTT reduce it further.</p>
+<p><strong>Trade-offs.</strong> <strong>0-RTT data is replayable</strong>, so it must only carry idempotent requests. Certificate pinning improves security but causes outages when rotation is mishandled.</p>
+<p><strong>Follow-ups.</strong> What does <code>Strict-Transport-Security</code> do and why does <code>preload</code> matter? What breaks with mixed content? What is ALPN for?</p>
+<h3 id="65-http-versions">6.5 HTTP versions</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 312" role="img" aria-label="How HTTP 1.1, 2 and 3 handle concurrency and packet loss">
+  <text class="title" x="16" y="24">Head-of-line blocking moves down a layer with each HTTP version</text>
+  <text class="s" x="16" y="44">Six requests on one origin · ✕ marks a lost packet</text>
+
+  <!-- HTTP/1.1 -->
+  <rect class="lane" x="12" y="60" width="276" height="196" rx="10"/>
+  <text class="t" x="28" y="84">HTTP/1.1</text>
+  <text class="xs" x="28" y="100">6 TCP connections, one request each at a time</text>
+  <rect class="seg-b" x="28" y="112" width="86" height="14" rx="3"/>
+  <rect class="seg-a" x="114" y="112" width="86" height="14" rx="3"/>
+  <rect class="seg-b" x="28" y="134" width="70" height="14" rx="3"/>
+  <rect class="seg-a" x="98" y="134" width="102" height="14" rx="3"/>
+  <rect class="seg-b" x="28" y="156" width="96" height="14" rx="3"/>
+  <rect class="seg-a" x="124" y="156" width="76" height="14" rx="3"/>
+  <rect class="seg-b" x="28" y="178" width="60" height="14" rx="3"/>
+  <rect class="seg-a" x="88" y="178" width="112" height="14" rx="3"/>
+  <text class="xs" x="28" y="212">Requests 7+ queue behind these.</text>
+  <text class="xs" x="28" y="228">Sharding and sprite sheets made sense</text>
+  <text class="xs" x="28" y="244">here — and only here.</text>
+
+  <!-- HTTP/2 -->
+  <rect class="lane" x="302" y="60" width="276" height="196" rx="10"/>
+  <text class="t" x="318" y="84">HTTP/2</text>
+  <text class="xs" x="318" y="100">One connection, streams interleaved as frames</text>
+  <rect class="seg-b" x="318" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-c" x="356" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-d" x="394" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-b" x="432" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-c" x="470" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-d" x="508" y="112" width="34" height="14" rx="3"/>
+  <text class="xs" x="318" y="146">one TCP connection ↑</text>
+  <path class="fill-bad" d="M462 136l0 0z"/>
+  <text class="t fill-bad" x="470" y="146">✕</text>
+  <rect class="box bad" x="318" y="156" width="244" height="54" rx="8"/>
+  <text class="xs" x="330" y="176">A lost TCP segment stalls EVERY stream —</text>
+  <text class="xs" x="330" y="194">TCP must deliver bytes in order, so all six wait.</text>
+  <text class="xs" x="318" y="230">HOL blocking removed at the application</text>
+  <text class="xs" x="318" y="246">layer, still present at the transport layer.</text>
+
+  <!-- HTTP/3 -->
+  <rect class="lane" x="592" y="60" width="276" height="196" rx="10"/>
+  <text class="t" x="608" y="84">HTTP/3</text>
+  <text class="xs" x="608" y="100">QUIC over UDP, streams independent</text>
+  <rect class="seg-b" x="608" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-c" x="646" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-d" x="684" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-b" x="722" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-c" x="760" y="112" width="34" height="14" rx="3"/>
+  <rect class="seg-d" x="798" y="112" width="34" height="14" rx="3"/>
+  <text class="t fill-bad" x="690" y="146">✕</text>
+  <rect class="box good" x="608" y="156" width="244" height="54" rx="8"/>
+  <text class="xs" x="620" y="176">Only the affected stream waits. The other</text>
+  <text class="xs" x="620" y="194">five keep delivering — the mobile win.</text>
+  <text class="xs" x="608" y="230">Also: connection migration survives a</text>
+  <text class="xs" x="608" y="246">Wi-Fi → cellular switch.</text>
+
+  <rect class="box hl" x="12" y="272" width="856" height="30" rx="7"/>
+  <text class="s" x="28" y="292">Consequence: under HTTP/2 and /3, domain sharding is an anti-pattern — many small cacheable chunks are fine.</text>
+</svg><figcaption>How each HTTP version handles concurrency, and where a lost packet stalls things.</figcaption></figure>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>HTTP/1.1</th>
+<th>HTTP/2</th>
+<th>HTTP/3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transport</td>
+<td>TCP</td>
+<td>TCP</td>
+<td>QUIC over UDP</td>
+</tr>
+<tr>
+<td>Concurrency</td>
+<td>\~6 connections per origin</td>
+<td>Multiplexed streams on one connection</td>
+<td>Multiplexed, independent streams</td>
+</tr>
+<tr>
+<td>Head-of-line blocking</td>
+<td>At the application layer</td>
+<td>Removed at app layer, <strong>remains at TCP layer</strong></td>
+<td>Removed</td>
+</tr>
+<tr>
+<td>Headers</td>
+<td>Plaintext, repeated</td>
+<td>HPACK compression</td>
+<td>QPACK compression</td>
+</tr>
+<tr>
+<td>Handshake</td>
+<td>TCP + TLS, 2–3 RTT</td>
+<td>TCP + TLS</td>
+<td>1 RTT, 0-RTT on resume</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> Under HTTP/1.1, sprite sheets, concatenated bundles and domain sharding were correct. Under HTTP/2 sharding is an anti-pattern and many small cacheable chunks are fine.</p>
+<p><strong>Trade-offs.</strong> H2 Server Push is dead (removed from Chrome) — the replacement is <code>103 Early Hints</code> plus <code>preload</code>.</p>
+<p><strong>Follow-ups.</strong> Does HTTP/2 remove the need for bundling? (No — compression ratio and request overhead still favour reasonable chunk sizes.) Why did Server Push fail?</p>
+<h3 id="66-http-methods-and-idempotency">6.6 HTTP methods and idempotency</h3>
+<p><strong>What it is.</strong> <em>Safe</em> means no state change; <em>idempotent</em> means repeating has the same end effect as doing it once.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Safe</th>
+<th>Idempotent</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET, HEAD, OPTIONS</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Cacheable; never use GET for a mutation — it gets prefetched and logged</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>No</td>
+<td>Yes</td>
+<td>Full replacement</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>No</td>
+<td>Yes</td>
+<td>Second call returns 404/204, end state matches</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>No</td>
+<td><strong>No</strong></td>
+<td>Create or trigger — the retry hazard</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td>No</td>
+<td>Not necessarily</td>
+<td>A merge patch can be; "increment by 1" is not</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> A booking POST carries a client-generated <code>Idempotency-Key</code>; the server stores key → response for a window, so a retry after a timeout returns the original result instead of double-booking.</p>
+<p><strong>Trade-offs.</strong> Idempotency is an API contract, not a client property. Retries without a circuit breaker and jittered backoff turn a blip into a retry storm.</p>
+<p><strong>Follow-ups.</strong> How do you make a POST retry-safe? Where do you put retry policy — the component, the data layer, or the gateway? What does <code>Retry-After</code> do?</p>
+<h3 id="67-realtime-transports">6.7 Realtime transports</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Long polling</th>
+<th>SSE</th>
+<th>WebSocket</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Direction</td>
+<td>Request/response</td>
+<td>Server → client</td>
+<td>Bidirectional</td>
+</tr>
+<tr>
+<td>Protocol</td>
+<td>HTTP</td>
+<td>HTTP (<code>text/event-stream</code>)</td>
+<td>Upgrade from HTTP, then its own framing</td>
+</tr>
+<tr>
+<td>Reconnect</td>
+<td>Manual</td>
+<td><strong>Built in</strong>, with <code>Last-Event-ID</code></td>
+<td>Manual</td>
+</tr>
+<tr>
+<td>Proxy/CDN friendliness</td>
+<td>Best</td>
+<td>Good</td>
+<td>Often needs special config</td>
+</tr>
+<tr>
+<td>Use for</td>
+<td>Fallback</td>
+<td>Price pushes, notifications, progress</td>
+<td>Chat, collaborative editing, trading</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> Subscribe per visible item rather than per result set — drive subscriptions from <code>IntersectionObserver</code> so offscreen cards unsubscribe; coalesce bursts into one flush per animation frame.</p>
+<p><strong>Trade-offs.</strong> WebSockets are stateful, which complicates load balancing, scaling and deploys; SSE rides normal HTTP infrastructure but is one-way and limited to text.</p>
+<p><strong>Follow-ups.</strong> How do you reconnect without hammering the server? (Exponential backoff with jitter, a sequence number to detect gaps, full refetch after a gap.) How do you scale a WebSocket fleet? How do you handle backpressure?</p>
+<h3 id="68-api-shapes-rest-graphql-bff">6.8 API shapes: REST, GraphQL, BFF</h3>
+<p><strong>What it is.</strong> REST exposes resources; GraphQL exposes one endpoint with a client-specified query; a BFF is a server owned by the frontend team that aggregates and trims payloads for one surface.</p>
+<p><strong>Example.</strong> For a travel marketplace, a BFF per surface (web, iOS, Android) keeps the mobile payload small without forcing every backend service to change.</p>
+<p><strong>Trade-offs.</strong> GraphQL removes over-fetching and client-side waterfalls, and costs you CDN cacheability (POST by default), N+1 risk on the server, and the need for query-cost limits and persisted queries. REST stays trivially cacheable.</p>
+<p><strong>Follow-ups.</strong> How do you cache a GraphQL response at the edge? Cursor vs offset pagination, and why does offset break on a live inventory? How do you version an API the frontend depends on?</p>
+<h2 id="7-caching-storage-and-offline">7. Caching, storage and offline</h2>
+<h3 id="71-http-cache-headers">7.1 HTTP cache headers</h3>
+<p><strong>What it is.</strong> <code>Cache-Control</code> sets the policy; <code>ETag</code>/<code>Last-Modified</code> enable conditional revalidation; <code>Vary</code> defines the cache key's extra dimensions.</p>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Meaning</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>max-age=31536000, immutable</code></td>
+<td>Never revalidate for a year</td>
+<td>Content-hashed static assets</td>
+</tr>
+<tr>
+<td><code>no-cache</code></td>
+<td>May store, <strong>must revalidate</strong> before use</td>
+<td>HTML documents</td>
+</tr>
+<tr>
+<td><code>no-store</code></td>
+<td>Never written to disk</td>
+<td>Authenticated or PII responses</td>
+</tr>
+<tr>
+<td><code>private</code> / <code>public</code></td>
+<td>Whether shared caches may store it</td>
+<td><code>private</code> for anything user-specific</td>
+</tr>
+<tr>
+<td><code>stale-while-revalidate=60</code></td>
+<td>Serve stale instantly, refresh in background</td>
+<td>Content APIs that tolerate seconds of staleness</td>
+</tr>
+<tr>
+<td><code>s-maxage</code></td>
+<td>CDN-only lifetime, overrides <code>max-age</code></td>
+<td>Short browser TTL, long edge TTL</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong></p>
+<pre><code>GET /app.3f9a1c.js  →  Cache-Control: public, max-age=31536000, immutable
+GET /                →  Cache-Control: no-cache
+                        ETag: &quot;v842&quot;
+   next request:        If-None-Match: &quot;v842&quot;  →  304 Not Modified
+</code></pre>
+<p><strong>Trade-offs.</strong> <code>private</code> vs <code>public</code> is a correctness decision, not a performance one — getting it wrong serves one user's booking page to another. Over-varying (e.g. on <code>User-Agent</code>) destroys hit rate.</p>
+<p><strong>Follow-ups.</strong> What's the difference between <code>no-cache</code> and <code>no-store</code>? What exactly does a 304 save? Strong vs weak ETags? Why must <code>Vary: Accept-Encoding</code> be set?</p>
+<h3 id="72-the-cache-busting-pattern">7.2 The cache-busting pattern</h3>
+<p><strong>What it is.</strong> Immutable, long-lived, content-hashed assets plus a short-lived or revalidated HTML document that points at them.</p>
+<p><strong>Example.</strong> <code>index.html</code> is <code>no-cache</code>; it references <code>app.3f9a1c.js</code> which is <code>immutable</code>. A deploy changes the hash, so no purge is needed and no user ever gets a mismatched chunk.</p>
+<p><strong>Trade-offs.</strong> You still must handle a chunk 404 for users who loaded old HTML before a deploy — catch <code>ChunkLoadError</code>, retry with a cache-bust, then force a reload.</p>
+<p><strong>Follow-ups.</strong> What happens to a user who's been sitting on a tab for an hour when you deploy? How do you roll back without breaking in-flight sessions? (Keep the previous N builds' assets on the CDN.)</p>
+<h3 id="73-cdn-and-the-cache-layer-stack">7.3 CDN and the cache layer stack</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 286" role="img" aria-label="Cache layers a response passes through, nearest to the user first">
+  <text class="title" x="16" y="24">A request stops at the first layer that can answer it</text>
+  <text class="s" x="16" y="44">Each miss costs latency; each layer you add protects the one behind it</text>
+
+  <rect class="box" x="16"  y="104" width="112" height="56" rx="8"/>
+  <text class="t" x="72" y="128" text-anchor="middle">Memory</text>
+  <text class="xs" x="72" y="146" text-anchor="middle">this tab only</text>
+
+  <rect class="box" x="146" y="104" width="112" height="56" rx="8"/>
+  <text class="t" x="202" y="128" text-anchor="middle">Disk cache</text>
+  <text class="xs" x="202" y="146" text-anchor="middle">Cache-Control</text>
+
+  <rect class="box hl" x="276" y="104" width="130" height="56" rx="8"/>
+  <text class="t" x="341" y="128" text-anchor="middle">Service Worker</text>
+  <text class="xs" x="341" y="146" text-anchor="middle">your code — offline</text>
+
+  <rect class="box" x="424" y="104" width="120" height="56" rx="8"/>
+  <text class="t" x="484" y="128" text-anchor="middle">CDN edge</text>
+  <text class="xs" x="484" y="146" text-anchor="middle">s-maxage, Vary</text>
+
+  <rect class="box" x="562" y="104" width="120" height="56" rx="8"/>
+  <text class="t" x="622" y="128" text-anchor="middle">CDN shield</text>
+  <text class="xs" x="622" y="146" text-anchor="middle">collapses misses</text>
+
+  <rect class="box bad" x="700" y="104" width="164" height="56" rx="8"/>
+  <text class="t" x="782" y="128" text-anchor="middle">Origin</text>
+  <text class="xs" x="782" y="146" text-anchor="middle">the thing you protect</text>
+
+  <path class="edge" d="M128 132H146"/>
+  <path class="edge" d="M258 132H276"/>
+  <path class="edge" d="M406 132H424"/>
+  <path class="edge" d="M544 132H562"/>
+  <path class="edge" d="M682 132H700"/>
+
+  <text class="xs" x="16" y="92">BROWSER</text>
+  <text class="xs" x="424" y="92">NETWORK</text>
+
+  <text class="xs" x="137" y="180" text-anchor="middle">miss</text>
+  <text class="xs" x="267" y="180" text-anchor="middle">miss</text>
+  <text class="xs" x="415" y="180" text-anchor="middle">miss</text>
+  <text class="xs" x="553" y="180" text-anchor="middle">miss</text>
+  <text class="xs" x="691" y="180" text-anchor="middle">miss</text>
+
+  <path class="edge accent" d="M782 104V78H72V104"/>
+  <text class="xs" x="440" y="70" text-anchor="middle">response flows back and is written into every layer it passed</text>
+
+  <rect class="box" x="16" y="206" width="414" height="64" rx="8"/>
+  <text class="t" x="32" y="228">Cached far from the user</text>
+  <text class="xs" x="32" y="248">Content-hashed JS/CSS/images · immutable, one year</text>
+  <text class="xs" x="32" y="264">Anonymous HTML shell · s-maxage with a purge or hash swap</text>
+
+  <rect class="box bad" x="450" y="206" width="414" height="64" rx="8"/>
+  <text class="t" x="466" y="228">Never cached in a shared layer</text>
+  <text class="xs" x="466" y="248">Prices, availability, anything personalised · Cache-Control: private</text>
+  <text class="xs" x="466" y="264">Get public/private wrong and one user sees another's booking page</text>
+</svg><figcaption>Every layer a response can be served from, nearest to the user first.</figcaption></figure>
+<p><strong>What it is.</strong> A response passes through: browser memory cache → browser disk cache → Service Worker cache → preload cache → CDN edge → CDN shield/regional → origin.</p>
+<p><strong>Example.</strong> A shield tier collapses many edge misses into one origin request, which protects the origin during a cache purge or a traffic spike.</p>
+<p><strong>Trade-offs.</strong> Caching personalised HTML at the edge requires the personalisation to be in the cache key, which fragments the cache. The usual resolution is to cache an anonymous shell and personalise client-side or via an edge function.</p>
+<p><strong>Follow-ups.</strong> What should never be cached at the CDN? How do you invalidate — purge by URL, surrogate key, or just change the hash? What does a cache HIT/MISS/STALE header tell you when debugging?</p>
+<h3 id="74-browser-storage">7.4 Browser storage</h3>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Size</th>
+<th>Sync?</th>
+<th>Sent to server</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cookie</td>
+<td>\~4KB</td>
+<td>n/a</td>
+<td>Yes, every request</td>
+<td>Session/auth (<code>HttpOnly</code>, <code>Secure</code>, <code>SameSite</code>)</td>
+</tr>
+<tr>
+<td><code>localStorage</code></td>
+<td>\~5MB</td>
+<td><strong>Synchronous — blocks the main thread</strong></td>
+<td>No</td>
+<td>Small prefs, flag cache. Never tokens</td>
+</tr>
+<tr>
+<td><code>sessionStorage</code></td>
+<td>\~5MB</td>
+<td>Synchronous</td>
+<td>No</td>
+<td>Per-tab state, multi-step funnel</td>
+</tr>
+<tr>
+<td>IndexedDB</td>
+<td>Quota-based</td>
+<td>Async</td>
+<td>No</td>
+<td>Offline data, search index, request queue</td>
+</tr>
+<tr>
+<td>Cache Storage</td>
+<td>Quota-based</td>
+<td>Async</td>
+<td>No</td>
+<td>Service Worker asset and response cache</td>
+</tr>
+<tr>
+<td>In-memory</td>
+<td>n/a</td>
+<td>n/a</td>
+<td>No</td>
+<td>Access tokens, anything secret-adjacent</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> Reading <code>localStorage</code> inside a scroll handler is a genuine performance bug — it is synchronous disk I/O on the main thread.</p>
+<p><strong>Trade-offs.</strong> Cookies travel on every request, adding bytes to every call; <code>localStorage</code> is convenient but XSS-readable and synchronous; IndexedDB is the only option at size but has an awkward API (use <code>idb</code>).</p>
+<p><strong>Follow-ups.</strong> Where would you store an auth token and why? What is storage quota and what happens when it's exceeded? How do you sync state between tabs? (<code>BroadcastChannel</code> or a <code>storage</code> event.)</p>
+<h3 id="75-cookie-attributes">7.5 Cookie attributes</h3>
+<p><strong>What it is.</strong> <code>HttpOnly</code> blocks JavaScript access; <code>Secure</code> restricts to HTTPS; <code>SameSite</code> controls cross-site sending; <code>Domain</code>/<code>Path</code> set scope; <code>Max-Age</code>/<code>Expires</code> set lifetime.</p>
+<p><strong>Example.</strong> <code>Set-Cookie: sid=...; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=1209600</code></p>
+<p><strong>Trade-offs.</strong> <code>SameSite=Strict</code> is the safest and breaks inbound links from email and partner sites (the user arrives logged out). <code>Lax</code> is the modern default and allows top-level GET navigation. <code>None</code> requires <code>Secure</code> and is needed for genuine third-party contexts.</p>
+<p><strong>Follow-ups.</strong> Why does <code>SameSite=Lax</code> mostly solve CSRF? What is a cookie-prefix (<code>__Host-</code>)? How do cookies behave across subdomains, and what breaks when several apps share an apex domain?</p>
+<h3 id="76-service-workers-and-offline">7.6 Service Workers and offline</h3>
+<p><strong>What it is.</strong> A proxy worker sitting between the page and the network, with its own cache, lifecycle and no DOM access.</p>
+<p><strong>Example.</strong> Lifecycle is install → waiting → activate; <code>skipWaiting</code> and <code>clients.claim</code> take over immediately. Strategy by resource type:</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hashed static assets</td>
+<td>Cache-first</td>
+</tr>
+<tr>
+<td>HTML documents</td>
+<td>Network-first with a cached fallback</td>
+</tr>
+<tr>
+<td>Content APIs (descriptions, reviews)</td>
+<td>Stale-while-revalidate</td>
+</tr>
+<tr>
+<td>Prices, availability, payments</td>
+<td>Network-only</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> A Service Worker is the most dangerous thing a frontend team deploys — a bad one is sticky and can serve broken assets indefinitely. Always ship a kill switch (remote flag that makes it unregister) and know <code>Clear-Site-Data</code>. <code>skipWaiting</code> risks mixing an old page with a new worker.</p>
+<p><strong>Follow-ups.</strong> How do you update a Service Worker safely? What is Background Sync for? How would you make a booking flow survive a tunnel? (Draft in IndexedDB, queued submit with an idempotency key, explicit offline UI — never an optimistic success.)</p>
+<h2 id="8-security">8. Security</h2>
+<h3 id="81-same-origin-policy-and-cors">8.1 Same-origin policy and CORS</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 328" role="img" aria-label="CORS preflight sequence between browser and server">
+  <text class="title" x="16" y="24">CORS relaxes the same-origin policy — it does not protect your API</text>
+  <text class="s" x="16" y="44">A non-simple request asks permission before the real one is sent</text>
+
+  <rect class="box" x="60"  y="62" width="180" height="34" rx="8"/>
+  <text class="t" x="150" y="84" text-anchor="middle">Browser</text>
+  <text class="xs" x="150" y="112" text-anchor="middle">origin: www.example.com</text>
+
+  <rect class="box" x="640" y="62" width="180" height="34" rx="8"/>
+  <text class="t" x="730" y="84" text-anchor="middle">api.example.com</text>
+  <text class="xs" x="730" y="112" text-anchor="middle">different origin</text>
+
+  <path class="lifeline" d="M150 120V300"/>
+  <path class="lifeline" d="M730 120V300"/>
+
+  <path class="edge" d="M150 142H730"/>
+  <text class="t" x="440" y="136" text-anchor="middle">OPTIONS /book — the preflight</text>
+  <text class="xs" x="440" y="158" text-anchor="middle">Origin · Access-Control-Request-Method: POST · -Request-Headers: authorization</text>
+
+  <path class="edge" d="M730 194H150"/>
+  <text class="t" x="440" y="188" text-anchor="middle">204 — permission granted</text>
+  <text class="xs" x="440" y="210" text-anchor="middle">Access-Control-Allow-Origin: www.example.com · -Allow-Credentials: true · -Max-Age: 600</text>
+
+  <path class="edge accent" d="M150 244H730"/>
+  <text class="t" x="440" y="238" text-anchor="middle">POST /book — the real request</text>
+
+  <path class="edge accent" d="M730 286H150"/>
+  <text class="t" x="440" y="280" text-anchor="middle">200 — and only now may JS read the body</text>
+
+  <rect class="box bad" x="16" y="304" width="420" height="0" rx="7"/>
+  <text class="xs" x="16" y="320">Allow-Credentials: true cannot be paired with Origin: * — echo a validated origin, never reflect it blindly.</text>
+  <text class="xs" x="520" y="320">Simple requests (GET, or POST with a form content-type) skip the preflight.</text>
+</svg><figcaption>A CORS preflight. The browser asks permission before sending the real request.</figcaption></figure>
+<p><strong>What it is.</strong> An origin is scheme + host + port. The same-origin policy blocks a document from <em>reading</em> cross-origin responses. CORS is the server's mechanism to <strong>relax</strong> that — it is not a defence.</p>
+<p><strong>Example.</strong> A non-simple request triggers a preflight:</p>
+<pre><code>OPTIONS /api/book          Origin: https://www.example.com
+                           Access-Control-Request-Method: POST
+                           Access-Control-Request-Headers: content-type, authorization
+→ Access-Control-Allow-Origin: https://www.example.com
+  Access-Control-Allow-Credentials: true
+  Access-Control-Max-Age: 600
+</code></pre>
+<p><strong>Trade-offs.</strong> <code>Allow-Credentials: true</code> cannot be combined with <code>Origin: *</code> — you must echo a specific, validated origin. Blindly reflecting <code>Origin</code> is a common vulnerability. A high <code>Max-Age</code> cuts preflights but delays policy changes.</p>
+<p><strong>Follow-ups.</strong> What makes a request "simple" (no preflight)? Does CORS protect your API? (No — curl ignores it; authorization is the server's job.) Why can a <code>&lt;img&gt;</code> or <code>&lt;form&gt;</code> go cross-origin but <code>fetch</code> cannot read the response?</p>
+<h3 id="82-xss">8.2 XSS</h3>
+<p><strong>What it is.</strong> Executing attacker-controlled script in your origin.</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>How</th>
+<th>Defence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stored</td>
+<td>Malicious input saved then rendered (a hotel review)</td>
+<td>Encode on output, sanitise on input</td>
+</tr>
+<tr>
+<td>Reflected</td>
+<td>Payload in the URL echoed into the page</td>
+<td>Context-aware escaping</td>
+</tr>
+<tr>
+<td>DOM-based</td>
+<td>Client-side sink: <code>innerHTML</code>, <code>document.write</code>, <code>eval</code>, <code>location</code>, <code>dangerouslySetInnerHTML</code></td>
+<td>Avoid sinks; DOMPurify; Trusted Types</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> React escapes interpolated values, so the real React vectors are exactly four: <code>dangerouslySetInnerHTML</code>, <code>href={userInput}</code> with a <code>javascript:</code> URL, spreading unvalidated props onto an element, and server-rendered JSON injection (an unescaped <code>&lt;/script&gt;</code> inside a serialised payload).</p>
+<p><strong>Trade-offs.</strong> Sanitising HTML is a losing arms race compared with not rendering HTML at all; <strong>Trusted Types</strong> converts a code-review problem into a browser-enforced one, at the cost of a migration.</p>
+<p><strong>Follow-ups.</strong> How would you safely render user-authored rich text? Why is <code>encodeURIComponent</code> not enough in an HTML attribute? What does Trusted Types enforce?</p>
+<h3 id="83-content-security-policy">8.3 Content Security Policy</h3>
+<p><strong>What it is.</strong> A response header restricting which sources of script, style, images and frames may load and execute.</p>
+<p><strong>Example.</strong> A strict modern policy uses nonces plus <code>strict-dynamic</code>, not a host allowlist:</p>
+<pre><code>Content-Security-Policy:
+  script-src 'nonce-{random}' 'strict-dynamic' https: 'unsafe-inline';
+  object-src 'none'; base-uri 'none'; require-trusted-types-for 'script';
+  report-uri /csp-report
+</code></pre>
+<p><code>'unsafe-inline'</code> and <code>https:</code> here are <strong>fallbacks for old browsers</strong> that modern browsers ignore once a nonce is present.</p>
+<p><strong>Trade-offs.</strong> Host allowlists are routinely bypassable via JSONP endpoints on allowed CDNs. Nonces are incompatible with full-page CDN caching (each response needs a fresh nonce) — which pushes you to hashes or edge-injected nonces. Inline styles from runtime CSS-in-JS and tag managers are the usual blockers.</p>
+<p><strong>Follow-ups.</strong> How do you roll out CSP without breaking the site? (<code>Content-Security-Policy-Report-Only</code>, collect violations for two weeks, then enforce.) Why is <code>strict-dynamic</code> better than an allowlist? How does CSP interact with a CDN?</p>
+<h3 id="84-csrf">8.4 CSRF</h3>
+<p><strong>What it is.</strong> An attacker-controlled page causes the victim's browser to make an authenticated <strong>write</strong> using cookies it sends automatically.</p>
+<p><strong>Example.</strong> Defences, in order of preference: <code>SameSite=Lax</code>/<code>Strict</code> cookies, a synchroniser or double-submit token, and checking <code>Origin</code>/<code>Sec-Fetch-Site</code> server-side.</p>
+<p><strong>Trade-offs.</strong> CSRF defences are only needed when you authenticate with cookies — a bearer token in an <code>Authorization</code> header is not sent automatically, so it is not CSRF-exposed (but is XSS-exposed instead).</p>
+<p><strong>Follow-ups.</strong> CORS vs CSRF in one sentence each. Does <code>SameSite=Lax</code> fully solve CSRF? (Not for top-level GET state changes — another reason GET must stay safe.)</p>
+<h3 id="85-security-headers">8.5 Security headers</h3>
+<table>
+<thead>
+<tr>
+<th>Header</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Strict-Transport-Security</code></td>
+<td>Force HTTPS; <code>preload</code> covers the first visit</td>
+</tr>
+<tr>
+<td><code>X-Content-Type-Options: nosniff</code></td>
+<td>Stop MIME-confusion attacks</td>
+</tr>
+<tr>
+<td><code>Referrer-Policy: strict-origin-when-cross-origin</code></td>
+<td>Stop leaking paths and query strings</td>
+</tr>
+<tr>
+<td><code>Permissions-Policy</code></td>
+<td>Disable geolocation/camera for embedded third parties</td>
+</tr>
+<tr>
+<td><code>Cross-Origin-Opener-Policy</code> / <code>-Embedder-Policy</code></td>
+<td>Process isolation; required for <code>SharedArrayBuffer</code></td>
+</tr>
+<tr>
+<td><code>Cross-Origin-Resource-Policy</code></td>
+<td>Block cross-origin reads of your resources</td>
+</tr>
+<tr>
+<td><code>X-Frame-Options</code> / CSP <code>frame-ancestors</code></td>
+<td>Clickjacking</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Follow-ups.</strong> Which of these would you set first on a new service, and why? What breaks when you turn on COEP?</p>
+<h3 id="86-authentication-vs-authorization">8.6 Authentication vs authorization</h3>
+<p><strong>What it is.</strong> Authentication is "who are you"; authorization is "what may you do."</p>
+<p><strong>Example.</strong> Hiding an admin button is a UX affordance. The server must independently enforce the permission on the endpoint.</p>
+<p><strong>Trade-offs.</strong> Fetching a capabilities object lets the UI render correctly without duplicating policy, at the cost of an extra round trip and a cache-invalidation question when roles change.</p>
+<p><strong>Follow-ups.</strong> Where must authorization be enforced? How do you handle a user whose permissions change mid-session?</p>
+<h3 id="87-oauth-oidc-and-jwt">8.7 OAuth, OIDC and JWT</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 470" role="img" aria-label="OAuth Authorization Code flow with PKCE for a browser app">
+  <text class="title" x="16" y="24">Authorization Code + PKCE — the only correct flow for a browser app</text>
+  <text class="s" x="16" y="44">The verifier never leaves the client, so an intercepted code is useless</text>
+
+  <rect class="box" x="30"  y="62" width="180" height="32" rx="8"/>
+  <text class="t" x="120" y="83" text-anchor="middle">SPA (public client)</text>
+  <rect class="box" x="330" y="62" width="200" height="32" rx="8"/>
+  <text class="t" x="430" y="83" text-anchor="middle">Authorization server</text>
+  <rect class="box" x="670" y="62" width="180" height="32" rx="8"/>
+  <text class="t" x="760" y="83" text-anchor="middle">Resource API</text>
+
+  <path class="lifeline" d="M120 94V378"/>
+  <path class="lifeline" d="M430 94V378"/>
+  <path class="lifeline" d="M760 94V378"/>
+
+  <rect class="box hl" x="34" y="108" width="172" height="44" rx="8"/>
+  <text class="xs" x="120" y="127" text-anchor="middle">1 · generate random verifier</text>
+  <text class="xs" x="120" y="143" text-anchor="middle">challenge = S256(verifier)</text>
+
+  <path class="edge" d="M120 182H430"/>
+  <text class="t" x="275" y="176" text-anchor="middle">2 · GET /authorize</text>
+  <text class="xs" x="275" y="198" text-anchor="middle">code_challenge · state · nonce · redirect_uri</text>
+
+  <path class="edge" d="M430 234H120"/>
+  <text class="t" x="275" y="228" text-anchor="middle">3 · redirect back with code</text>
+  <text class="xs" x="275" y="250" text-anchor="middle">verify state matches — this is the CSRF check</text>
+
+  <path class="edge accent" d="M120 286H430"/>
+  <text class="t" x="275" y="280" text-anchor="middle">4 · POST /token — code + code_verifier</text>
+  <text class="xs" x="275" y="302" text-anchor="middle">server re-hashes the verifier and compares</text>
+
+  <path class="edge accent" d="M430 338H120"/>
+  <text class="t" x="275" y="332" text-anchor="middle">5 · access token + refresh token</text>
+  <text class="xs" x="275" y="354" text-anchor="middle">access token in memory · refresh in an HttpOnly cookie</text>
+
+  <path class="edge accent" d="M120 378H760"/>
+  <text class="t" x="560" y="372" text-anchor="middle">6 · Authorization: Bearer …</text>
+  <text class="xs" x="560" y="394" text-anchor="middle">API validates signature, pinned alg, iss, aud, exp</text>
+
+  <rect class="box bad" x="16" y="406" width="418" height="58" rx="8"/>
+  <text class="t" x="32" y="426">Never</text>
+  <text class="xs" x="32" y="444">Implicit flow — leaked tokens into history and Referer</text>
+  <text class="xs" x="32" y="459">Tokens in localStorage · trusting JWT claims client-side</text>
+
+  <rect class="box good" x="448" y="406" width="416" height="58" rx="8"/>
+  <text class="t" x="464" y="426">Refresh rotation with reuse detection</text>
+  <text class="xs" x="464" y="444">Each refresh issues a new token and kills the old one</text>
+  <text class="xs" x="464" y="459">An old one reappearing = theft → revoke the whole family</text>
+</svg><figcaption>Authorization Code with PKCE — the only correct OAuth flow for a browser app.</figcaption></figure>
+<p><strong>What it is.</strong> OAuth 2.0 is a delegated <strong>authorization</strong> framework; OpenID Connect is the <strong>authentication</strong> layer on top of it (the <code>id_token</code>); JWT is merely a <strong>token format</strong>. An OAuth implementation need not use JWTs.</p>
+<p><strong>Example.</strong> For a browser app, use Authorization Code with <strong>PKCE</strong>. The implicit flow is deprecated because it leaked tokens into URL fragments, history and referrers. Validate <code>state</code> (CSRF on the callback) and <code>nonce</code> (id_token replay).</p>
+<p>A JWT is <code>header.payload.signature</code>, base64url — <strong>encoded, not encrypted</strong>. Server-side validation must check the signature, pin the expected <code>alg</code> (reject <code>none</code> and algorithm confusion), and check <code>iss</code>, <code>aud</code>, <code>exp</code>, <code>nbf</code>.</p>
+<p><strong>Trade-offs.</strong> Stateless JWTs scale well but <strong>cannot be revoked before expiry</strong> — so either keep access-token lifetimes very short or maintain a denylist and give up some statelessness. Opaque tokens with introspection are the opposite trade.</p>
+<p><strong>Follow-ups.</strong> Access vs refresh tokens? How does rotation with reuse detection work? (Each refresh issues a new token and invalidates the old; if an old one reappears, revoke the whole family.) What stops ten parallel 401s triggering ten refreshes? (A single-flight lock.)</p>
+<h3 id="88-token-storage">8.8 Token storage</h3>
+<p><strong>What it is.</strong> The choice between <code>localStorage</code>, cookies and memory for auth material.</p>
+<p><strong>Example.</strong> The defensible architecture: short-lived access token <strong>in memory only</strong>, refresh token in an <code>HttpOnly; Secure; SameSite=Strict</code> cookie scoped to the refresh path, silent refresh on 401.</p>
+<p><strong>Trade-offs.</strong> <code>localStorage</code> is XSS-readable; cookies are CSRF-exposed but can be <code>HttpOnly</code>. The honest caveat: under XSS you lose either way, because the attacker can simply call your API from the victim's session. That is why CSP and Trusted Types matter more than storage choice.</p>
+<p><strong>Follow-ups.</strong> Why is "just use <code>HttpOnly</code> cookies" not a complete answer? What survives a page refresh with in-memory tokens? (Nothing — you silently refresh on load.)</p>
+<h3 id="89-supply-chain-and-third-parties">8.9 Supply chain and third parties</h3>
+<p><strong>What it is.</strong> Risk arriving through dependencies and third-party scripts rather than your own code.</p>
+<p><strong>Example.</strong> Controls: committed lockfile, <code>npm ci</code> only, Renovate/Dependabot with grouped patch automerge, <code>npm audit</code>/Socket in CI, <code>ignore-scripts</code> plus a private registry proxy, and provenance/sigstore where available. For third-party tags: Subresource Integrity hashes, <code>crossorigin</code>, sandboxed iframes, and a review gate.</p>
+<p><strong>Trade-offs.</strong> SRI breaks when the vendor updates the file — which is the point, but it means vendor-hosted "always latest" scripts cannot use it. Sandboxing a tag often breaks the feature the business wanted.</p>
+<p><strong>Follow-ups.</strong> What is dependency confusion and how do scoped private packages prevent it? A marketing tag on your checkout page — what's the blast radius? (Full compromise.) How would you audit what third-party scripts are actually on the page?</p>
+<h3 id="810-privacy-and-compliance-on-the-frontend">8.10 Privacy and compliance on the frontend</h3>
+<p><strong>What it is.</strong> Consent, data minimisation and scope reduction as frontend responsibilities.</p>
+<p><strong>Example.</strong> Consent management must gate analytics <em>before</em> it loads; PII never goes in URLs (they land in logs and <code>Referer</code>); session-replay tools need field masking; and a payment iframe or hosted fields keeps card data out of your DOM, which removes you from most PCI scope.</p>
+<p><strong>Trade-offs.</strong> Hosted payment fields reduce compliance scope and cost you styling control and a slightly worse checkout UX.</p>
+<p><strong>Follow-ups.</strong> How do you keep analytics working under a strict CSP? What would you mask in session replay on a booking form?</p>
+<h2 id="9-performance">9. Performance</h2>
+<h3 id="91-core-web-vitals">9.1 Core Web Vitals</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 334" role="img" aria-label="Where each Core Web Vital is measured during a page's life">
+  <text class="title" x="16" y="24">Each vital measures a different moment — and a different failure</text>
+  <text class="s" x="16" y="44">Measured at the 75th percentile of real users, not in the lab</text>
+
+  <path class="grid" d="M120 268H856"/>
+  <text class="xs" x="856" y="286" text-anchor="end">time →</text>
+
+  <text class="xs" x="16" y="84">NETWORK</text>
+  <rect class="seg-a" x="120" y="70" width="110" height="20" rx="3"/>
+  <text class="xs" x="175" y="84" text-anchor="middle">server + network</text>
+  <rect class="seg-b" x="230" y="70" width="90" height="20" rx="3"/>
+  <text class="xs" x="275" y="84" text-anchor="middle">HTML</text>
+  <rect class="seg-c" x="320" y="70" width="180" height="20" rx="3"/>
+  <text class="xs" x="410" y="84" text-anchor="middle">CSS + JS + hero image</text>
+
+  <path class="grid dash" d="M230 62V268"/>
+  <path class="grid dash" d="M320 62V268"/>
+  <path class="grid dash" d="M500 62V268"/>
+
+  <circle class="fill-accent" cx="230" cy="110" r="5"/>
+  <text class="t" x="242" y="114">TTFB</text>
+  <text class="xs" x="242" y="130">server + network only · diagnostic, not a vital</text>
+
+  <circle class="fill-accent" cx="320" cy="150" r="5"/>
+  <text class="t" x="332" y="154">FCP</text>
+  <text class="xs" x="332" y="170">first pixel of anything · blocked by CSS and sync JS</text>
+
+  <circle class="fill-good" cx="500" cy="190" r="6"/>
+  <text class="t" x="514" y="194">LCP — good ≤ 2.5 s</text>
+  <text class="xs" x="514" y="210">largest in-viewport element painted · usually the hero image or H1</text>
+
+  <text class="xs" x="16" y="238">MAIN THREAD</text>
+  <rect class="seg-d" x="330" y="226" width="56" height="18" rx="3"/>
+  <rect class="seg-d" x="398" y="226" width="34" height="18" rx="3"/>
+  <rect class="seg-d" x="560" y="226" width="78" height="18" rx="3"/>
+  <rect class="seg-d" x="660" y="226" width="26" height="18" rx="3"/>
+  <text class="xs" x="700" y="234">long tasks ≥ 50 ms</text>
+  <text class="xs" x="700" y="250">sum = TBT (the lab proxy)</text>
+
+  <path class="edge accent" d="M560 260V244"/>
+  <text class="t" x="552" y="306" text-anchor="start">INP — good ≤ 200 ms</text>
+  <text class="xs" x="552" y="322">a tap landing on a long task: input delay + processing + next paint</text>
+
+  <rect class="box bad" x="16" y="292" width="510" height="36" rx="8"/>
+  <text class="t" x="32" y="308">CLS — good ≤ 0.1</text>
+  <text class="xs" x="32" y="322">measured across the whole session: images without dimensions, late fonts, injected banners</text>
+</svg><figcaption>Where each Core Web Vital is measured during a page&#x27;s life.</figcaption></figure>
+<p><strong>What it is.</strong> Three field metrics, measured at the 75th percentile of real users.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Good</th>
+<th>Needs work</th>
+<th>Measures</th>
+<th>Top causes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LCP</td>
+<td>≤ 2.5s</td>
+<td>≤ 4.0s</td>
+<td>Render time of the largest in-viewport element</td>
+<td>Slow TTFB, render-blocking CSS/JS, lazy-loaded hero, unoptimised images</td>
+</tr>
+<tr>
+<td>INP</td>
+<td>≤ 200ms</td>
+<td>≤ 500ms</td>
+<td>Worst interaction latency: input delay + processing + presentation</td>
+<td>Long tasks, heavy handlers, large re-render trees, hydration</td>
+</tr>
+<tr>
+<td>CLS</td>
+<td>≤ 0.1</td>
+<td>≤ 0.25</td>
+<td>Sum of unexpected layout shift scores</td>
+<td>Images without dimensions, injected banners, late fonts, dynamic content above the fold</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> Supporting diagnostics: <strong>TTFB</strong> (server + network), <strong>FCP</strong> (first paint of anything), <strong>TBT</strong> (sum of long-task time over 50ms), <strong>TTI</strong>. TBT is the <em>lab</em> proxy; INP is the <em>field</em> metric.</p>
+<p><strong>Trade-offs.</strong> p75 hides the tail — always look at p95 too, and segment by device class and country, because a global average flatters you while low-end Android users suffer.</p>
+<p><strong>Follow-ups.</strong> Why did INP replace FID? What's the difference between lab and field data? How do you attribute an INP regression to a specific interaction? (<code>event</code> timing entries and the Long Animation Frames API.)</p>
+<h3 id="92-measurement">9.2 Measurement</h3>
+<p><strong>What it is.</strong> Lab tools give deterministic, repeatable numbers; field tools (RUM) give the truth about real users.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-javascript">import { onLCP, onINP, onCLS } from 'web-vitals';
+const send = m =&gt; navigator.sendBeacon('/rum', JSON.stringify({
+  name: m.name, value: m.value, id: m.id,
+  route: currentRoute(), buildId: __BUILD_ID__,   // attribute regressions to a deploy
+  conn: navigator.connection?.effectiveType,
+}));
+onLCP(send); onINP(send); onCLS(send);
+</code></pre>
+<p><strong>Trade-offs.</strong> Lighthouse CI is good for gating because it is deterministic, and blind to real device and network diversity. RUM is true but noisy and needs volume before a signal appears — hence synthetic monitoring as the early-warning layer.</p>
+<p><strong>Follow-ups.</strong> How do you read a Performance panel trace? (Long tasks, forced reflow warnings, the main-thread flame chart, Recalculate Style and Layout blocks.) What is CrUX? Why beacon on <code>visibilitychange</code> rather than <code>unload</code>?</p>
+<h3 id="93-loading-optimisation">9.3 Loading optimisation</h3>
+<p><strong>What it is.</strong> Shortening the critical path from request to largest paint.</p>
+<p><strong>Example.</strong> In rough order of payoff:</p>
+<ol>
+<li><strong>Critical CSS</strong> inline, rest deferred; per-route CSS extraction.</li>
+<li><strong>Resource hints</strong>: <code>preconnect</code> to the image/API origin, <code>preload</code> the LCP image and the critical font, <code>fetchpriority="high"</code> on the hero and <code>low</code> below the fold, <code>prefetch</code> the next likely route.</li>
+<li><strong>Images</strong>: AVIF with WebP fallback, responsive <code>srcset</code>/<code>sizes</code>, explicit <code>width</code>/<code>height</code> or <code>aspect-ratio</code>, <code>loading="lazy"</code> <strong>only</strong> below the fold, <code>decoding="async"</code>, CDN resizing on the fly.</li>
+<li><strong>Fonts</strong>: <code>font-display: swap</code> (or <code>optional</code>), <code>preload</code> one critical woff2, subset glyph ranges, <code>size-adjust</code> metric overrides so the swap doesn't shift layout.</li>
+<li><strong>JavaScript</strong>: route-level splitting, then component-level for heavy widgets, then shrink what remains.</li>
+<li><strong>Third parties</strong>: facade pattern (a fake chat button that loads the real widget on click), iframe sandboxing, or Partytown.</li>
+</ol>
+<p><strong>Trade-offs.</strong> Preload competes with itself — more than about three hints and you delay the thing you cared about. <code>loading="lazy"</code> on the LCP image is a classic self-inflicted regression.</p>
+<p><strong>Follow-ups.</strong> What's the difference between <code>preload</code>, <code>prefetch</code> and <code>preconnect</code>? Why can inlining a script hurt? How would you optimise a hotel listing page with forty images?</p>
+<h3 id="94-compression">9.4 Compression</h3>
+<p><strong>What it is.</strong> Brotli (<code>br</code>) beats gzip by roughly 15–20% on text assets; gzip is the universal fallback. Negotiated via <code>Accept-Encoding</code>, which makes <code>Vary: Accept-Encoding</code> mandatory.</p>
+<p><strong>Example.</strong> Pre-compress static assets at build time with Brotli quality 11 and serve the <code>.br</code> file; use quality 4–6 for dynamic responses so you don't trade TTFB for bytes.</p>
+<p><strong>Trade-offs.</strong> Never re-compress already-compressed payloads (JPEG, AVIF, WebP, woff2, video) — you burn CPU and can grow the file. Compressing a response containing a secret alongside reflected user input is the BREACH class.</p>
+<p><strong>Follow-ups.</strong> Why state bundle budgets in compressed bytes? How does compression interact with CDN caching? Why not Brotli images?</p>
+<h3 id="95-runtime-performance">9.5 Runtime performance</h3>
+<p><strong>What it is.</strong> Keeping interactions under the INP threshold once the page is loaded.</p>
+<p><strong>Example.</strong> The standard levers: virtualise long lists (<code>react-window</code>, TanStack Virtual); <code>useDeferredValue</code>/<code>startTransition</code> for filtering while typing; debounce input and throttle scroll; move big JSON parses to a worker; animate on the compositor via CSS or the Web Animations API; memoise deliberately rather than everywhere.</p>
+<p><strong>Trade-offs.</strong> Memoisation has its own cost (comparison plus retained references) and <code>useMemo</code> everywhere makes code harder to change for no measured gain — prefer state colocation and context splitting first. React Compiler changes this calculus.</p>
+<p><strong>Follow-ups.</strong> A 10,000-row price calendar is janky — what do you do? Why doesn't <code>React.memo</code> help when you pass an inline object or arrow? What is a long task and how do you break one up?</p>
+<h3 id="96-budgets-and-enforcement">9.6 Budgets and enforcement</h3>
+<p><strong>What it is.</strong> A per-route limit on transferred bytes and lab metrics, enforced in CI.</p>
+<p><strong>Example.</strong> Search route: 170KB gzip JS, 50KB CSS, LCP image ≤ 150KB, Lighthouse LCP ≤ 2.5s. Enforce with <code>size-limit</code> or <code>bundlesize</code>; fail the PR and post the delta plus a treemap link as a bot comment.</p>
+<p><strong>Trade-offs.</strong> Hard budgets block legitimate features; the usual resolution is a documented exception process with an owner and an expiry, not a silently raised threshold.</p>
+<p><strong>Follow-ups.</strong> Where do you set the budget — total repo or per route? Who owns a budget breach? How do you stop budgets drifting upward over a year?</p>
+<h3 id="97-a-performance-debugging-workflow">9.7 A performance debugging workflow</h3>
+<p><strong>What it is.</strong> A repeatable sequence from symptom to systemic fix.</p>
+<p><strong>Example.</strong></p>
+<ol>
+<li><strong>Quantify</strong> in RUM: which metric, which p, which segment, since when.</li>
+<li><strong>Correlate</strong> with build ids and releases to find a candidate cause.</li>
+<li><strong>Reproduce</strong> in the lab with matching throttling and device class.</li>
+<li><strong>Trace</strong> in the Performance panel; find the long task or the blocking resource.</li>
+<li><strong>Attribute</strong> to a module — bundle analyser treemap, or the LoAF script attribution.</li>
+<li><strong>Fix</strong>, then verify in the lab, then confirm in RUM at p75 and p95.</li>
+<li><strong>Guardrail</strong>: a budget, a lint rule, or a CI check so the class of regression cannot return.</li>
+</ol>
+<p><strong>Trade-offs.</strong> Steps 1–2 are often skipped in favour of jumping to the lab — which finds <em>a</em> problem, rarely <em>the</em> problem.</p>
+<p><strong>Follow-ups.</strong> Walk me through a real regression you diagnosed. How did you know the fix worked? What stops it recurring?</p>
+<h2 id="10-bundling-and-build-systems">10. Bundling and build systems</h2>
+<h3 id="101-module-formats">10.1 Module formats</h3>
+<p><strong>What it is.</strong> CommonJS uses dynamic, synchronous <code>require</code> resolved at runtime. ESM uses static <code>import</code>/<code>export</code>, hoisted, with live bindings, resolved before execution.</p>
+<p><strong>Example.</strong> That static structure is what makes tree shaking, top-level <code>await</code> and import maps possible. CJS cannot be reliably tree-shaken because <code>require('./x')[name]</code> is only knowable at runtime.</p>
+<p><strong>Trade-offs.</strong> Interop is the pain: <code>"type": "module"</code>, dual <code>exports</code> maps, no <code>__dirname</code> in ESM, and packages that ship both. A platform team's job is to publish correct <code>exports</code> conditions (<code>import</code>, <code>require</code>, <code>types</code>, <code>browser</code>, <code>default</code>) and run <code>publint</code>/<code>arethetypeswrong</code> in CI.</p>
+<p><strong>Follow-ups.</strong> Why can't CJS be tree-shaken? What is the dual-package hazard? What does an import map solve?</p>
+<h3 id="102-what-a-bundler-does">10.2 What a bundler does</h3>
+<p><strong>What it is.</strong> Resolve imports from the entry points → load and transform each module → build the module graph → optimise (tree shake, scope hoist, minify, split chunks) → emit content-hashed chunks plus a manifest.</p>
+<p><strong>Example.</strong> The manifest is what the server or HTML uses to map a route to its chunks — and what makes "build once, promote many" possible.</p>
+<p><strong>Trade-offs.</strong> More aggressive optimisation means slower builds; most teams run full optimisation only in production builds and transpile-only in dev.</p>
+<p><strong>Follow-ups.</strong> What is scope hoisting and why does it help? What's in a source map and why <code>hidden-source-map</code> in production?</p>
+<h3 id="103-tree-shaking">10.3 Tree shaking</h3>
+<p><strong>What it is.</strong> Dead-code elimination over the ESM module graph.</p>
+<p><strong>Example.</strong> It works only when modules are ESM, the bundler can prove no side effects, and the package declares <code>"sideEffects": false</code> (or lists the files that do have them).</p>
+<p><strong>Trade-offs.</strong> Silent breakers: re-exporting a whole barrel (<code>export * from './everything'</code>), CJS dependencies, class-property mutation at module scope, and transpiling to CJS before bundling. <strong>Barrel files are the number-one cause of bloated frontend bundles</strong> — the fix is to ban deep barrels, import from paths, or generate per-component entry points.</p>
+<p><strong>Follow-ups.</strong> Why did importing one icon pull in 400KB? What does <code>sideEffects</code> actually tell the bundler? How do you prove a dependency is tree-shakeable?</p>
+<h3 id="104-code-splitting-and-chunking">10.4 Code splitting and chunking</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 320" role="img" aria-label="Chunk graph showing stable vendor chunks and per-route chunks">
+  <text class="title" x="16" y="24">Split so the chunks that rarely change stay cached</text>
+  <text class="s" x="16" y="44">A chunk's hash changing invalidates it for every user — so isolate what churns</text>
+
+  <rect class="box" x="16" y="88" width="120" height="48" rx="8"/>
+  <text class="t" x="76" y="110" text-anchor="middle">index.html</text>
+  <text class="xs" x="76" y="126" text-anchor="middle">no-cache</text>
+
+  <rect class="box good" x="180" y="66" width="150" height="52" rx="8"/>
+  <text class="t" x="255" y="86" text-anchor="middle">framework.a91f.js</text>
+  <text class="xs" x="255" y="101" text-anchor="middle">react, react-dom</text>
+  <text class="xs" x="255" y="114" text-anchor="middle">hash changes ~never</text>
+
+  <rect class="box good" x="180" y="126" width="150" height="44" rx="8"/>
+  <text class="t" x="255" y="146" text-anchor="middle">commons.5c20.js</text>
+  <text class="xs" x="255" y="162" text-anchor="middle">used by ≥ 3 routes</text>
+
+  <rect class="box hl" x="380" y="70" width="140" height="40" rx="8"/>
+  <text class="xs" x="450" y="94" text-anchor="middle">search.3f9a.js</text>
+  <rect class="box hl" x="380" y="120" width="140" height="40" rx="8"/>
+  <text class="xs" x="450" y="144" text-anchor="middle">hotel.7b1c.js</text>
+  <rect class="box hl" x="380" y="170" width="140" height="40" rx="8"/>
+  <text class="xs" x="450" y="194" text-anchor="middle">checkout.e2d4.js</text>
+
+  <rect class="box warn" x="570" y="70" width="150" height="40" rx="8"/>
+  <text class="xs" x="645" y="94" text-anchor="middle">map.js — on interaction</text>
+  <rect class="box warn" x="570" y="120" width="150" height="40" rx="8"/>
+  <text class="xs" x="645" y="144" text-anchor="middle">datepicker.js — on focus</text>
+  <rect class="box warn" x="570" y="170" width="150" height="40" rx="8"/>
+  <text class="xs" x="645" y="194" text-anchor="middle">payment.js — on step 3</text>
+
+  <path class="edge" d="M136 104H158V92H180"/>
+  <path class="edge" d="M136 118V148H180"/>
+  <path class="edge" d="M330 92H356V90H380"/>
+  <path class="edge" d="M330 148H356V140H380"/>
+  <path class="edge" d="M330 148H356V190H380"/>
+  <path class="edge" d="M520 90H570"/>
+  <path class="edge" d="M520 140H570"/>
+  <path class="edge" d="M520 190H570"/>
+
+  <text class="xs" x="180" y="62">LOADED ON EVERY ROUTE</text>
+  <text class="xs" x="380" y="62">ONE PER ROUTE</text>
+  <text class="xs" x="570" y="62">LAZY — React.lazy + Suspense</text>
+
+  <text class="xs" x="740" y="94">prefetch these</text>
+  <text class="xs" x="740" y="112">on hover or</text>
+  <text class="xs" x="740" y="130">pointer intent,</text>
+  <text class="xs" x="740" y="148">so splitting</text>
+  <text class="xs" x="740" y="166">never costs a</text>
+  <text class="xs" x="740" y="184">visible delay</text>
+
+  <rect class="box bad" x="16" y="232" width="420" height="76" rx="8"/>
+  <text class="t" x="32" y="254">What silently breaks this</text>
+  <text class="xs" x="32" y="274">export * from './everything' — one import pulls the barrel</text>
+  <text class="xs" x="32" y="292">A CJS dependency, or transpiling to CJS before bundling</text>
+
+  <rect class="box good" x="450" y="232" width="414" height="76" rx="8"/>
+  <text class="t" x="466" y="254">The failure you must handle</text>
+  <text class="xs" x="466" y="274">After a deploy, a stale tab requests a chunk that no longer exists</text>
+  <text class="xs" x="466" y="292">Catch ChunkLoadError → retry cache-busted → force reload</text>
+</svg><figcaption>A chunk graph. Stable chunks stay cached; route chunks change independently.</figcaption></figure>
+<p><strong>What it is.</strong> Breaking the graph into chunks loaded on demand.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-javascript">const SearchPage = React.lazy(() =&gt; import('./SearchPage'));          // route level
+const Map = React.lazy(() =&gt; import('./Map'));                        // heavy widget
+onMouseEnter={() =&gt; import('./CheckoutPage')}                          // prefetch on intent
+</code></pre>
+<p>Chunk strategy: a <code>framework</code> chunk (react, react-dom) that changes rarely so it stays cached, a <code>commons</code> chunk for modules used by ≥N routes, and per-route chunks.</p>
+<p><strong>Trade-offs.</strong> Over-splitting costs request overhead and deepens the waterfall; under-splitting ships code nobody runs. Splitting also introduces the chunk-404-after-deploy failure, which needs a retry-then-reload handler.</p>
+<p><strong>Follow-ups.</strong> Where do you split first? How do you avoid a loading spinner on every navigation? Why does a shared chunk's hash changing invalidate everything downstream?</p>
+<h3 id="105-tool-comparison">10.5 Tool comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Engine</th>
+<th>Strength</th>
+<th>Choose when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Webpack 5</td>
+<td>JS</td>
+<td>Largest plugin ecosystem, Module Federation, filesystem cache</td>
+<td>Large legacy monorepos, federation-heavy setups</td>
+</tr>
+<tr>
+<td>Vite</td>
+<td>esbuild (dev) + Rollup (prod)</td>
+<td>Native-ESM dev server, near-instant HMR</td>
+<td>Default for new apps</td>
+</tr>
+<tr>
+<td>Rspack / Turbopack</td>
+<td>Rust</td>
+<td>Webpack-compatible (Rspack), 5–10× faster</td>
+<td>Migrating a big Webpack build without a rewrite</td>
+</tr>
+<tr>
+<td>esbuild</td>
+<td>Go</td>
+<td>Extremely fast transform and bundle</td>
+<td>Libraries, tooling, dev transforms</td>
+</tr>
+<tr>
+<td>Rollup / tsup</td>
+<td>JS</td>
+<td>Cleanest library output, multiple formats</td>
+<td>Publishing design-system packages</td>
+</tr>
+<tr>
+<td>SWC / Babel</td>
+<td>Rust / JS</td>
+<td>Transform only</td>
+<td>SWC for speed, Babel when you need AST plugins or codemods</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Follow-ups.</strong> Why is Vite's dev server fast? (Serves source as native ESM, transforms on demand, pre-bundles deps with esbuild.) Why does Vite still use Rollup for production?</p>
+<h3 id="106-hmr">10.6 HMR</h3>
+<p><strong>What it is.</strong> Swapping a module in the running app and propagating the update up the import graph to the nearest boundary that accepts it.</p>
+<p><strong>Example.</strong> If a change to a context provider full-reloads the page, it is because the boundary is effectively the root — usually a module with side effects or a root-level export change.</p>
+<p><strong>Trade-offs.</strong> HMR preserves state, which speeds iteration but can mask bugs that only appear on a fresh mount.</p>
+<p><strong>Follow-ups.</strong> Why does our HMR full-reload every time? What state survives an HMR update and what doesn't?</p>
+<h3 id="107-build-speed-at-scale">10.7 Build speed at scale</h3>
+<table>
+<thead>
+<tr>
+<th>Lever</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Persistent filesystem cache (Webpack 5, Vite)</td>
+<td>5–10× on warm local builds</td>
+</tr>
+<tr>
+<td>Remote build cache (Turborepo, Nx Cloud, Bazel)</td>
+<td>CI reuses teammates' and previous runs' outputs</td>
+</tr>
+<tr>
+<td>Affected-only builds from the dependency graph</td>
+<td>PR CI proportional to the change, not the repo</td>
+</tr>
+<tr>
+<td>Transpile-only in dev, type-check in a parallel job</td>
+<td>Removes <code>tsc</code> from the hot loop</td>
+</tr>
+<tr>
+<td><code>hidden-source-map</code> in prod</td>
+<td>Large emit-time saving, still uploadable to Sentry</td>
+</tr>
+<tr>
+<td>Babel → SWC, Webpack → Rspack</td>
+<td>Usually the single biggest step change</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> Remote caching requires deterministic builds — timestamps, absolute paths and non-pinned tool versions all poison the cache.</p>
+<p><strong>Follow-ups.</strong> Our CI is 35 minutes; get it to 10. What makes a build non-deterministic? How would you measure build time as an SLO?</p>
+<h2 id="11-platform-architecture">11. Platform architecture</h2>
+<h3 id="111-styling-approaches">11.1 Styling approaches</h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Runtime cost</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plain CSS + BEM</td>
+<td>None</td>
+<td>Simple, cacheable</td>
+<td>Discipline-dependent, no scoping guarantee</td>
+</tr>
+<tr>
+<td>CSS Modules</td>
+<td>None</td>
+<td>Real scoping, zero runtime</td>
+<td>Needs CSS variables for dynamic theming</td>
+</tr>
+<tr>
+<td>Tailwind / utility</td>
+<td>None</td>
+<td>Tiny shipped CSS, no naming debates</td>
+<td>Verbose markup, needs token discipline</td>
+</tr>
+<tr>
+<td>Runtime CSS-in-JS (styled-components, Emotion)</td>
+<td><strong>Per-render style computation</strong></td>
+<td>Colocated, dynamic props</td>
+<td>Runtime overhead, breaks with RSC, hurts INP at scale</td>
+</tr>
+<tr>
+<td>Zero-runtime CSS-in-JS (vanilla-extract, Linaria, Panda)</td>
+<td>None</td>
+<td>Type-safe tokens, extracted at build</td>
+<td>Build complexity, less dynamic</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> The defensible modern recommendation is <strong>CSS variables for tokens plus a zero-runtime or utility layer</strong>: it survives Server Components, costs nothing at runtime, and makes theming a CSS concern rather than a React concern.</p>
+<p><strong>Follow-ups.</strong> Why does runtime CSS-in-JS hurt INP? How would you theme without re-rendering? What breaks when you use Emotion inside a Server Component?</p>
+<h3 id="112-design-tokens">11.2 Design tokens</h3>
+<p><strong>What it is.</strong> Three tiers: <strong>primitives</strong> (<code>--blue-500: #1a73e8</code>), <strong>semantic</strong> (<code>--color-action-primary: var(--blue-500)</code>), <strong>component</strong> (<code>--button-bg-primary: var(--color-action-primary)</code>).</p>
+<p><strong>Example.</strong> Components consume only tiers 2 and 3. Themes swap the tier-1→tier-2 mapping via a <code>data-theme</code> attribute, so a theme switch is one DOM attribute and zero React re-renders. Tokens live in one source (JSON / Figma Tokens) and generate CSS, TS types, iOS and Android outputs via Style Dictionary.</p>
+<p><strong>Trade-offs.</strong> Three tiers is more indirection than a small team needs; it pays off the moment you have a second theme, a white-label partner, or a native platform.</p>
+<p><strong>Follow-ups.</strong> How do you add dark mode without touching every component? How do you stop teams using raw hex values? (Lint rule plus a Stylelint config.)</p>
+<h3 id="113-component-api-design">11.3 Component API design</h3>
+<p><strong>What it is.</strong> The rules that make a shared library usable by hundreds of engineers without tickets.</p>
+<p><strong>Example.</strong></p>
+<ul>
+<li><strong>Composition over configuration.</strong> A <code>&lt;Select&gt;</code> with 40 props is unmaintainable; compound components (<code>Select.Trigger</code>, <code>Select.Option</code>) let consumers compose. Headless primitives (Radix, React Aria, Ark) give behaviour and a11y while you own styling.</li>
+<li><strong>Support controlled and uncontrolled</strong> — <code>value</code> + <code>onChange</code>, and <code>defaultValue</code>.</li>
+<li><strong>Bounded escape hatches</strong> — allow <code>className</code>/<code>style</code> on the root, forward refs, spread rest props onto the right element, expose <code>as</code>/<code>asChild</code> for polymorphism; don't expose internals you'll want to change.</li>
+<li><strong>Accessibility is not a prop</strong> — keyboard interaction, focus management and <code>aria-*</code> live inside the component.</li>
+<li><strong>No business logic</strong> — no fetching, flags or analytics coupling inside a primitive.</li>
+</ul>
+<p><strong>Trade-offs.</strong> Headless libraries save you months of a11y work and add a dependency you must track. Escape hatches improve adoption and make future refactors harder — which is why they should be explicit and documented, not accidental.</p>
+<p><strong>Follow-ups.</strong> Design the API for a date-range picker. How do you handle a team that needs a one-off variant? How do you forward a ref through a polymorphic component?</p>
+<h3 id="114-publishing-shared-packages">11.4 Publishing shared packages</h3>
+<p><strong>What it is.</strong> Internal versioned packages as the distribution mechanism for platform code.</p>
+<p><strong>Example.</strong> The breaking-change playbook:</p>
+<ol>
+<li>Additive change first — new prop, old behaviour unchanged by default.</li>
+<li>Deprecate with <code>@deprecated</code> JSDoc, a dev-only console warning, and a lint rule.</li>
+<li>Ship a <strong>codemod</strong> (<code>jscodeshift</code>/<code>ts-morph</code>) and run it across the monorepo yourself.</li>
+<li>Publish the major with a migration guide and a compatibility layer for one minor cycle.</li>
+<li>Track "packages on latest major" on a dashboard and chase the tail personally.</li>
+</ol>
+<p><strong>Trade-offs.</strong> Semver discipline slows you down and is the only thing that makes a shared library trustworthy. Steps 3 and 5 are the ones most teams skip, and they are where adoption actually happens.</p>
+<p><strong>Follow-ups.</strong> How do you prevent two versions of React in a consumer's bundle? (Peer dependencies plus a duplicate check in CI.) How do you version design tokens?</p>
+<h3 id="115-monorepo-vs-polyrepo">11.5 Monorepo vs polyrepo</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Monorepo</th>
+<th>Polyrepo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cross-cutting change</td>
+<td>One atomic PR</td>
+<td>N coordinated PRs and a release dance</td>
+</tr>
+<tr>
+<td>Dependency versions</td>
+<td>Single version policy, enforced</td>
+<td>Drift is the default</td>
+</tr>
+<tr>
+<td>CI cost</td>
+<td>Needs affected-graph tooling or it explodes</td>
+<td>Naturally bounded</td>
+</tr>
+<tr>
+<td>Release independence</td>
+<td>Requires tooling (changesets)</td>
+<td>Free</td>
+</tr>
+<tr>
+<td>Ownership</td>
+<td><code>CODEOWNERS</code> paths</td>
+<td>Repo boundaries</td>
+</tr>
+<tr>
+<td>Tooling investment</td>
+<td>High, centralised, pays back at scale</td>
+<td>Low per repo, duplicated N times</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> Choose by <strong>how often changes cross boundaries</strong>. If a typical feature touches the design system and two apps, monorepo — and you must fund the build tooling. If teams genuinely ship independently against stable contracts, polyrepo plus published packages is cheaper.</p>
+<p><strong>Follow-ups.</strong> How do you keep monorepo CI fast? (pnpm, affected-only, remote cache.) What's the failure mode of each? (Unowned shared code — identical in both.)</p>
+<h3 id="116-micro-frontends">11.6 Micro-frontends</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 326" role="img" aria-label="Module Federation host and remotes with a shared singleton scope">
+  <text class="title" x="16" y="24">Independent deploys, one page — and one copy of React</text>
+  <text class="s" x="16" y="44">Module Federation resolves remotes at runtime, not at build time</text>
+
+  <rect class="box hl" x="330" y="64" width="220" height="50" rx="8"/>
+  <text class="t" x="440" y="86" text-anchor="middle">Host shell</text>
+  <text class="xs" x="440" y="103" text-anchor="middle">routing · auth · layout · error boundaries</text>
+
+  <rect class="box" x="30"  y="156" width="240" height="60" rx="8"/>
+  <text class="t" x="150" y="178" text-anchor="middle">Search team</text>
+  <text class="xs" x="150" y="195" text-anchor="middle">exposes: ./SearchPage</text>
+  <text class="xs" x="150" y="210" text-anchor="middle">remoteEntry.js · own deploy</text>
+
+  <rect class="box" x="320"  y="156" width="240" height="60" rx="8"/>
+  <text class="t" x="440" y="178" text-anchor="middle">Account team</text>
+  <text class="xs" x="440" y="195" text-anchor="middle">exposes: ./AccountPage</text>
+  <text class="xs" x="440" y="210" text-anchor="middle">remoteEntry.js · own deploy</text>
+
+  <rect class="box" x="610" y="156" width="240" height="60" rx="8"/>
+  <text class="t" x="730" y="178" text-anchor="middle">Payments team</text>
+  <text class="xs" x="730" y="195" text-anchor="middle">exposes: ./Checkout</text>
+  <text class="xs" x="730" y="210" text-anchor="middle">remoteEntry.js · own deploy</text>
+
+  <path class="edge" d="M380 114V136H150V156"/>
+  <path class="edge" d="M440 114V156"/>
+  <path class="edge" d="M500 114V136H730V156"/>
+  <text class="xs" x="238" y="132">loaded at runtime</text>
+
+  <rect class="box good" x="30" y="238" width="400" height="72" rx="8"/>
+  <text class="t" x="46" y="260">shared: { react: { singleton: true, requiredVersion } }</text>
+  <text class="xs" x="46" y="280">Two copies of React is the canonical production incident —</text>
+  <text class="xs" x="46" y="298">hooks throw, context is empty, nothing is debuggable.</text>
+
+  <rect class="box bad" x="450" y="238" width="400" height="72" rx="8"/>
+  <text class="t" x="466" y="260">What you must build before shipping this</text>
+  <text class="xs" x="466" y="280">Error boundary + fallback per remote · version-pinned manifest</text>
+  <text class="xs" x="466" y="298">for rollback · contract tests between host and every remote</text>
+
+  <text class="xs" x="30" y="148">Centralised regardless: design tokens and components, auth, analytics, routing contract, error reporting, performance budget.</text>
+</svg><figcaption>Module Federation at runtime. React must be a shared singleton.</figcaption></figure>
+<p><strong>What it is.</strong> Independently deployable frontend applications composed into one user-facing surface.</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Mechanism</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Build-time packages</td>
+<td>npm versions in one host</td>
+<td>Simple, optimal bundles</td>
+<td>No independent deploy</td>
+</tr>
+<tr>
+<td>Module Federation</td>
+<td>Runtime <code>remoteEntry.js</code> + shared scope</td>
+<td>True independent deploy, shared singletons</td>
+<td>Version negotiation, runtime failures, hard debugging</td>
+</tr>
+<tr>
+<td>Import maps + native ESM</td>
+<td>Browser-level resolution</td>
+<td>Standards-based</td>
+<td>Caching care needed, immature tooling</td>
+</tr>
+<tr>
+<td>iframes</td>
+<td>Hard isolation</td>
+<td>Perfect CSS/JS isolation, security boundary</td>
+<td>Routing, sizing, a11y, duplicated runtime</td>
+</tr>
+<tr>
+<td>Web Components</td>
+<td>Custom elements per team</td>
+<td>Framework-agnostic, works in partner sites</td>
+<td>Styling/slotting friction, weak SSR story</td>
+</tr>
+<tr>
+<td>Server-side composition (ESI, Tailor, Podium)</td>
+<td>Edge stitches HTML fragments</td>
+<td>Great first load, SEO-safe</td>
+<td>Needs edge infra; interactivity still needs a plan</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> With Module Federation the host declares <code>remotes</code>, the remote declares <code>exposes</code>, and both declare <code>shared</code> with <code>singleton: true</code> and <code>requiredVersion</code> for React — two React copies is the canonical production incident.</p>
+<p><strong>Trade-offs.</strong> Micro-frontends are justified only when teams need <strong>independent deploy cadence</strong> and the org boundary is real. The price: duplicated dependencies, version skew, cross-app inconsistency, harder E2E testing, worse aggregate performance, and a much heavier platform team.</p>
+<p><strong>Follow-ups.</strong> When would you <em>not</em> use micro-frontends? What must stay centralised regardless? (Tokens and components, auth, analytics and experiments, routing contract, error reporting, perf budget.) How do you roll back one remote?</p>
+<h3 id="117-many-apps-one-domain">11.7 Many apps, one domain</h3>
+<p><strong>What it is.</strong> Several independently deployed apps served under one hostname via path-based routing at the CDN, reverse proxy or edge function.</p>
+<p><strong>Example.</strong> <code>/search/*</code> → origin A, <code>/account/*</code> → origin B, via CloudFront behaviours or an edge function. The details that matter:</p>
+<ul>
+<li><strong>Asset path collisions</strong> — each app emits under its own prefix (<code>/search/_assets/...</code>) or chunk names clash at the edge. Set <code>publicPath</code>/<code>base</code> per app.</li>
+<li><strong>SPA fallback per behaviour</strong> — <code>/account/settings/billing</code> must rewrite to <em>that</em> app's <code>index.html</code>, not a global one.</li>
+<li><strong>Cookie scope</strong> — apex-domain cookies are shared by all apps; scope non-auth cookies by path and be explicit about who may write the session cookie.</li>
+<li><strong>Cache keys and HTML TTL</strong> — hashed assets immutable, each app's HTML invalidated independently.</li>
+<li><strong>Shared chrome</strong> — a common header either duplicates (drift) or is federated/edge-included (coupling).</li>
+<li><strong>Failure isolation</strong> — if app B's origin is down, app A must still serve.</li>
+</ul>
+<p><strong>Trade-offs.</strong> Edge routing isolates apps and adds infrastructure and routing-rule complexity that someone must own.</p>
+<p><strong>Follow-ups.</strong> How do you deploy one app without touching the others? What happens to a user navigating between two apps — full page load or client-side? What breaks with relative asset paths?</p>
+<h3 id="118-the-frontend-data-layer">11.8 The frontend data layer</h3>
+<p><strong>What it is.</strong> One place that owns request behaviour: auth headers, retries, caching, serialisation, error normalisation and cancellation.</p>
+<p><strong>Example.</strong> Instead of every component calling <code>fetch</code> differently, a query layer standardises cache keys, loading and error states, dedup, and <code>AbortController</code> wiring for stale searches.</p>
+<p><strong>Trade-offs.</strong> Not every request should retry — reads yes, non-idempotent mutations only with an idempotency key. Blanket retry policy is how a blip becomes an outage.</p>
+<p><strong>Follow-ups.</strong> Where should retry policy live? How do you cancel a stale search? How do you normalise errors from three different backends?</p>
+<h3 id="119-developer-experience">11.9 Developer experience</h3>
+<p><strong>What it is.</strong> Treating the local loop and CI as a product with metrics.</p>
+<p><strong>Example.</strong> The four numbers worth quoting: cold install, dev server start, HMR round-trip, CI wall-clock p95. The five-step adoption playbook for any platform change: prove it on one team with before/after numbers → make it opt-in and trivial → provide the codemod → warn, then enforce (dev warning → CI warning → CI error, with announced dates) → dashboard the tail and close it by pairing.</p>
+<p><strong>Trade-offs.</strong> Enforcement too early creates resentment; too late and you have permanent drift. The dates are the contract.</p>
+<p><strong>Follow-ups.</strong> How do you measure DX? (PR cycle time, first-run CI pass rate, flake rate, time-to-first-PR, cache hit rate, plus a survey.) How do you get 12 teams to adopt something without a mandate?</p>
+<h2 id="12-testing">12. Testing</h2>
+<h3 id="121-the-shape-trophy-not-pyramid">12.1 The shape: trophy, not pyramid</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 330" role="img" aria-label="The testing trophy: how many tests belong at each layer">
+  <text class="title" x="16" y="24">Most frontend bugs are integration bugs — so that is where the mass goes</text>
+  <text class="s" x="16" y="44">Width ≈ how many tests belong at that layer</text>
+
+  <rect class="box" x="300" y="62" width="280" height="40" rx="8"/>
+  <text class="t" x="440" y="80" text-anchor="middle">End to end · 20–50 tests</text>
+  <text class="xs" x="440" y="96" text-anchor="middle">Playwright · revenue-critical journeys only</text>
+  <text class="xs" x="596" y="86">slow, flaky, highest confidence</text>
+
+  <rect class="box hl" x="120" y="112" width="640" height="76" rx="8"/>
+  <text class="t" x="440" y="136" text-anchor="middle">Integration / component · thousands</text>
+  <text class="xs" x="440" y="156" text-anchor="middle">Testing Library + MSW · a component with its children, real DOM, mocked network</text>
+  <text class="xs" x="440" y="176" text-anchor="middle">getByRole queries survive refactors and assert accessibility as a side effect</text>
+
+  <rect class="box" x="230" y="198" width="420" height="44" rx="8"/>
+  <text class="t" x="440" y="218" text-anchor="middle">Unit · hundreds</text>
+  <text class="xs" x="440" y="236" text-anchor="middle">Vitest · pure functions, reducers, hooks, formatters</text>
+
+  <rect class="box good" x="60" y="252" width="760" height="40" rx="8"/>
+  <text class="t" x="440" y="272" text-anchor="middle">Static · TypeScript + ESLint</text>
+  <text class="xs" x="440" y="288" text-anchor="middle">free on every keystroke · catches a whole class of bugs before a test runs</text>
+
+  <path class="edge" d="M46 292V62"/>
+  <text class="xs" x="30" y="180" text-anchor="middle" transform="rotate(-90 30 180)">cost &amp; confidence per test ↑</text>
+
+  <text class="xs" x="596" y="222">cheap, fast, narrow</text>
+
+  <rect class="box" x="16" y="302" width="848" height="26" rx="7"/>
+  <text class="xs" x="32" y="320">Alongside, not inside, the trophy: contract tests vs the API schema · visual regression per story · axe on every component · Lighthouse CI per route.</text>
+</svg><figcaption>The testing trophy — width is roughly how many tests belong at each layer.</figcaption></figure>
+<p><strong>What it is.</strong> For frontend the useful distribution is a thin base of static analysis, a few unit tests, <strong>the bulk in integration/component tests</strong>, and a small high-value E2E layer.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Tool</th>
+<th>Scope</th>
+<th>Count</th>
+<th>Runs in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Static</td>
+<td>TypeScript, ESLint</td>
+<td>Types, patterns</td>
+<td>n/a</td>
+<td>Pre-commit + CI</td>
+</tr>
+<tr>
+<td>Unit</td>
+<td>Vitest / Jest</td>
+<td>Pure functions, reducers, hooks</td>
+<td>Hundreds</td>
+<td>Seconds, on save</td>
+</tr>
+<tr>
+<td>Component / integration</td>
+<td>Vitest + Testing Library, Playwright CT</td>
+<td>A component with children, real DOM, mocked network</td>
+<td>Thousands</td>
+<td>1–5 min in CI</td>
+</tr>
+<tr>
+<td>Contract</td>
+<td>Pact, or schema diff vs OpenAPI/GraphQL</td>
+<td>Frontend↔backend payload shape</td>
+<td>Per endpoint</td>
+<td>CI, both repos</td>
+</tr>
+<tr>
+<td>Visual regression</td>
+<td>Chromatic / Percy / Playwright screenshots</td>
+<td>Rendered pixels per state</td>
+<td>Per story</td>
+<td>CI on PR</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>Playwright, Cypress</td>
+<td>Critical journeys on a real build</td>
+<td>20–50, not 500</td>
+<td>CI on merge + scheduled</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Lighthouse CI, size-limit</td>
+<td>Budgets per route</td>
+<td>Per route</td>
+<td>CI on PR</td>
+</tr>
+<tr>
+<td>A11y</td>
+<td>axe-core in component tests</td>
+<td>WCAG violations</td>
+<td>Every component</td>
+<td>CI on PR</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> The classic pyramid came from backend services where unit tests catch most defects. Most frontend bugs are integration bugs — wrong props, wrong state transition, wrong fetch shape — so the mass belongs one layer up.</p>
+<p><strong>Follow-ups.</strong> Why not more E2E? (Slow, flaky, expensive to maintain, and they fail for reasons unrelated to the change.) What would you test at each layer for a booking form?</p>
+<h3 id="122-testing-behaviour-not-implementation">12.2 Testing behaviour, not implementation</h3>
+<p><strong>What it is.</strong> Query the DOM the way a user perceives it — by role and accessible name — rather than by class or internal structure.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-javascript">// good — survives refactors, and asserts accessibility as a side effect
+await userEvent.click(screen.getByRole('button', { name: /search/i }));
+expect(await screen.findByRole('list', { name: /results/i })).toBeInTheDocument();
+
+// bad — couples the test to markup
+wrapper.find('.btn-primary').simulate('click');
+</code></pre>
+<p><strong>Trade-offs.</strong> Role-based queries are slower to write and occasionally force you to fix the markup first — which is the point. Test ids are a legitimate fallback for things with no accessible identity, used sparingly.</p>
+<p><strong>Follow-ups.</strong> Why is <code>getByRole</code> preferred? When is a test id acceptable? Why are large DOM snapshots worse than no test? (They get rubber-stamped on failure.)</p>
+<h3 id="123-mocking-and-msw">12.3 Mocking and MSW</h3>
+<p><strong>What it is.</strong> Intercepting at the <strong>network</strong> boundary rather than the module boundary, so the component under test runs its real data layer.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-javascript">const server = setupServer(
+  http.get('/api/search', () =&gt; HttpResponse.json({ hotels: [...] })),
+  http.get('/api/prices', () =&gt; new HttpResponse(null, { status: 500 })), // error path
+);
+</code></pre>
+<p><strong>Trade-offs.</strong> Mocking the hook instead tests nothing but your mock. MSW handlers are another artefact that can drift from the real API — which is what contract tests are for.</p>
+<p><strong>Follow-ups.</strong> What's the difference between a stub, a mock and a fake? How do you test a loading state deterministically? How do you keep mocks honest?</p>
+<h3 id="124-contract-testing">12.4 Contract testing</h3>
+<p><strong>What it is.</strong> Verifying that the shape the frontend expects matches what the backend actually produces, without running both end to end.</p>
+<p><strong>Example.</strong> Consumer-driven contracts (Pact) publish the frontend's expectations; the provider's CI replays them. Alternatively, generate types from OpenAPI/GraphQL in CI so a breaking schema change fails the frontend build.</p>
+<p><strong>Trade-offs.</strong> Pact adds a broker and process overhead; schema-generated types are cheaper but only catch shape changes, not semantic ones.</p>
+<p><strong>Follow-ups.</strong> Who owns a broken contract? How do you ship a backward-incompatible API without breaking the web client?</p>
+<h3 id="125-visual-regression-and-accessibility-testing">12.5 Visual regression and accessibility testing</h3>
+<p><strong>What it is.</strong> Screenshot diffing per component state, and automated WCAG rule checks.</p>
+<p><strong>Example.</strong> Every design-system component ships a Storybook story per state, which doubles as both the visual-regression fixture and the axe test target — across themes and both text directions.</p>
+<p><strong>Trade-offs.</strong> Visual diffs catch what assertions can't and generate noise from font rendering and animation; you need deterministic rendering (frozen clock, disabled animations, pinned browser). axe catches roughly a third of a11y issues — claiming automation covers accessibility is a red flag.</p>
+<p><strong>Follow-ups.</strong> How do you stop visual tests being flaky? What does axe <em>not</em> catch? (Focus order, meaningful alt text, correct heading structure, keyboard traps in practice.)</p>
+<h3 id="126-flaky-tests">12.6 Flaky tests</h3>
+<p><strong>What it is.</strong> Tests that pass and fail on identical code, destroying trust in the suite.</p>
+<p><strong>Example.</strong> A programme that actually works:</p>
+<ol>
+<li><strong>Quarantine, don't ignore</strong> — a detected flaky test moves to a suite that still runs but doesn't block, with an auto-filed ticket and an owner from <code>CODEOWNERS</code>.</li>
+<li><strong>Measure flake rate</strong> per test and per suite, and publish it. A test over the threshold is deleted, not retried forever.</li>
+<li><strong>Ban blanket retries</strong> at suite level; allow one retry, recorded as a flake signal.</li>
+<li><strong>Attack root causes</strong>: auto-waiting locators instead of fixed timeouts, per-test data seeded via API not UI, frozen time and network, containerised environment identical to CI.</li>
+<li><strong>Gate the gate</strong> — if <code>main</code>'s suite pass rate drops below \~99%, the pipeline is the incident.</li>
+</ol>
+<p><strong>Trade-offs.</strong> Deleting a flaky test loses coverage and is often still correct — a test nobody trusts provides zero coverage already while costing wall-clock and attention.</p>
+<p><strong>Follow-ups.</strong> What causes flakiness in E2E specifically? How do you detect a flaky test automatically? (Re-run on <code>main</code> on a schedule and diff outcomes.)</p>
+<h3 id="127-coverage">12.7 Coverage</h3>
+<p><strong>What it is.</strong> The proportion of code executed by the test suite.</p>
+<p><strong>Example.</strong> Enforce coverage on <strong>changed lines</strong> in a PR rather than a global percentage. Use mutation testing (Stryker) on critical modules — pricing, currency, date handling — to check whether the tests actually assert anything.</p>
+<p><strong>Trade-offs.</strong> A global target produces coverage theatre: tests that execute code without asserting. Changed-lines coverage avoids both that and the untested-new-code problem.</p>
+<p><strong>Follow-ups.</strong> Is 100% coverage a good goal? What does mutation testing measure that line coverage doesn't?</p>
+<h3 id="128-a-testing-strategy-for-a-large-frontend">12.8 A testing strategy for a large frontend</h3>
+<p><strong>What it is.</strong> The platform-level answer: own the infrastructure, not the individual tests.</p>
+<p><strong>Example.</strong> Publish the test utilities as a package — a <code>renderWithProviders</code> wrapper carrying theme, i18n, router and query client; MSW handlers generated from the API schema; a Playwright fixture that logs in via API and seeds data. Every team then starts from the right setup, and improvements propagate with a version bump.</p>
+<p><strong>Trade-offs.</strong> A shared harness becomes a bottleneck if the platform team is the only one who can change it — hence a contribution model and clear extension points.</p>
+<p><strong>Follow-ups.</strong> How do you raise testing standards across twelve teams? What do you do about a team that writes no tests? How do you decide what gets an E2E test?</p>
+<h2 id="13-operations">13. Operations</h2>
+<h3 id="131-pipeline-shape">13.1 Pipeline shape</h3>
+<figure class="dgw"><svg class="dg" viewBox="0 0 880 330" role="img" aria-label="Frontend CI/CD pipeline with one artifact promoted through environments">
+  <text class="title" x="16" y="24">Build the artifact once, then only ever promote it</text>
+  <text class="s" x="16" y="44">Rebuilding per environment breaks the guarantee that what you tested is what you shipped</text>
+
+  <rect class="lane" x="12" y="60" width="400" height="176" rx="10"/>
+  <text class="xs" x="28" y="80">ON EVERY PULL REQUEST — run in parallel</text>
+  <rect class="box" x="28" y="92" width="118" height="30" rx="6"/><text class="xs" x="87" y="111" text-anchor="middle">lint + types</text>
+  <rect class="box" x="156" y="92" width="118" height="30" rx="6"/><text class="xs" x="215" y="111" text-anchor="middle">unit + component</text>
+  <rect class="box" x="284" y="92" width="112" height="30" rx="6"/><text class="xs" x="340" y="111" text-anchor="middle">a11y (axe)</text>
+  <rect class="box" x="28" y="130" width="118" height="30" rx="6"/><text class="xs" x="87" y="149" text-anchor="middle">bundle-size diff</text>
+  <rect class="box" x="156" y="130" width="118" height="30" rx="6"/><text class="xs" x="215" y="149" text-anchor="middle">Lighthouse CI</text>
+  <rect class="box" x="284" y="130" width="112" height="30" rx="6"/><text class="xs" x="340" y="149" text-anchor="middle">visual diff</text>
+  <rect class="box hl" x="28" y="172" width="368" height="42" rx="8"/>
+  <text class="t" x="212" y="192" text-anchor="middle">Preview URL per PR</text>
+  <text class="xs" x="212" y="209" text-anchor="middle">designers and PMs can click the change before it merges</text>
+
+  <path class="edge" d="M412 148H446"/>
+
+  <rect class="box" x="446" y="118" width="150" height="60" rx="8"/>
+  <text class="t" x="521" y="142" text-anchor="middle">Build ONCE</text>
+  <text class="xs" x="521" y="160" text-anchor="middle">immutable artifact</text>
+  <text class="xs" x="521" y="174" text-anchor="middle">hashed chunks + manifest</text>
+
+  <path class="edge" d="M596 148H634"/>
+
+  <rect class="box" x="634" y="92" width="110" height="38" rx="8"/>
+  <text class="xs" x="689" y="116" text-anchor="middle">staging</text>
+  <rect class="box warn" x="634" y="140" width="110" height="38" rx="8"/>
+  <text class="xs" x="689" y="164" text-anchor="middle">canary 1%</text>
+  <rect class="box good" x="634" y="188" width="110" height="38" rx="8"/>
+  <text class="xs" x="689" y="212" text-anchor="middle">production</text>
+
+  <path class="edge" d="M689 130V140"/>
+  <path class="edge" d="M689 178V188"/>
+  <text class="xs" x="754" y="117">same artifact</text>
+  <text class="xs" x="754" y="165">watch RUM by build id</text>
+  <text class="xs" x="754" y="213">staged by geo / device</text>
+
+  <path class="edge accent" d="M634 207H560V258H212"/>
+  <text class="t" x="400" y="242" text-anchor="middle">Rollback = flip a flag, or point the CDN at the previous artifact</text>
+
+  <rect class="box bad" x="12" y="268" width="856" height="54" rx="8"/>
+  <text class="t" x="28" y="290">The frontend-specific catch</text>
+  <text class="xs" x="28" y="310">Users mid-session still hold the old HTML and will request old chunks. Keep the previous N builds on the CDN, and handle ChunkLoadError with a cache-busted retry then a reload.</text>
+</svg><figcaption>A frontend pipeline. One artifact is built, then promoted; rollback is a pointer flip.</figcaption></figure>
+<p><strong>What it is.</strong> The sequence of checks on a PR and the promotion path after merge.</p>
+<p><strong>Example.</strong> On every PR: cached install → lint, type-check and unit/component tests in parallel → build affected packages → bundle-size diff comment → Lighthouse CI on key routes → visual regression → a11y checks → a <strong>preview URL</strong> per PR. On merge: build once into an immutable artifact and promote <strong>that same artifact</strong> through environments.</p>
+<p><strong>Trade-offs.</strong> "Build once, promote many" requires runtime configuration rather than build-time inlining, which is slightly more work and is the only way to guarantee that what you tested is what you shipped.</p>
+<p><strong>Follow-ups.</strong> Why not rebuild per environment? What goes in a PR check vs a nightly job? How do preview deploys change code review?</p>
+<h3 id="132-progressive-delivery">13.2 Progressive delivery</h3>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Gives you</th>
+<th>Watch out for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Feature flags</td>
+<td>Deploy decoupled from release; kill switch without a rollback</td>
+<td>Flag debt — require an expiry date and a cleanup ticket</td>
+</tr>
+<tr>
+<td>Canary by percentage</td>
+<td>Regression caught on 1% of traffic</td>
+<td>Needs per-cohort metrics or there's no signal</td>
+</tr>
+<tr>
+<td>Blue/green at the CDN</td>
+<td>Instant switch and rollback</td>
+<td>Both versions' chunks must stay fetchable</td>
+</tr>
+<tr>
+<td>Server-side experiment assignment</td>
+<td>No flicker, no blocking script</td>
+<td>Must be in the cache key or you serve the wrong variant</td>
+</tr>
+<tr>
+<td>Staged rollout by geo/device</td>
+<td>Limited blast radius</td>
+<td>Observability must segment the same way</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example.</strong> An experiment platform that doesn't regress performance: assign at the edge or in the BFF, pass the assignment into SSR, fire the exposure event only when the component actually renders, add sample-ratio-mismatch alerting, auto-expire experiments, and run a per-experiment performance budget check.</p>
+<p><strong>Trade-offs.</strong> Client-side assignment is far easier to ship and works with static caching, at the cost of flicker, CLS and INP. Server-side is correct and couples experiments to the render path and the cache key.</p>
+<p><strong>Follow-ups.</strong> How do you A/B test without a flash of the wrong variant? How do you stop flags accumulating? How would you roll back a frontend change in 60 seconds?</p>
+<h3 id="133-frontend-rollback">13.3 Frontend rollback</h3>
+<p><strong>What it is.</strong> Reverting the served version without breaking users who are mid-session.</p>
+<p><strong>Example.</strong> Users holding old HTML will request old chunks. Keep the previous N builds' assets on the CDN (immutable hashed assets make this free) and handle <code>ChunkLoadError</code> with a cache-busted retry then a reload.</p>
+<p><strong>Trade-offs.</strong> Flipping a feature flag is faster and safer than a deploy rollback, but only covers code that was behind a flag — which is an argument for flagging more than feels necessary.</p>
+<p><strong>Follow-ups.</strong> What's different about rolling back a frontend vs a backend service? What breaks if you purge the CDN on every deploy?</p>
+<h3 id="134-observability">13.4 Observability</h3>
+<p><strong>What it is.</strong> Knowing what real users experience, and being able to attribute it.</p>
+<p><strong>Example.</strong></p>
+<ul>
+<li><strong>RUM</strong> — <code>web-vitals</code> plus custom timings (time-to-search-results, time-to-first-price), beaconed with <code>sendBeacon</code>. Segment by route, device class, country, connection and <strong>build id</strong> — the build id is what lets you blame a deploy.</li>
+<li><strong>Error tracking</strong> — Sentry with source maps uploaded in CI, release tagging, grouping rules, and a per-release error-rate gate. Filter browser-extension and third-party noise or the signal drowns.</li>
+<li><strong>Tracing</strong> — propagate a trace header from the browser (OpenTelemetry browser instrumentation) so a slow page can be followed into backend spans. This answers "is it us or the API?"</li>
+<li><strong>Synthetic monitoring</strong> — the booking funnel from several regions, as the early warning before RUM volume accumulates.</li>
+</ul>
+<p><strong>Trade-offs.</strong> RUM is truthful and lagging; synthetic is fast and artificial. You need both, and the cost is two systems to maintain and reconcile.</p>
+<p><strong>Follow-ups.</strong> How do you attribute an LCP regression to a specific release? What do you do about errors from browser extensions? How much RUM do you sample and why?</p>
+<h3 id="135-slos-and-error-budgets">13.5 SLOs and error budgets</h3>
+<p><strong>What it is.</strong> A target for a user-facing metric over a window, with a budget for failing it.</p>
+<p><strong>Example.</strong> "p75 LCP on search ≤ 2.5s over 28 days"; "JS error rate ≤ 0.5% of sessions"; "booking funnel success ≥ 99.5%". Attach a written policy: burn the budget and feature work pauses for reliability work.</p>
+<p><strong>Trade-offs.</strong> SLOs only work if someone will actually honour the policy; an SLO with no consequence is a dashboard. Setting them too tight produces alert fatigue.</p>
+<p><strong>Follow-ups.</strong> What would you set as the three SLOs for a frontend platform team? What's the difference between alerting on a threshold and on burn rate?</p>
+<h3 id="136-incident-handling">13.6 Incident handling</h3>
+<p><strong>What it is.</strong> Detect → mitigate → diagnose → review.</p>
+<p><strong>Example.</strong> Alert on SLO burn rate rather than raw spikes; <strong>mitigate before diagnosing</strong> (flip the flag, roll back the CDN pointer); diagnose afterwards; run a blameless postmortem whose action item removes the <em>class</em> of failure, not just the instance.</p>
+<p><strong>Trade-offs.</strong> Mitigating first sometimes destroys the evidence — so capture the trace, the build id and a HAR before you roll back.</p>
+<p><strong>Follow-ups.</strong> Walk me through a frontend incident you owned. What was the prevention item? How do you know it worked?</p>
+<h2 id="14-accessibility-and-internationalization">14. Accessibility and internationalization</h2>
+<h3 id="141-wcag-essentials">14.1 WCAG essentials</h3>
+<p><strong>What it is.</strong> POUR — perceivable, operable, understandable, robust — with WCAG 2.2 AA as the usual bar.</p>
+<p><strong>Example.</strong> The concrete AA requirements you'll be asked about: 4.5:1 contrast for body text (3:1 for large text and UI components), a visible focus indicator, 24×24 CSS px minimum target size (44×44 is the stricter AAA/mobile guidance), no information conveyed by colour alone, and 200% zoom without loss of content.</p>
+<p><strong>Trade-offs.</strong> Meeting contrast ratios constrains brand palettes; the resolution is to bake compliant pairs into semantic tokens so product teams cannot pick a failing combination.</p>
+<p><strong>Follow-ups.</strong> What's the difference between AA and AAA? How do you handle a brand colour that fails contrast?</p>
+<h3 id="142-semantic-html-and-aria">14.2 Semantic HTML and ARIA</h3>
+<p><strong>What it is.</strong> Native elements carry role, keyboard behaviour and focus for free. ARIA only adds semantics — it adds no behaviour.</p>
+<p><strong>Example.</strong> <code>&lt;button&gt;</code> gives focusability, Enter/Space activation and the right role; <code>&lt;div onClick&gt;</code> gives a bug report. The first rule of ARIA is don't use ARIA.</p>
+<p><strong>Trade-offs.</strong> Custom components sometimes need ARIA because no native element exists (combobox, tabs, tree) — and then you own every keyboard interaction yourself.</p>
+<p><strong>Follow-ups.</strong> When is <code>aria-label</code> wrong? What does <code>role="presentation"</code> do? Why is <code>aria-hidden</code> on a focusable element a bug?</p>
+<h3 id="143-keyboard-and-focus-management">14.3 Keyboard and focus management</h3>
+<p><strong>What it is.</strong> The hard part of accessibility: what has focus, where it goes, and what is announced.</p>
+<p><strong>Example.</strong> Focus trap inside a modal, return focus to the trigger on close, <code>aria-live="polite"</code> region for async results ("24 hotels found"), skip links, logical tab order, and no positive <code>tabindex</code>.</p>
+<p><strong>Trade-offs.</strong> <code>aria-live</code> announcements that fire on every keystroke are worse than none — debounce them and announce results, not progress.</p>
+<p><strong>Follow-ups.</strong> How do you make an autocomplete accessible? (<code>role="combobox"</code>, <code>aria-expanded</code>, <code>aria-controls</code>, <code>aria-activedescendant</code> — the hardest standard pattern.) Where does focus go after deleting a row?</p>
+<h3 id="144-testing-accessibility">14.4 Testing accessibility</h3>
+<p><strong>What it is.</strong> A layered approach, because no single method is sufficient.</p>
+<p><strong>Example.</strong> axe-core in component tests catches roughly a third of issues; add keyboard-only test runs, a screen-reader pass (VoiceOver/NVDA) on critical flows, and periodic audits with disabled users.</p>
+<p><strong>Trade-offs.</strong> Automation is cheap and shallow; manual testing is expensive and real. The platform play is to enforce axe on every design-system component so product teams inherit compliance.</p>
+<p><strong>Follow-ups.</strong> What can't axe detect? How would you stop accessibility regressing across twelve teams?</p>
+<h3 id="145-internationalization-architecture">14.5 Internationalization architecture</h3>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Message catalogues</td>
+<td>ICU MessageFormat for plurals, gender and select; keys namespaced by feature; never concatenate sentences</td>
+</tr>
+<tr>
+<td>Loading</td>
+<td>Split translations per route and locale; load the active locale only — shipping 40 locales to every user is a common bundle bug</td>
+</tr>
+<tr>
+<td>Dates, numbers, currency</td>
+<td>Native <code>Intl.DateTimeFormat</code>, <code>Intl.NumberFormat</code>, <code>Intl.RelativeTimeFormat</code>, <code>Intl.PluralRules</code>; <code>Temporal</code> as it lands</td>
+</tr>
+<tr>
+<td>Wire format</td>
+<td>Send ISO/UTC; format on the client in the user's locale and timezone</td>
+</tr>
+<tr>
+<td>Currency</td>
+<td>Never string-template a price — locale controls symbol position, grouping and decimals; conversion server-side with a rate timestamp</td>
+</tr>
+<tr>
+<td>Timezones</td>
+<td>Hotel check-in dates are <em>local calendar dates</em>, not instants — a genuine travel-domain trap</td>
+</tr>
+<tr>
+<td>Pseudo-localisation</td>
+<td>A build-time pseudo-locale (<code>[!!! Ṡéárçh !!!]</code>) to catch hardcoded strings and layout breakage in CI</td>
+</tr>
+<tr>
+<td>Text expansion</td>
+<td>German and Finnish run 30–50% longer than English — never fix widths to English text</td>
+</tr>
+<tr>
+<td>RTL</td>
+<td>CSS logical properties (<code>margin-inline-start</code>, <code>inset-inline</code>), <code>dir="rtl"</code> on <code>&lt;html&gt;</code>, mirrored icons, visual regression in both directions</td>
+</tr>
+<tr>
+<td>SEO</td>
+<td><code>hreflang</code> alternates per locale, localised URLs, correct <code>lang</code> attribute</td>
+</tr>
+<tr>
+<td>Workflow</td>
+<td>Extract keys in CI, push to the TMS, fail the build on missing keys for launched locales, fall back to English with a logged warning rather than showing the key</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-offs.</strong> ICU is verbose and is the only sane way to handle languages with six plural forms. Server-side locale detection is accurate and fragments the CDN cache; client-side is cacheable and causes a flash.</p>
+<p><strong>Follow-ups.</strong> How do you format a price for 40 markets? Why can't you concatenate "Showing " + n + " results"? How would you support RTL in an existing design system? What breaks when a translator writes a string 60% longer?</p>
+<h2 id="15-applying-it">15. Applying it</h2>
+<h3 id="151-a-system-design-framework">15.1 A system-design framework</h3>
+<p>Use the same eight steps every time, and announce them at the start.</p>
+<ol>
+<li><strong>Clarify and scope (5 min).</strong> Users and devices, locales and markets, logged-in or anonymous, SEO needed, scale (QPS, catalogue size), and what is explicitly out of scope.</li>
+<li><strong>Define success metrics (2 min).</strong> Two user metrics (p75 LCP, INP), one business metric (search→book conversion), one engineering metric (build time or deploy frequency).</li>
+<li><strong>Sketch the architecture (8 min).</strong> Client, CDN/edge, BFF, backend services, third parties. Label arrows with protocol and cache policy.</li>
+<li><strong>Pick the rendering strategy (5 min).</strong> Segment the page by volatility.</li>
+<li><strong>Component hierarchy and state (8 min).</strong> Mark which state is URL, server cache, local, global. Name the data-fetching and Suspense boundaries.</li>
+<li><strong>Data layer and contract (5 min).</strong> Endpoint shapes, pagination, error model, optimistic updates, cache keys and invalidation.</li>
+<li><strong>Cross-cutting concerns (7 min).</strong> Budget, a11y, i18n, security headers, analytics and experiments, error/empty/loading states, offline.</li>
+<li><strong>Trade-offs and next steps (5 min).</strong> Two rejected alternatives and why. End with the metric you'd watch after launch.</li>
+</ol>
+<h3 id="152-worked-scenarios">15.2 Worked scenarios</h3>
+<p><strong>Hotel search results page.</strong> Streaming SSR at the edge for shell and first cards; filters, dates and occupancy in the URL; results in a server cache keyed by the normalised filter object; prices fetched separately and never cached; virtualised list with <code>content-visibility: auto</code>; AVIF with fixed aspect ratios; <code>fetchpriority="high"</code> on the first card image; map library loaded on interaction; filter changes in <code>startTransition</code> with <code>AbortController</code> cancellation; cursor pagination because offset breaks on live inventory. <em>Rejected:</em> client-side filtering (only works for small result sets) and a single global rendering strategy.</p>
+<p><strong>Image delivery pipeline.</strong> One high-res master; an image CDN derives variants from URL parameters (<code>?w=800&amp;fm=avif&amp;q=70</code>), cached immutably at the edge; a design-system <code>&lt;Image&gt;</code> component generates <code>srcset</code>/<code>sizes</code> and enforces <code>width</code>/<code>height</code>, <code>loading</code>, <code>decoding</code> and <code>fetchpriority</code>; LQIP inside a fixed <code>aspect-ratio</code> box so CLS stays 0. <em>Guardrails:</em> CI fails any raw <code>&lt;img&gt;</code>, a budget on LCP image bytes, RUM reports the LCP element type.</p>
+<p><strong>Design system rollout to 12 teams.</strong> Phase 0 audit — script the codebase to count distinct button implementations and colour values; that number creates the mandate. Phase 1 tokens only, adopted by codemod. Phase 2 the ten highest-traffic primitives on headless libraries with a11y and visual regression from day one. Phase 3 migration via codemods plus pairing, with a per-team adoption dashboard. Phase 4 enforcement via lint rules. <em>Risks:</em> the library becoming a bottleneck (contribution model, documented escape hatches) and version skew in a federated setup (singleton shared scope, compatibility matrix).</p>
+<p><strong>Offline-capable booking flow.</strong> Service Worker with precached shell, network-first HTML, network-only for prices; funnel state in IndexedDB keyed by a draft booking id; a request queue with Background Sync and a client-generated <strong>idempotency key</strong> so a retry cannot double-book; explicit offline UI rather than optimistic success; on reconnect, re-validate price and availability server-side and show a diff; a remote kill switch for the worker.</p>
+<p><strong>Real-time price updates.</strong> SSE for one-way pushes (simpler, auto-reconnect) or WebSocket if you need client→server too; subscribe per visible card via <code>IntersectionObserver</code> so offscreen items unsubscribe; coalesce bursts into one <code>startTransition</code> flush per animation frame; exponential backoff with jitter plus a sequence number to detect gaps and refetch; animate price changes without moving scroll position, and require confirmation if the price changed between selection and payment.</p>
+<p><strong>Experimentation platform.</strong> Covered in 13.2 — server-side assignment, variant in the cache key, typed variant names generated from the experiment registry, exposure on render, SRM alerting, auto-expiry, per-experiment performance budget.</p>
+<h3 id="153-sources-and-further-reading">15.3 Sources and further reading</h3>
+<p><a href="https://developer.mozilla.org/">MDN Web Docs</a> · <a href="https://web.dev/">web.dev</a> · <a href="https://refactoring.guru/">Refactoring Guru</a> · <a href="https://github.com/binhnguyennus/awesome-scalability">Awesome Scalability</a></p></main>
+</div>
+<button id="top" aria-label="Back to top">↑ Top</button>
+<script>
+(function(){
+  var nav = document.getElementById('nav');
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  var filter = document.getElementById('filter');
+
+  filter.addEventListener('input', function(){
+    var q = filter.value.trim().toLowerCase();
+    links.forEach(function(a){
+      var hit = !q || a.textContent.toLowerCase().indexOf(q) > -1;
+      a.style.display = hit ? '' : 'none';
+    });
+    nav.querySelectorAll('.nav-sub').forEach(function(g){
+      var any = Array.prototype.some.call(g.querySelectorAll('a'), function(a){
+        return a.style.display !== 'none';
+      });
+      g.style.display = any ? '' : 'none';
+    });
+  });
+
+  var heads = Array.prototype.slice.call(document.querySelectorAll('main h2[id], main h3[id]'));
+  var byId = {};
+  links.forEach(function(a){ byId[a.getAttribute('href').slice(1)] = a; });
+
+  var current = null;
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var a = byId[e.target.id];
+      if(!a || a === current) return;
+      if(current) current.classList.remove('active');
+      a.classList.add('active');
+      current = a;
+      var box = a.getBoundingClientRect();
+      if(box.top < 70 || box.bottom > window.innerHeight - 20){
+        a.scrollIntoView({block:'center'});
+      }
+    });
+  }, {rootMargin:'-10% 0px -75% 0px', threshold:0});
+  heads.forEach(function(h){ obs.observe(h); });
+
+  var top = document.getElementById('top');
+  top.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+  window.addEventListener('scroll', function(){
+    top.classList.toggle('show', window.scrollY > 700);
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
