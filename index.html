@@ -13,6 +13,9 @@
   --warn:#b45309; --warn-tint:#fef3c7;
   --bad:#b91c1c;  --bad-tint:#fee2e2;
   --tint:#f1f1ec; --code-bg:#f4f4ef;
+  --hl-comment:#6a737d; --hl-keyword:#8250df; --hl-string:#0a7d33;
+  --hl-number:#b45309;  --hl-func:#1f6feb;    --hl-attr:#b31d28;
+  --hl-punct:#57606a;   --hl-type:#953800;
   --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
 }
@@ -25,6 +28,9 @@
     --warn:#fbbf24; --warn-tint:#4a3410;
     --bad:#f87171;  --bad-tint:#4c1d1d;
     --tint:#24242b; --code-bg:#23232a;
+    --hl-comment:#8b949e; --hl-keyword:#d2a8ff; --hl-string:#7ee787;
+    --hl-number:#ffa657;  --hl-func:#79c0ff;    --hl-attr:#ff7b72;
+    --hl-punct:#9aa0a6;   --hl-type:#ffa657;
   }
 }
 *{box-sizing:border-box}
@@ -101,6 +107,27 @@ table{
 th,td{border:1px solid var(--rule); padding:8px 11px; text-align:left; vertical-align:top}
 th{background:var(--tint); font-weight:650; font-size:12.5px; letter-spacing:.01em}
 tbody tr:nth-child(even){background:color-mix(in srgb, var(--tint) 45%, transparent)}
+
+/* ---------- syntax highlighting (Pygments, build-time) ---------- */
+.codehilite{margin:0 0 16px}
+.codehilite pre{margin:0}
+.codehilite .c, .codehilite .c1, .codehilite .cm, .codehilite .cs,
+.codehilite .cp{color:var(--hl-comment); font-style:italic}
+.codehilite .k, .codehilite .kc, .codehilite .kd, .codehilite .kn,
+.codehilite .kr, .codehilite .ow{color:var(--hl-keyword)}
+.codehilite .kt{color:var(--hl-type)}
+.codehilite .s, .codehilite .s1, .codehilite .s2, .codehilite .sb,
+.codehilite .sd, .codehilite .se, .codehilite .si, .codehilite .sr,
+.codehilite .sc{color:var(--hl-string)}
+.codehilite .m, .codehilite .mi, .codehilite .mf, .codehilite .mh,
+.codehilite .mo, .codehilite .l{color:var(--hl-number)}
+.codehilite .nf, .codehilite .nb, .codehilite .nc, .codehilite .ne{color:var(--hl-func)}
+.codehilite .na, .codehilite .nt{color:var(--hl-attr)}
+.codehilite .n, .codehilite .nx, .codehilite .nd, .codehilite .nv{color:var(--ink)}
+.codehilite .o, .codehilite .p{color:var(--hl-punct)}
+.codehilite .err{color:inherit; background:none; border:0}
+.codehilite .w{color:inherit}
+@media print{ .codehilite pre{background:#f6f6f6} }
 
 /* ---------- self-test ---------- */
 details.q{
@@ -448,32 +475,34 @@ svg.dg .arwA{fill:var(--accent)}
 <p class="lead-in"><strong>Trade-offs.</strong> The stack is synchronous and single-threaded. Anything long-running on it blocks rendering and input, which is the root of every INP problem.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What's on the stack when a promise resolves? Why does a stack trace lose frames across an <code>await</code>?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — the stack explains why this catch never fires
-try {
-  setTimeout(() =&gt; { throw new Error('boom'); }, 0);
-} catch (e) {
-  // unreachable: the callback runs later, on a fresh, empty stack
-}
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — the stack explains why this catch never fires</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s1">'boom'</span><span class="p">);</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="mf">0</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// unreachable: the callback runs later, on a fresh, empty stack</span>
+<span class="p">}</span>
 
-// 2 — but this one does, because await resumes the same logical frame
-try {
-  await Promise.reject(new Error('boom'));
-} catch (e) {
-  // caught
-}
+<span class="c1">// 2 — but this one does, because await resumes the same logical frame</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s1">'boom'</span><span class="p">));</span>
+<span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// caught</span>
+<span class="p">}</span>
 
-// 3 — recursion depth is finite; depth is roughly 10k frames in V8
-const depth = (n = 0) =&gt; depth(n + 1);
-try { depth(); } catch (e) { e.name; } // 'RangeError'
-</code></pre>
+<span class="c1">// 3 — recursion depth is finite; depth is roughly 10k frames in V8</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">depth</span><span class="p">(</span><span class="nx">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1</span><span class="p">);</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">depth</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// 'RangeError'</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Trace it — what order do the logs print?</summary>
 <div class="inner">
-<pre><code class="language-javascript">function a() { console.log('a'); b(); console.log('a done'); }
-function b() { console.log('b'); c(); console.log('b done'); }
-function c() { console.log('c'); }
-a();
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">a</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'a'</span><span class="p">);</span><span class="w"> </span><span class="nx">b</span><span class="p">();</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'a done'</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">b</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'b'</span><span class="p">);</span><span class="w"> </span><span class="nx">c</span><span class="p">();</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'b done'</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">c</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'c'</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="nx">a</span><span class="p">();</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Answer:</strong> <code>a · b · c · b done · a done</code>.</p>
 <p>Each call pushes a frame and the caller is suspended, not finished. <code>b done</code>
 cannot print until <code>c</code> pops, and <code>a done</code> cannot print until <code>b</code> pops. The
@@ -528,40 +557,43 @@ cannot print until <code>c</code> pops, and <code>a done</code> cannot print unt
 </svg><figcaption>When each kind of declaration becomes usable, and where the temporal dead zone sits.</figcaption></figure>
 <p class="lead-in"><strong>What it is.</strong> Declarations are registered during the creation phase. <code>var</code> is initialised to <code>undefined</code>; function declarations are initialised fully; <code>let</code>, <code>const</code> and <code>class</code> are registered but uninitialised — reading them before the declaration throws. That window is the temporal dead zone.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-javascript">console.log(a); // undefined
-console.log(b); // ReferenceError — TDZ
-var a = 1;
-let b = 2;
+<div class="codehilite"><pre><span></span><code><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span><span class="w"> </span><span class="c1">// undefined</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span><span class="w"> </span><span class="c1">// ReferenceError — TDZ</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1</span><span class="p">;</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2</span><span class="p">;</span>
 
-foo();          // works — declaration hoisted whole
-bar();          // TypeError: bar is not a function
-function foo() {}
-var bar = function () {};
-</code></pre>
+<span class="nx">foo</span><span class="p">();</span><span class="w">          </span><span class="c1">// works — declaration hoisted whole</span>
+<span class="nx">bar</span><span class="p">();</span><span class="w">          </span><span class="c1">// TypeError: bar is not a function</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">foo</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">bar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{};</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> The TDZ turns a class of silent <code>undefined</code> bugs into loud errors, at the cost of ordering discipline.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why does the TDZ exist? Are function declarations hoisted inside blocks? What does <code>typeof b</code> do in the TDZ? (It throws — the one case where <code>typeof</code> is not safe.)</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — the loop-variable classic
-for (var i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 3 3 3
-for (let i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 0 1 2
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — the loop-variable classic</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">var</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">3</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">i</span><span class="p">));</span><span class="w"> </span><span class="c1">// 3 3 3</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">3</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">i</span><span class="p">));</span><span class="w"> </span><span class="c1">// 0 1 2</span>
 
-// 2 — const protects the binding, not the value
-const user = { name: 'Ada' };
-user.name = 'changed';   // fine — the object is mutable
-// user = {};          // TypeError: assignment to constant variable
+<span class="c1">// 2 — const protects the binding, not the value</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'Ada'</span><span class="w"> </span><span class="p">};</span>
+<span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'changed'</span><span class="p">;</span><span class="w">   </span><span class="c1">// fine — the object is mutable</span>
+<span class="c1">// user = {};          // TypeError: assignment to constant variable</span>
 
-// 3 — a function declaration inside a block is block-scoped in modules
-if (true) { function f() {} }
-// f is not reliably visible outside the block — use a const arrow instead
-</code></pre>
+<span class="c1">// 3 — a function declaration inside a block is block-scoped in modules</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">f</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// f is not reliably visible outside the block — use a const arrow instead</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Predict the output</summary>
 <div class="inner">
-<pre><code class="language-javascript">console.log(typeof x);
-console.log(typeof y);
-var x = 1;
-let y = 2;
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">x</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">y</span><span class="p">);</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1</span><span class="p">;</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2</span><span class="p">;</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Answer:</strong> <code>'undefined'</code>, then a <code>ReferenceError</code>.</p>
 <p><code>typeof</code> is famously safe on undeclared identifiers — but <strong>not</strong> inside the
 temporal dead zone. <code>y</code> is declared, just not yet initialised, so the engine
@@ -611,46 +643,50 @@ can fail, and it is a common interview trap.</p>
 </svg><figcaption>A closure keeping its defining scope alive after the outer call returned.</figcaption></figure>
 <p class="lead-in"><strong>What it is.</strong> A closure is a function plus a reference to the lexical environment it was created in. Lookup walks the scope chain outward to the global scope.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-javascript">for (var i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 3 3 3 — one binding
-for (let i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 0 1 2 — per-iteration binding
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">var</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">3</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">i</span><span class="p">));</span><span class="w"> </span><span class="c1">// 3 3 3 — one binding</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">3</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">i</span><span class="p">));</span><span class="w"> </span><span class="c1">// 0 1 2 — per-iteration binding</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> Closures are the most common memory leak in long-lived SPAs: a listener closing over a DOM subtree keeps it alive after unmount. Guard with cleanup functions and <code>AbortController</code>.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How would you implement <code>once</code>, memoise, or a private counter with a closure? How do closures cause detached-DOM leaks?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — private state, no class needed
-function counter() {
-  let n = 0;                       // unreachable from outside
-  return { inc: () =&gt; ++n, value: () =&gt; n };
-}
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — private state, no class needed</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">counter</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w">                       </span><span class="c1">// unreachable from outside</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">inc</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="o">++</span><span class="nx">n</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="p">};</span>
+<span class="p">}</span>
 
-// 2 — run-once, a closure over a boolean
-const once = fn =&gt; {
-  let done = false, result;
-  return (...args) =&gt; done ? result : (done = true, result = fn(...args));
-};
+<span class="c1">// 2 — run-once, a closure over a boolean</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">once</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fn</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(...</span><span class="nx">args</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">done</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fn</span><span class="p">(...</span><span class="nx">args</span><span class="p">));</span>
+<span class="p">};</span>
 
-// 3 — memoise: the cache lives in the closure, not in global scope
-const memo = fn =&gt; {
-  const cache = new Map();
-  return x =&gt; cache.has(x) ? cache.get(x) : (cache.set(x, fn(x)), cache.get(x));
-};
-</code></pre>
+<span class="c1">// 3 — memoise: the cache lives in the closure, not in global scope</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">memo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fn</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Map</span><span class="p">();</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">cache</span><span class="p">.</span><span class="nx">has</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">cache</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">cache</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="w"> </span><span class="nx">fn</span><span class="p">(</span><span class="nx">x</span><span class="p">)),</span><span class="w"> </span><span class="nx">cache</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">x</span><span class="p">));</span>
+<span class="p">};</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Why does this leak, and what is the one-line fix?</summary>
 <div class="inner">
-<pre><code class="language-javascript">function attach(node) {
-  const bigData = new Array(1e6).fill(node.textContent);
-  node.addEventListener('click', () =&gt; console.log(bigData.length));
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">attach</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">bigData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Array</span><span class="p">(</span><span class="mf">1e6</span><span class="p">).</span><span class="nx">fill</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">textContent</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">node</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'click'</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">bigData</span><span class="p">.</span><span class="nx">length</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Answer:</strong> the listener closes over <code>bigData</code> <em>and</em> over <code>node</code>. Even after the
 node is removed from the DOM, the listener keeps both alive — a detached DOM node
 plus a million-element array, retained for the life of the page.</p>
 <p>The fix is to tie the subscription to a lifetime:</p>
-<pre><code class="language-javascript">const ac = new AbortController();
-node.addEventListener('click', handler, { signal: ac.signal });
-// later: ac.abort();  — removes the listener and releases the closure
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">ac</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">AbortController</span><span class="p">();</span>
+<span class="nx">node</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'click'</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="nx">ac</span><span class="p">.</span><span class="nx">signal</span><span class="w"> </span><span class="p">});</span>
+<span class="c1">// later: ac.abort();  — removes the listener and releases the closure</span>
+</code></pre></div>
+
 <p>Note the cause is not "closures are leaky" — it is that nothing ever removed the
 subscription. The closure is just what made the retention large.</p>
 </div>
@@ -709,45 +745,48 @@ subscription. The closure is just what made the retention large.</p>
 <li>Microtasks: promise continuations, <code>queueMicrotask</code>, <code>MutationObserver</code>.</li>
 </ul>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-javascript">console.log('1 sync');
-setTimeout(() =&gt; console.log('5 macrotask'), 0);
-Promise.resolve().then(() =&gt; console.log('3 microtask'));
-queueMicrotask(() =&gt; console.log('4 microtask'));
-console.log('2 sync');
-// 1 sync, 2 sync, 3 microtask, 4 microtask, 5 macrotask
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'1 sync'</span><span class="p">);</span>
+<span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'5 macrotask'</span><span class="p">),</span><span class="w"> </span><span class="mf">0</span><span class="p">);</span>
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'3 microtask'</span><span class="p">));</span>
+<span class="nx">queueMicrotask</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'4 microtask'</span><span class="p">));</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'2 sync'</span><span class="p">);</span>
+<span class="c1">// 1 sync, 2 sync, 3 microtask, 4 microtask, 5 macrotask</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> A microtask that queues another microtask starves rendering forever; a <code>setTimeout</code> loop does not (nested timeouts clamp to 4ms after five levels). Microtasks give ordering guarantees at the cost of being unyielding.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Predict the output of a mixed <code>setTimeout</code>/promise/<code>async</code> snippet. Why does <code>Promise.resolve().then(spin)</code> freeze the tab? Where does <code>requestAnimationFrame</code> run relative to microtasks?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — await is microtask scheduling, so this prints 1 4 2 3
-async function f() { console.log(2); await null; console.log(3); }
-console.log(1); f(); console.log(4);
-// 1 · 2 · 4 · 3  — the body runs synchronously up to the first await
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — await is microtask scheduling, so this prints 1 4 2 3</span>
+<span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">f</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="mf">2</span><span class="p">);</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="mf">3</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="mf">1</span><span class="p">);</span><span class="w"> </span><span class="nx">f</span><span class="p">();</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="mf">4</span><span class="p">);</span>
+<span class="c1">// 1 · 2 · 4 · 3  — the body runs synchronously up to the first await</span>
 
-// 2 — rAF runs after microtasks, before paint
-Promise.resolve().then(() =&gt; console.log('micro'));
-requestAnimationFrame(() =&gt; console.log('frame'));
-// micro · frame
+<span class="c1">// 2 — rAF runs after microtasks, before paint</span>
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'micro'</span><span class="p">));</span>
+<span class="nx">requestAnimationFrame</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'frame'</span><span class="p">));</span>
+<span class="c1">// micro · frame</span>
 
-// 3 — yielding so input can be handled between chunks
-async function process(items) {
-  for (const [i, item] of items.entries()) {
-    work(item);
-    if (i % 100 === 0) await new Promise(r =&gt; setTimeout(r, 0));
-  }
-}
-</code></pre>
+<span class="c1">// 3 — yielding so input can be handled between chunks</span>
+<span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">process</span><span class="p">(</span><span class="nx">items</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">item</span><span class="p">]</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">items</span><span class="p">.</span><span class="nx">entries</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">work</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mf">100</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="mf">0</span><span class="p">));</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Order these eight logs</summary>
 <div class="inner">
-<pre><code class="language-javascript">console.log('1');
-setTimeout(() =&gt; console.log('2'), 0);
-Promise.resolve().then(() =&gt; { console.log('3'); return Promise.resolve(); })
-                 .then(() =&gt; console.log('4'));
-queueMicrotask(() =&gt; console.log('5'));
-(async () =&gt; { console.log('6'); await null; console.log('7'); })();
-console.log('8');
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'1'</span><span class="p">);</span>
+<span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'2'</span><span class="p">),</span><span class="w"> </span><span class="mf">0</span><span class="p">);</span>
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'3'</span><span class="p">);</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span><span class="w"> </span><span class="p">})</span>
+<span class="w">                 </span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'4'</span><span class="p">));</span>
+<span class="nx">queueMicrotask</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'5'</span><span class="p">));</span>
+<span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'6'</span><span class="p">);</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'7'</span><span class="p">);</span><span class="w"> </span><span class="p">})();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'8'</span><span class="p">);</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Answer:</strong> <code>1 · 6 · 8 · 3 · 5 · 7 · 4 · 2</code></p>
 <ul>
 <li><code>1</code>, <code>6</code>, <code>8</code> are synchronous. The async IIFE body runs immediately up to its <code>await</code>.</li>
@@ -818,61 +857,65 @@ console.log('8');
 </svg><figcaption>Serial await vs Promise.all vs bounded concurrency, on the same six requests.</figcaption></figure>
 <p class="lead-in"><strong>What it is.</strong> <code>await x</code> splits the function: everything after it becomes a microtask continuation. <code>async</code> functions always return a promise.</p>
 <p class="lead-in"><strong>Example.</strong> Serial vs parallel vs bounded concurrency:</p>
-<pre><code class="language-javascript">for (const id of ids) out.push(await fetch(url(id)));        // N × latency
-const out = await Promise.all(ids.map(id =&gt; fetch(url(id)))); // 1 × latency, N sockets
+<div class="codehilite"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">ids</span><span class="p">)</span><span class="w"> </span><span class="nx">out</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">(</span><span class="nx">id</span><span class="p">)));</span><span class="w">        </span><span class="c1">// N × latency</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">ids</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">id</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">(</span><span class="nx">id</span><span class="p">))));</span><span class="w"> </span><span class="c1">// 1 × latency, N sockets</span>
 
-async function mapLimit(items, limit, fn) {                   // bounded
-  const out = [], running = new Set();
-  for (const [i, item] of items.entries()) {
-    const p = Promise.resolve(fn(item, i)).then(r =&gt; { running.delete(p); return r; });
-    out.push(p); running.add(p);
-    if (running.size &gt;= limit) await Promise.race(running);
-  }
-  return Promise.all(out);
-}
-</code></pre>
+<span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">mapLimit</span><span class="p">(</span><span class="nx">items</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="p">,</span><span class="w"> </span><span class="nx">fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                   </span><span class="c1">// bounded</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[],</span><span class="w"> </span><span class="nx">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Set</span><span class="p">();</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">item</span><span class="p">]</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">items</span><span class="p">.</span><span class="nx">entries</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">fn</span><span class="p">(</span><span class="nx">item</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)).</span><span class="nx">then</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">running</span><span class="p">.</span><span class="ow">delete</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="nx">out</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span><span class="w"> </span><span class="nx">running</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">running</span><span class="p">.</span><span class="nx">size</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="nx">limit</span><span class="p">)</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">race</span><span class="p">(</span><span class="nx">running</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">out</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> <code>all</code> fails fast (one rejection discards the rest); <code>allSettled</code> never rejects, right for dashboards and telemetry; <code>any</code> returns the first fulfilled and rejects with <code>AggregateError</code>; <code>race</code> returns the first settled and is the timeout idiom. Unbounded <code>Promise.all</code> over a large list floods the server and the browser's connection pool.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How do you add a timeout to a fetch? How do you cancel in-flight work? What is an unhandled rejection and how do you report it?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — timeout any promise, using race
-const withTimeout = (p, ms) =&gt; Promise.race([
-  p,
-  new Promise((_, rej) =&gt; setTimeout(() =&gt; rej(new Error('timeout')), ms)),
-]);
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — timeout any promise, using race</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">withTimeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="nx">ms</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">race</span><span class="p">([</span>
+<span class="w">  </span><span class="nx">p</span><span class="p">,</span>
+<span class="w">  </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">((</span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">rej</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">rej</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s1">'timeout'</span><span class="p">)),</span><span class="w"> </span><span class="nx">ms</span><span class="p">)),</span>
+<span class="p">]);</span>
 
-// 2 — retry with exponential backoff and jitter
-async function retry(fn, tries = 3) {
-  for (let i = 0; i &lt; tries; i++) {
-    try { return await fn(); }
-    catch (e) {
-      if (i === tries - 1) throw e;
-      const wait = 2 ** i * 100 + Math.random() * 100;   // jitter avoids a thundering herd
-      await new Promise(r =&gt; setTimeout(r, wait));
-    }
-  }
-}
+<span class="c1">// 2 — retry with exponential backoff and jitter</span>
+<span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">retry</span><span class="p">(</span><span class="nx">fn</span><span class="p">,</span><span class="w"> </span><span class="nx">tries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">tries</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fn</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">i</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">tries</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1</span><span class="p">)</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="nx">e</span><span class="p">;</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">wait</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">100</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">100</span><span class="p">;</span><span class="w">   </span><span class="c1">// jitter avoids a thundering herd</span>
+<span class="w">      </span><span class="k">await</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">wait</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 
-// 3 — genuinely sequential, when each step needs the previous result
-const result = await steps.reduce(
-  (acc, step) =&gt; acc.then(step),
-  Promise.resolve(initial),
-);
-</code></pre>
+<span class="c1">// 3 — genuinely sequential, when each step needs the previous result</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">steps</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span>
+<span class="w">  </span><span class="p">(</span><span class="nx">acc</span><span class="p">,</span><span class="w"> </span><span class="nx">step</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">acc</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">step</span><span class="p">),</span>
+<span class="w">  </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">initial</span><span class="p">),</span>
+<span class="p">);</span>
+</code></pre></div>
+
 <details class="q">
 <summary>What does this log, and why is it a bug?</summary>
 <div class="inner">
-<pre><code class="language-javascript">const results = [];
-[1, 2, 3].forEach(async (n) =&gt; {
-  results.push(await double(n));
-});
-console.log(results.length);
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[];</span>
+<span class="p">[</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="nx">n</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="kr">double</span><span class="p">(</span><span class="nx">n</span><span class="p">));</span>
+<span class="p">});</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">results</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Answer:</strong> <code>0</code>.</p>
 <p><code>forEach</code> ignores the returned promise, so all three callbacks are started and
 abandoned — <code>console.log</code> runs before any of them resume. <code>await</code> inside a
 callback does not make the <em>outer</em> function wait.</p>
-<pre><code class="language-javascript">const results = await Promise.all([1, 2, 3].map(double));   // 3
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">all</span><span class="p">([</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">].</span><span class="nx">map</span><span class="p">(</span><span class="kr">double</span><span class="p">));</span><span class="w">   </span><span class="c1">// 3</span>
+</code></pre></div>
+
 <p>The general rule: <code>forEach</code> is not async-aware. Use <code>map</code> + <code>Promise.all</code>, or a
 <code>for…of</code> loop if you genuinely need them sequential.</p>
 </div>
@@ -930,32 +973,34 @@ callback does not make the <em>outer</em> function wait.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Class-field arrows bind per instance — convenient but they cost memory per instance and are not on the prototype, so they cannot be overridden or spied on easily.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What is <code>this</code> in a standalone function in a module? In a <code>setTimeout</code> callback? In an event handler? Implement <code>bind</code> yourself.</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — the receiver is lost the moment you detach the method
-const obj = { n: 1, get() { return this.n; } };
-const f = obj.get;
-obj.get(); // 1      — rule 3, receiver is obj
-f();       // throws — rule 4, this is undefined in a module
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — the receiver is lost the moment you detach the method</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">n</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">get</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">n</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">obj</span><span class="p">.</span><span class="nx">get</span><span class="p">;</span>
+<span class="nx">obj</span><span class="p">.</span><span class="nx">get</span><span class="p">();</span><span class="w"> </span><span class="c1">// 1      — rule 3, receiver is obj</span>
+<span class="nx">f</span><span class="p">();</span><span class="w">       </span><span class="c1">// throws — rule 4, this is undefined in a module</span>
 
-// 2 — array callbacks take an explicit thisArg
-[1, 2].map(function () { return this.k; }, { k: 9 }); // [9, 9]
+<span class="c1">// 2 — array callbacks take an explicit thisArg</span>
+<span class="p">[</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="mf">2</span><span class="p">].</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">k</span><span class="p">;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">k</span><span class="o">:</span><span class="w"> </span><span class="mf">9</span><span class="w"> </span><span class="p">});</span><span class="w"> </span><span class="c1">// [9, 9]</span>
 
-// 3 — prototype method vs class field, and what each costs
-class A {
-  onClick() {}            // on A.prototype — one copy, needs binding
-  onTap = () =&gt; {};       // per instance — pre-bound, costs memory per object
-}
-</code></pre>
+<span class="c1">// 3 — prototype method vs class field, and what each costs</span>
+<span class="kd">class</span><span class="w"> </span><span class="nx">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">onClick</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">            </span><span class="c1">// on A.prototype — one copy, needs binding</span>
+<span class="w">  </span><span class="nx">onTap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{};</span><span class="w">       </span><span class="c1">// per instance — pre-bound, costs memory per object</span>
+<span class="p">}</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Which of these four log 10?</summary>
 <div class="inner">
-<pre><code class="language-javascript">const o = {
-  n: 10,
-  regular() { return this.n; },
-  arrow: () =&gt; this?.n,
-  nested() { return [1].map(function () { return this?.n; })[0]; },
-  nestedArrow() { return [1].map(() =&gt; this.n)[0]; },
-};
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">n</span><span class="o">:</span><span class="w"> </span><span class="mf">10</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">regular</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">n</span><span class="p">;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">arrow</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">this</span><span class="o">?</span><span class="p">.</span><span class="nx">n</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">nested</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">[</span><span class="mf">1</span><span class="p">].</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="o">?</span><span class="p">.</span><span class="nx">n</span><span class="p">;</span><span class="w"> </span><span class="p">})[</span><span class="mf">0</span><span class="p">];</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">nestedArrow</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">[</span><span class="mf">1</span><span class="p">].</span><span class="nx">map</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">n</span><span class="p">)[</span><span class="mf">0</span><span class="p">];</span><span class="w"> </span><span class="p">},</span>
+<span class="p">};</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Answer:</strong> <code>regular()</code> and <code>nestedArrow()</code> return <code>10</code>.</p>
 <ul>
 <li><code>regular</code> — rule 3, the receiver is <code>o</code>.</li>
@@ -1026,35 +1071,38 @@ function that already has the <code>this</code> you want.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Prototype sharing saves memory; prototype mutation at runtime deoptimises V8's hidden classes and should be avoided in hot paths. Monkey-patching built-in prototypes breaks other libraries.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Difference between <code>__proto__</code> and <code>prototype</code>? How does <code>instanceof</code> work? How would you implement inheritance without <code>class</code>?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — instanceof is a walk, not a type tag
-class A {} class B extends A {}
-const b = new B();
-b instanceof A;                              // true — A.prototype is on the chain
-Object.getPrototypeOf(B.prototype) === A.prototype; // true
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — instanceof is a walk, not a type tag</span>
+<span class="kd">class</span><span class="w"> </span><span class="nx">A</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">B</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">A</span><span class="w"> </span><span class="p">{}</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">B</span><span class="p">();</span>
+<span class="nx">b</span><span class="w"> </span><span class="ow">instanceof</span><span class="w"> </span><span class="nx">A</span><span class="p">;</span><span class="w">                              </span><span class="c1">// true — A.prototype is on the chain</span>
+<span class="nb">Object</span><span class="p">.</span><span class="nx">getPrototypeOf</span><span class="p">(</span><span class="nx">B</span><span class="p">.</span><span class="nx">prototype</span><span class="p">)</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">A</span><span class="p">.</span><span class="nx">prototype</span><span class="p">;</span><span class="w"> </span><span class="c1">// true</span>
 
-// 2 — own vs inherited
-const o = Object.create({ inherited: 1 });
-o.own = 2;
-'inherited' in o;                  // true  — `in` walks the chain
-o.hasOwnProperty('inherited');     // false — own properties only
-Object.keys(o);                    // ['own'] — own and enumerable
+<span class="c1">// 2 — own vs inherited</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">({</span><span class="w"> </span><span class="nx">inherited</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="w"> </span><span class="p">});</span>
+<span class="nx">o</span><span class="p">.</span><span class="nx">own</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2</span><span class="p">;</span>
+<span class="s1">'inherited'</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">o</span><span class="p">;</span><span class="w">                  </span><span class="c1">// true  — `in` walks the chain</span>
+<span class="nx">o</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="s1">'inherited'</span><span class="p">);</span><span class="w">     </span><span class="c1">// false — own properties only</span>
+<span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">o</span><span class="p">);</span><span class="w">                    </span><span class="c1">// ['own'] — own and enumerable</span>
 
-// 3 — a null-prototype object has no inherited methods at all
-const dict = Object.create(null);
-dict.toString;                     // undefined — safe as a plain string map
-</code></pre>
+<span class="c1">// 3 — a null-prototype object has no inherited methods at all</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">dict</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+<span class="nx">dict</span><span class="p">.</span><span class="nx">toString</span><span class="p">;</span><span class="w">                     </span><span class="c1">// undefined — safe as a plain string map</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Why does this break, and what is the safer check?</summary>
 <div class="inner">
-<pre><code class="language-javascript">const data = JSON.parse('{&quot;hasOwnProperty&quot;: 1}');
-data.hasOwnProperty('x');   // TypeError: not a function
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="s1">'{"hasOwnProperty": 1}'</span><span class="p">);</span>
+<span class="nx">data</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="s1">'x'</span><span class="p">);</span><span class="w">   </span><span class="c1">// TypeError: not a function</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Answer:</strong> the parsed object <strong>shadows</strong> the inherited method with a number, so
 calling it fails. Any object built from untrusted input can do this.</p>
 <p>Safe forms, in order of preference:</p>
-<pre><code class="language-javascript">Object.hasOwn(data, 'x');                          // modern, clearest
-Object.prototype.hasOwnProperty.call(data, 'x');   // the classic borrow
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="nb">Object</span><span class="p">.</span><span class="nx">hasOwn</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span><span class="w"> </span><span class="s1">'x'</span><span class="p">);</span><span class="w">                          </span><span class="c1">// modern, clearest</span>
+<span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span><span class="w"> </span><span class="s1">'x'</span><span class="p">);</span><span class="w">   </span><span class="c1">// the classic borrow</span>
+</code></pre></div>
+
 <p>The same reasoning is why <code>Object.create(null)</code> is the right choice for a
 lookup map — there is nothing on the chain to shadow or to collide with.</p>
 </div>
@@ -1108,22 +1156,23 @@ lookup map — there is nothing on the chain to shadow or to collide with.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Weak collections prevent leaks but make eviction non-deterministic — you cannot rely on a finalizer running.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How do you find a leak in DevTools? (Heap snapshot → interact → second snapshot → "objects allocated between 1 and 2" → sort by retained size → follow the retainer path.) What does a sawtooth memory graph that never returns to baseline mean?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — a WeakMap lets the key be collected; a Map does not
-const meta = new WeakMap();
-meta.set(node, { seen: true });   // when `node` dies, the entry dies with it
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — a WeakMap lets the key be collected; a Map does not</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">meta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">WeakMap</span><span class="p">();</span>
+<span class="nx">meta</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">seen</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">});</span><span class="w">   </span><span class="c1">// when `node` dies, the entry dies with it</span>
 
-// 2 — the three subscriptions that outlive a component
-const id = setInterval(tick, 1000);          // must clearInterval
-window.addEventListener('resize', onResize); // must removeEventListener
-const sub = store.subscribe(onChange);       // must unsubscribe
-// one controller can cover the listeners:
-const ac = new AbortController();
-window.addEventListener('resize', onResize, { signal: ac.signal });
+<span class="c1">// 2 — the three subscriptions that outlive a component</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setInterval</span><span class="p">(</span><span class="nx">tick</span><span class="p">,</span><span class="w"> </span><span class="mf">1000</span><span class="p">);</span><span class="w">          </span><span class="c1">// must clearInterval</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'resize'</span><span class="p">,</span><span class="w"> </span><span class="nx">onResize</span><span class="p">);</span><span class="w"> </span><span class="c1">// must removeEventListener</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">sub</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">store</span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="nx">onChange</span><span class="p">);</span><span class="w">       </span><span class="c1">// must unsubscribe</span>
+<span class="c1">// one controller can cover the listeners:</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">ac</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">AbortController</span><span class="p">();</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'resize'</span><span class="p">,</span><span class="w"> </span><span class="nx">onResize</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="nx">ac</span><span class="p">.</span><span class="nx">signal</span><span class="w"> </span><span class="p">});</span>
 
-// 3 — an unbounded module-level cache is a leak with good intentions
-const cache = new Map();                    // grows forever
-const bounded = new Map();                  // evict by size or time instead
-</code></pre>
+<span class="c1">// 3 — an unbounded module-level cache is a leak with good intentions</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Map</span><span class="p">();</span><span class="w">                    </span><span class="c1">// grows forever</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">bounded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Map</span><span class="p">();</span><span class="w">                  </span><span class="c1">// evict by size or time instead</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Two snapshots, same page, 40 MB apart. What do you look at first?</summary>
 <div class="inner">
@@ -1196,30 +1245,31 @@ baseline. If memory does return to baseline, you have churn, not a leak.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Implement debounce with a leading edge and <code>cancel()</code>. Why does <code>JSON.parse(JSON.stringify(x))</code> lose <code>undefined</code>, <code>Date</code> and cycles? When is <code>stopImmediatePropagation</code> needed over <code>stopPropagation</code>?</p>
 <h2 id="3-typescript">3. TypeScript</h2>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — debounce with a cancel, the version worth memorising
-function debounce(fn, ms) {
-  let t;
-  const wrapped = (...a) =&gt; { clearTimeout(t); t = setTimeout(() =&gt; fn(...a), ms); };
-  wrapped.cancel = () =&gt; clearTimeout(t);
-  return wrapped;
-}
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — debounce with a cancel, the version worth memorising</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">debounce</span><span class="p">(</span><span class="nx">fn</span><span class="p">,</span><span class="w"> </span><span class="nx">ms</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">t</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">wrapped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(...</span><span class="nx">a</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">t</span><span class="p">);</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">fn</span><span class="p">(...</span><span class="nx">a</span><span class="p">),</span><span class="w"> </span><span class="nx">ms</span><span class="p">);</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="nx">wrapped</span><span class="p">.</span><span class="nx">cancel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">t</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">wrapped</span><span class="p">;</span>
+<span class="p">}</span>
 
-// 2 — throttle: trailing edge preserved
-function throttle(fn, ms) {
-  let last = 0, timer;
-  return (...a) =&gt; {
-    const now = Date.now(), wait = ms - (now - last);
-    if (wait &lt;= 0) { last = now; fn(...a); }
-    else { clearTimeout(timer); timer = setTimeout(() =&gt; { last = Date.now(); fn(...a); }, wait); }
-  };
-}
+<span class="c1">// 2 — throttle: trailing edge preserved</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">throttle</span><span class="p">(</span><span class="nx">fn</span><span class="p">,</span><span class="w"> </span><span class="nx">ms</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="nx">timer</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(...</span><span class="nx">a</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">now</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">(),</span><span class="w"> </span><span class="nx">wait</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ms</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="nx">now</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">last</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">wait</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">now</span><span class="p">;</span><span class="w"> </span><span class="nx">fn</span><span class="p">(...</span><span class="nx">a</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">timer</span><span class="p">);</span><span class="w"> </span><span class="nx">timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span><span class="w"> </span><span class="nx">fn</span><span class="p">(...</span><span class="nx">a</span><span class="p">);</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">wait</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
 
-// 3 — event delegation: one listener for any number of rows
-table.addEventListener('click', (e) =&gt; {
-  const row = e.target.closest('[data-hotel-id]');
-  if (row &amp;&amp; table.contains(row)) select(row.dataset.hotelId);
-});
-</code></pre>
+<span class="c1">// 3 — event delegation: one listener for any number of rows</span>
+<span class="nx">table</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'click'</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">row</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">closest</span><span class="p">(</span><span class="s1">'[data-hotel-id]'</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">row</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">table</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="nx">row</span><span class="p">))</span><span class="w"> </span><span class="nx">select</span><span class="p">(</span><span class="nx">row</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">hotelId</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Search-as-you-type: debounce or throttle, and what else?</summary>
 <div class="inner">
@@ -1243,63 +1293,68 @@ bug class: the user sees results for a query they already edited away.</p>
 <h3 id="31-structural-typing-and-branded-types">3.1 Structural typing and branded types</h3>
 <p class="lead-in"><strong>What it is.</strong> TypeScript compares types by shape, not by name. Two unrelated types with the same members are interchangeable.</p>
 <p class="lead-in"><strong>Example.</strong> To get nominal behaviour for identifiers:</p>
-<pre><code class="language-typescript">type HotelId = string &amp; { readonly __brand: 'HotelId' };
-type CityId  = string &amp; { readonly __brand: 'CityId' };
-const asHotelId = (s: string) =&gt; s as HotelId;
-// passing a CityId where a HotelId is expected is now a compile error
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">HotelId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">readonly</span><span class="w"> </span><span class="nx">__brand</span><span class="o">:</span><span class="w"> </span><span class="s1">'HotelId'</span><span class="w"> </span><span class="p">};</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">CityId</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">readonly</span><span class="w"> </span><span class="nx">__brand</span><span class="o">:</span><span class="w"> </span><span class="s1">'CityId'</span><span class="w"> </span><span class="p">};</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">asHotelId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">HotelId</span><span class="p">;</span>
+<span class="c1">// passing a CityId where a HotelId is expected is now a compile error</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> Branding costs a cast at the boundary and slightly noisier types, and buys you a whole class of ID-mixup bugs caught at compile time.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why does TypeScript use structural typing? Where does structural typing surprise people? (Excess property checks apply to object literals only.)</p>
 <h3 id="32-any-vs-unknown-vs-never">3.2 <code>any</code> vs <code>unknown</code> vs <code>never</code></h3>
 <p class="lead-in"><strong>What it is.</strong> <code>any</code> disables checking and propagates silently. <code>unknown</code> is the safe top type — assignable from anything, assignable to nothing without narrowing. <code>never</code> is the bottom type: no value inhabits it.</p>
 <p class="lead-in"><strong>Example.</strong> <code>never</code> gives exhaustiveness for free:</p>
-<pre><code class="language-typescript">function render(s: FetchState) {
-  switch (s.status) {
-    case 'loading': return spinner();
-    case 'error':   return alert(s.error.message);
-    case 'success': return list(s.data);
-    default: { const _never: never = s; return _never; } // errors if a variant is added
-  }
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">render</span><span class="p">(</span><span class="nx">s</span><span class="o">:</span><span class="w"> </span><span class="kt">FetchState</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">status</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s1">'loading'</span><span class="o">:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">spinner</span><span class="p">();</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s1">'error'</span><span class="o">:</span><span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="nx">alert</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s1">'success'</span><span class="o">:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">list</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+<span class="w">    </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">_never</span><span class="o">:</span><span class="w"> </span><span class="kt">never</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">s</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">_never</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// errors if a variant is added</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> Banning <code>any</code> outright creates friction at untyped third-party boundaries; the usual policy is <code>unknown</code> plus a parse, with <code>any</code> allowed only behind an explicit lint suppression and a comment.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why is <code>unknown</code> safer than <code>any</code>? What does <code>never</code> mean as a return type? How do you type a function that always throws?</p>
 <h3 id="33-discriminated-unions">3.3 Discriminated unions</h3>
 <p class="lead-in"><strong>What it is.</strong> A union of object types sharing a literal-typed discriminant field, which lets the compiler narrow by checking that field.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-typescript">type FetchState&lt;T&gt; =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'error'; error: Error }
-  | { status: 'success'; data: T };
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">FetchState</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'idle'</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'loading'</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'error'</span><span class="p">;</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">Error</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'success'</span><span class="p">;</span><span class="w"> </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="p">};</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> More verbose than <code>{ loading: boolean; error?: Error; data?: T }</code>, but it makes impossible states unrepresentable — you can never have <code>loading: true</code> with <code>data</code> present.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Model a booking flow's states. How does narrowing work with <code>in</code>, <code>typeof</code> and custom type guards (<code>x is Foo</code>)?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-typescript">// 1 — the discriminant does not have to be called &quot;status&quot;
-type Shape =
-  | { kind: 'circle'; r: number }
-  | { kind: 'rect'; w: number; h: number };
-const area = (s: Shape) =&gt; s.kind === 'circle' ? Math.PI * s.r ** 2 : s.w * s.h;
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — the discriminant does not have to be called "status"</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Shape</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s1">'circle'</span><span class="p">;</span><span class="w"> </span><span class="nx">r</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s1">'rect'</span><span class="p">;</span><span class="w"> </span><span class="nx">w</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w"> </span><span class="nx">h</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">};</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">area</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="o">:</span><span class="w"> </span><span class="kt">Shape</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">kind</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">'circle'</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">PI</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">r</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="nx">2</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">s.w</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">h</span><span class="p">;</span>
 
-// 2 — a custom type guard narrows across function boundaries
-function isError&lt;T&gt;(s: FetchState&lt;T&gt;): s is Extract&lt;FetchState&lt;T&gt;, { status: 'error' }&gt; {
-  return s.status === 'error';
-}
+<span class="c1">// 2 — a custom type guard narrows across function boundaries</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">isError</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">s</span><span class="o">:</span><span class="w"> </span><span class="kt">FetchState</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="nx">is</span><span class="w"> </span><span class="nx">Extract</span><span class="o">&lt;</span><span class="nx">FetchState</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'error'</span><span class="w"> </span><span class="p">}</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">'error'</span><span class="p">;</span>
+<span class="p">}</span>
 
-// 3 — a booking funnel where impossible states cannot be constructed
-type Booking =
-  | { step: 'dates' }
-  | { step: 'rooms'; dates: DateRange }
-  | { step: 'pay';   dates: DateRange; room: Room }
-  | { step: 'done';  confirmation: string };
-// you cannot reach 'pay' without a room — the type enforces the order
-</code></pre>
+<span class="c1">// 3 — a booking funnel where impossible states cannot be constructed</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Booking</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">step</span><span class="o">:</span><span class="w"> </span><span class="s1">'dates'</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">step</span><span class="o">:</span><span class="w"> </span><span class="s1">'rooms'</span><span class="p">;</span><span class="w"> </span><span class="nx">dates</span><span class="o">:</span><span class="w"> </span><span class="kt">DateRange</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">step</span><span class="o">:</span><span class="w"> </span><span class="s1">'pay'</span><span class="p">;</span><span class="w">   </span><span class="nx">dates</span><span class="o">:</span><span class="w"> </span><span class="kt">DateRange</span><span class="p">;</span><span class="w"> </span><span class="nx">room</span><span class="o">:</span><span class="w"> </span><span class="kt">Room</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">step</span><span class="o">:</span><span class="w"> </span><span class="s1">'done'</span><span class="p">;</span><span class="w">  </span><span class="nx">confirmation</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span>
+<span class="c1">// you cannot reach 'pay' without a room — the type enforces the order</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Why is the boolean version worse?</summary>
 <div class="inner">
-<pre><code class="language-typescript">interface State&lt;T&gt; { loading: boolean; error?: Error; data?: T }
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">interface</span><span class="w"> </span><span class="nx">State</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">loading</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"> </span><span class="nx">error?</span><span class="o">:</span><span class="w"> </span><span class="kt">Error</span><span class="p">;</span><span class="w"> </span><span class="nx">data?</span><span class="o">:</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Answer:</strong> it permits combinations that cannot happen, and forces every reader to
 defend against them. <code>{ loading: true, error: e, data: d }</code> type-checks perfectly,
 so each consumer invents its own precedence rule — and they disagree.</p>
@@ -1312,13 +1367,14 @@ down every <code>if (loading)</code> by hand and hoping you found them all.</p>
 <h3 id="34-generics-conditional-and-mapped-types">3.4 Generics, conditional and mapped types</h3>
 <p class="lead-in"><strong>What it is.</strong> Generics parameterise types; conditional types branch on assignability with <code>infer</code>; mapped types transform every key of a type, optionally remapping keys with <code>as</code>.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-typescript">type Unwrap&lt;T&gt; = T extends Promise&lt;infer U&gt; ? Unwrap&lt;U&gt; : T;
-type Getters&lt;T&gt; = { [K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K] };
-// Getters&lt;{ name: string }&gt; === { getName: () =&gt; string }
+<div class="codehilite"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">Unwrap</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">T</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">infer</span><span class="w"> </span><span class="nx">U</span><span class="o">&gt;</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">Unwrap</span><span class="o">&lt;</span><span class="nx">U</span><span class="o">&gt;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">T</span><span class="p">;</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Getters</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="nx">K</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">keyof</span><span class="w"> </span><span class="nx">T</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="sb">`get</span><span class="si">${</span><span class="nx">Capitalize</span><span class="o">&lt;</span><span class="kt">string</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nx">K</span><span class="o">&gt;</span><span class="si">}</span><span class="sb">`</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">T</span><span class="p">[</span><span class="nx">K</span><span class="p">]</span><span class="w"> </span><span class="p">};</span>
+<span class="c1">// Getters&lt;{ name: string }&gt; === { getName: () =&gt; string }</span>
 
-type PolymorphicProps&lt;E extends React.ElementType&gt; =
-  { as?: E } &amp; Omit&lt;React.ComponentPropsWithoutRef&lt;E&gt;, 'as'&gt;;
-</code></pre>
+<span class="kr">type</span><span class="w"> </span><span class="nx">PolymorphicProps</span><span class="o">&lt;</span><span class="nx">E</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">React</span><span class="p">.</span><span class="nx">ElementType</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">as?</span><span class="o">:</span><span class="w"> </span><span class="kt">E</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nx">Omit</span><span class="o">&lt;</span><span class="nx">React</span><span class="p">.</span><span class="nx">ComponentPropsWithoutRef</span><span class="o">&lt;</span><span class="nx">E</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="s1">'as'</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> Deep recursive conditional types are expressive but slow the compiler and produce unreadable errors. A platform rule of thumb: if the type needs a comment to explain it, prefer an explicit overload.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Implement <code>DeepPartial</code>. What are <code>Partial</code>, <code>Required</code>, <code>Pick</code>, <code>Omit</code>, <code>Record</code>, <code>ReturnType</code> built from? Why do large unions blow up compile time?</p>
 <h3 id="35-variance-and-where-typescript-is-unsound">3.5 Variance and where TypeScript is unsound</h3>
@@ -1329,27 +1385,29 @@ type PolymorphicProps&lt;E extends React.ElementType&gt; =
 <h3 id="36-runtime-validation-at-the-boundary">3.6 Runtime validation at the boundary</h3>
 <p class="lead-in"><strong>What it is.</strong> Types are erased at compile time, so anything crossing a boundary — API responses, URL params, <code>localStorage</code>, <code>postMessage</code>, feature flags — must be parsed, not asserted.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-typescript">const Hotel = z.object({ id: z.string(), price: z.number(), currency: z.string().length(3) });
-type Hotel = z.infer&lt;typeof Hotel&gt;;          // one source of truth
-const hotel = Hotel.parse(await res.json()); // throws on drift, at the edge
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">Hotel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">(),</span><span class="w"> </span><span class="nx">price</span><span class="o">:</span><span class="w"> </span><span class="kt">z.number</span><span class="p">(),</span><span class="w"> </span><span class="nx">currency</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">().</span><span class="nx">length</span><span class="p">(</span><span class="mf">3</span><span class="p">)</span><span class="w"> </span><span class="p">});</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Hotel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">infer</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">Hotel</span><span class="o">&gt;</span><span class="p">;</span><span class="w">          </span><span class="c1">// one source of truth</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">hotel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Hotel</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">());</span><span class="w"> </span><span class="c1">// throws on drift, at the edge</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> Zod adds bundle weight (Valibot is lighter, ArkType faster) and runtime cost per parse. Validate at boundaries only, not on every internal call.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Where exactly do you validate? How do you keep frontend types in sync with the backend? (Generate from OpenAPI/GraphQL/protobuf in CI so a breaking change fails the build.)</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-typescript">// 1 — one schema, one type, parsed once at the edge
-const Hotel = z.object({ id: z.string(), price: z.number() });
-type Hotel = z.infer&lt;typeof Hotel&gt;;
-const hotel = Hotel.parse(await res.json());
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — one schema, one type, parsed once at the edge</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">Hotel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">(),</span><span class="w"> </span><span class="nx">price</span><span class="o">:</span><span class="w"> </span><span class="kt">z.number</span><span class="p">()</span><span class="w"> </span><span class="p">});</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Hotel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">infer</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">Hotel</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">hotel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Hotel</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">());</span>
 
-// 2 — safeParse when a bad payload should degrade, not crash
-const r = Hotel.safeParse(raw);
-if (!r.success) { report(r.error); return fallback; }
+<span class="c1">// 2 — safeParse when a bad payload should degrade, not crash</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Hotel</span><span class="p">.</span><span class="nx">safeParse</span><span class="p">(</span><span class="nx">raw</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">r</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">report</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">error</span><span class="p">);</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">fallback</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-// 3 — the boundaries people forget
-const flags  = Flags.parse(JSON.parse(localStorage.getItem('flags') ?? '{}'));
-const params = Search.parse(Object.fromEntries(new URLSearchParams(location.search)));
-window.addEventListener('message', (e) =&gt; Msg.parse(e.data));  // postMessage is a boundary too
-</code></pre>
+<span class="c1">// 3 — the boundaries people forget</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">flags</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nx">Flags</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">getItem</span><span class="p">(</span><span class="s1">'flags'</span><span class="p">)</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s1">'{}'</span><span class="p">));</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">params</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Search</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">fromEntries</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nx">URLSearchParams</span><span class="p">(</span><span class="nx">location</span><span class="p">.</span><span class="nx">search</span><span class="p">)));</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'message'</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">Msg</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">data</span><span class="p">));</span><span class="w">  </span><span class="c1">// postMessage is a boundary too</span>
+</code></pre></div>
+
 <details class="q">
 <summary>The backend renames a field. Where should that break?</summary>
 <div class="inner">
@@ -1373,10 +1431,11 @@ problem in production. You want the schema to be the shared artifact.</p>
 <h3 id="37-declaration-merging-and-module-augmentation">3.7 Declaration merging and module augmentation</h3>
 <p class="lead-in"><strong>What it is.</strong> Interfaces with the same name in the same scope merge; <code>declare module</code> extends a third-party library's types.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-typescript">declare module 'styled-components' {
-  export interface DefaultTheme extends AppTheme {}
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kr">declare</span><span class="w"> </span><span class="nx">module</span><span class="w"> </span><span class="s1">'styled-components'</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">export</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">DefaultTheme</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">AppTheme</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> Powerful for design-system theming, but global augmentation is invisible action-at-a-distance and can conflict between packages.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How do you type a library that ships no types? What goes in <code>exports</code> conditions (<code>import</code>, <code>require</code>, <code>types</code>, <code>browser</code>) when publishing a package?</p>
 <h3 id="38-typescript-at-monorepo-scale">3.8 TypeScript at monorepo scale</h3>
@@ -1510,18 +1569,19 @@ problem in production. You want the schema to be the shared artifact.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Each promoted layer costs GPU memory; leaving <code>will-change</code> on many elements causes layer explosion and can make things slower than not promoting at all.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Which properties are cheap to animate and why? What does promoting a layer actually do? How would you debug a janky animation in DevTools? (Rendering panel → paint flashing, layer borders, FPS meter.)</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-css">/* 1 — same visual motion, three very different costs */
-.a { left: 100px; }                  /* layout → paint → composite */
-.b { background-color: red; }        /* paint → composite */
-.c { transform: translateX(100px); } /* composite only */
+<div class="codehilite"><pre><span></span><code><span class="c">/* 1 — same visual motion, three very different costs */</span>
+<span class="p">.</span><span class="nc">a</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">left</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w">                  </span><span class="c">/* layout → paint → composite */</span>
+<span class="p">.</span><span class="nc">b</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="kc">red</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w">        </span><span class="c">/* paint → composite */</span>
+<span class="p">.</span><span class="nc">c</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="nb">translateX</span><span class="p">(</span><span class="mi">100</span><span class="kt">px</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c">/* composite only */</span>
 
-/* 2 — promote only for the duration of the animation, then release */
-.card.animating { will-change: transform; }
+<span class="c">/* 2 — promote only for the duration of the animation, then release */</span>
+<span class="p">.</span><span class="nc">card</span><span class="p">.</span><span class="nc">animating</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">will-change</span><span class="p">:</span><span class="w"> </span><span class="k">transform</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-/* 3 — stop a widget's reflows escaping into the host page */
-.widget { contain: layout paint; content-visibility: auto;
-          contain-intrinsic-size: 0 420px; }
-</code></pre>
+<span class="c">/* 3 — stop a widget's reflows escaping into the host page */</span>
+<span class="p">.</span><span class="nc">widget</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">contain</span><span class="p">:</span><span class="w"> </span><span class="n">layout</span><span class="w"> </span><span class="n">paint</span><span class="p">;</span><span class="w"> </span><span class="k">content-visibility</span><span class="p">:</span><span class="w"> </span><span class="kc">auto</span><span class="p">;</span>
+<span class="w">          </span><span class="k">contain-intrinsic-size</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">420</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+
 <details class="q">
 <summary>It animates smoothly in isolation but janks in the real page. Why?</summary>
 <div class="inner">
@@ -1599,13 +1659,14 @@ problem is elsewhere. If it freezes, it never was.</p>
 </svg><figcaption>Layout thrashing: n forced reflows, versus one when reads and writes are batched.</figcaption></figure>
 <p class="lead-in"><strong>What it is.</strong> Reading a geometry property while style is dirty forces a synchronous layout. Interleaving reads and writes in a loop produces O(n) forced reflows.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-javascript">// BAD — read/write/read/write, n forced synchronous layouts
-boxes.forEach(b =&gt; { b.style.width = b.offsetWidth + 10 + 'px'; });
+<div class="codehilite"><pre><span></span><code><span class="c1">// BAD — read/write/read/write, n forced synchronous layouts</span>
+<span class="nx">boxes</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">offsetWidth</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">10</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">'px'</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
 
-// GOOD — batch reads, then batch writes
-const widths = boxes.map(b =&gt; b.offsetWidth);
-boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
-</code></pre>
+<span class="c1">// GOOD — batch reads, then batch writes</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">widths</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">boxes</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">offsetWidth</span><span class="p">);</span>
+<span class="nx">boxes</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">widths</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">10</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">'px'</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+
 <p>Forcing properties: <code>offsetTop/Left/Width/Height</code>, <code>scrollTop/Height</code>, <code>clientWidth/Height</code>, <code>getComputedStyle()</code>, <code>getBoundingClientRect()</code>, <code>focus()</code>, <code>scrollIntoView()</code>.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> A read/write scheduler (FastDOM-style) fixes it generically but adds a frame of latency and indirection. <code>ResizeObserver</code>/<code>IntersectionObserver</code> deliver measurements off the critical path and are usually the better answer.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why is <code>getBoundingClientRect()</code> expensive? How does DevTools surface a forced reflow? Where would you put the fix — the component or the framework?</p>
@@ -1737,22 +1798,23 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 <p class="lead-in"><strong>Trade-offs.</strong> Observers are asynchronous and batched — better for performance, but you cannot read a value synchronously right after a change.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Implement infinite scroll without a scroll listener. How does <code>AbortController</code> clean up both a fetch and its listeners? What are the <code>rootMargin</code> and <code>threshold</code> options for?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — infinite scroll with no scroll listener at all
-const io = new IntersectionObserver(([e]) =&gt; e.isIntersecting &amp;&amp; loadMore(),
-                                    { rootMargin: '400px' });   // prefetch before it is visible
-io.observe(sentinel);
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — infinite scroll with no scroll listener at all</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">io</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">IntersectionObserver</span><span class="p">(([</span><span class="nx">e</span><span class="p">])</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">isIntersecting</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">loadMore</span><span class="p">(),</span>
+<span class="w">                                    </span><span class="p">{</span><span class="w"> </span><span class="nx">rootMargin</span><span class="o">:</span><span class="w"> </span><span class="s1">'400px'</span><span class="w"> </span><span class="p">});</span><span class="w">   </span><span class="c1">// prefetch before it is visible</span>
+<span class="nx">io</span><span class="p">.</span><span class="nx">observe</span><span class="p">(</span><span class="nx">sentinel</span><span class="p">);</span>
 
-// 2 — impression tracking: fire once, when half the card has been seen
-new IntersectionObserver((es) =&gt; es.forEach((e) =&gt; {
-  if (e.isIntersecting) { track(e.target.dataset.id); io2.unobserve(e.target); }
-}), { threshold: 0.5 });
+<span class="c1">// 2 — impression tracking: fire once, when half the card has been seen</span>
+<span class="ow">new</span><span class="w"> </span><span class="nx">IntersectionObserver</span><span class="p">((</span><span class="nx">es</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">es</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">isIntersecting</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">track</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span><span class="w"> </span><span class="nx">io2</span><span class="p">.</span><span class="nx">unobserve</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}),</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">threshold</span><span class="o">:</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="p">});</span>
 
-// 3 — one controller cancels a fetch and its listeners together
-const ac = new AbortController();
-fetch(url, { signal: ac.signal });
-el.addEventListener('click', onClick, { signal: ac.signal });
-ac.abort();   // both gone
-</code></pre>
+<span class="c1">// 3 — one controller cancels a fetch and its listeners together</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">ac</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">AbortController</span><span class="p">();</span>
+<span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="nx">ac</span><span class="p">.</span><span class="nx">signal</span><span class="w"> </span><span class="p">});</span>
+<span class="nx">el</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'click'</span><span class="p">,</span><span class="w"> </span><span class="nx">onClick</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="nx">ac</span><span class="p">.</span><span class="nx">signal</span><span class="w"> </span><span class="p">});</span>
+<span class="nx">ac</span><span class="p">.</span><span class="nx">abort</span><span class="p">();</span><span class="w">   </span><span class="c1">// both gone</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Why is IntersectionObserver faster than a scroll handler?</summary>
 <div class="inner">
@@ -1929,18 +1991,19 @@ for your handler before scrolling.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Hydration is why a server-rendered page can <em>look</em> ready and not respond — the "uncanny valley" that wrecks INP. Avoiding it entirely usually means framework lock-in.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What causes a hydration mismatch? (<code>Date.now()</code>, locale formatting, <code>window</code> access during render, random ids, UA-dependent markup.) How do you fix a genuinely client-only value? What does React do when markup doesn't match?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-jsx">// 1 — the mismatch nobody expects: locale and clock differ server vs client
-&lt;span&gt;{new Date().toLocaleDateString()}&lt;/span&gt;
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — the mismatch nobody expects: locale and clock differ server vs client</span>
+<span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;{</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">().</span><span class="nx">toLocaleDateString</span><span class="p">()}&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
 
-// 2 — the two-pass escape hatch for genuinely client-only values
-const [mounted, setMounted] = useState(false);
-useEffect(() =&gt; setMounted(true), []);
-return &lt;span&gt;{mounted ? localTime() : null}&lt;/span&gt;;
+<span class="c1">// 2 — the two-pass escape hatch for genuinely client-only values</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">mounted</span><span class="p">,</span><span class="w"> </span><span class="nx">setMounted</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+<span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setMounted</span><span class="p">(</span><span class="kc">true</span><span class="p">),</span><span class="w"> </span><span class="p">[]);</span>
+<span class="k">return</span><span class="w"> </span><span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;{</span><span class="nx">mounted</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">localTime</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kc">null</span><span class="p">}&lt;/</span><span class="nt">span</span><span class="p">&gt;;</span>
 
-// 3 — hydrate a heavy island only once it is visible
-const Map = lazy(() =&gt; import('./Map'));
-&lt;Suspense fallback={&lt;MapSkeleton /&gt;}&gt;{visible &amp;&amp; &lt;Map /&gt;}&lt;/Suspense&gt;
-</code></pre>
+<span class="c1">// 3 — hydrate a heavy island only once it is visible</span>
+<span class="kd">const</span><span class="w"> </span><span class="nb">Map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">lazy</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s1">'./Map'</span><span class="p">));</span>
+<span class="p">&lt;</span><span class="nt">Suspense</span><span class="w"> </span><span class="na">fallback</span><span class="o">=</span><span class="p">{&lt;</span><span class="nt">MapSkeleton</span><span class="w"> </span><span class="p">/&gt;}&gt;{</span><span class="nx">visible</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">&lt;</span><span class="nt">Map</span><span class="w"> </span><span class="p">/&gt;}&lt;/</span><span class="nt">Suspense</span><span class="p">&gt;</span>
+</code></pre></div>
+
 <details class="q">
 <summary>LCP is 1.8s but INP is 500ms on a server-rendered page. Diagnose it.</summary>
 <div class="inner">
@@ -2015,16 +2078,17 @@ most of the answer.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> O(n) heuristic diffing instead of an optimal O(n³) tree diff: fast, but it relies on you giving stable keys and not changing component types.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why must render be pure? Why does StrictMode double-invoke in dev? What happens in commit vs render? When is <code>useLayoutEffect</code> correct over <code>useEffect</code>?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-jsx">// 1 — index keys attach state to a slot, not to an item
-{items.map((it, i) =&gt; &lt;Row key={i} /&gt;)}     // sort → checkbox state stays behind
-{items.map((it)    =&gt; &lt;Row key={it.id} /&gt;)} // sort → state travels with the row
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — index keys attach state to a slot, not to an item</span>
+<span class="p">{</span><span class="nx">items</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">it</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">&lt;</span><span class="nt">Row</span><span class="w"> </span><span class="na">key</span><span class="o">=</span><span class="p">{</span><span class="nx">i</span><span class="p">}</span><span class="w"> </span><span class="p">/&gt;)}</span><span class="w">     </span><span class="c1">// sort → checkbox state stays behind</span>
+<span class="p">{</span><span class="nx">items</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">it</span><span class="p">)</span><span class="w">    </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">&lt;</span><span class="nt">Row</span><span class="w"> </span><span class="na">key</span><span class="o">=</span><span class="p">{</span><span class="nx">it</span><span class="p">.</span><span class="nx">id</span><span class="p">}</span><span class="w"> </span><span class="p">/&gt;)}</span><span class="w"> </span><span class="c1">// sort → state travels with the row</span>
 
-// 2 — changing the element type unmounts the whole subtree
-{editing ? &lt;input value={v} /&gt; : &lt;Input value={v} /&gt;}   // remounts, focus lost
+<span class="c1">// 2 — changing the element type unmounts the whole subtree</span>
+<span class="p">{</span><span class="nx">editing</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">&lt;</span><span class="nt">input</span><span class="w"> </span><span class="na">value</span><span class="o">=</span><span class="p">{</span><span class="nx">v</span><span class="p">}</span><span class="w"> </span><span class="p">/&gt;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">&lt;</span><span class="nt">Input</span><span class="w"> </span><span class="na">value</span><span class="o">=</span><span class="p">{</span><span class="nx">v</span><span class="p">}</span><span class="w"> </span><span class="p">/&gt;}</span><span class="w">   </span><span class="c1">// remounts, focus lost</span>
 
-// 3 — a key change is the deliberate way to reset state
-&lt;Form key={userId} /&gt;   // switching user clears every field inside
-</code></pre>
+<span class="c1">// 3 — a key change is the deliberate way to reset state</span>
+<span class="p">&lt;</span><span class="nt">Form</span><span class="w"> </span><span class="na">key</span><span class="o">=</span><span class="p">{</span><span class="nx">userId</span><span class="p">}</span><span class="w"> </span><span class="p">/&gt;</span><span class="w">   </span><span class="c1">// switching user clears every field inside</span>
+</code></pre></div>
+
 <details class="q">
 <summary>A sorted table keeps the wrong rows checked. Walk through it.</summary>
 <div class="inner">
@@ -2157,22 +2221,23 @@ well as current code, most teams simply ban them.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> A component can render without committing, so side effects in render became actively dangerous; and <strong>tearing</strong> becomes possible with external mutable stores, which is why <code>useSyncExternalStore</code> exists.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What is tearing? What's the difference between <code>useTransition</code> and <code>useDeferredValue</code>? What does Suspense actually suspend on?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-jsx">// 1 — keep typing responsive while a large list re-filters
-const [q, setQ] = useState('');
-const deferred = useDeferredValue(q);         // list renders from the stale value
-const rows = useMemo(() =&gt; filter(all, deferred), [all, deferred]);
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — keep typing responsive while a large list re-filters</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">q</span><span class="p">,</span><span class="w"> </span><span class="nx">setQ</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="s1">''</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">deferred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useDeferredValue</span><span class="p">(</span><span class="nx">q</span><span class="p">);</span><span class="w">         </span><span class="c1">// list renders from the stale value</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">rows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useMemo</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">filter</span><span class="p">(</span><span class="nx">all</span><span class="p">,</span><span class="w"> </span><span class="nx">deferred</span><span class="p">),</span><span class="w"> </span><span class="p">[</span><span class="nx">all</span><span class="p">,</span><span class="w"> </span><span class="nx">deferred</span><span class="p">]);</span>
 
-// 2 — mark a navigation as interruptible and show pending state
-const [isPending, startTransition] = useTransition();
-startTransition(() =&gt; setRoute(next));
+<span class="c1">// 2 — mark a navigation as interruptible and show pending state</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">isPending</span><span class="p">,</span><span class="w"> </span><span class="nx">startTransition</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useTransition</span><span class="p">();</span>
+<span class="nx">startTransition</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setRoute</span><span class="p">(</span><span class="nx">next</span><span class="p">));</span>
 
-// 3 — an external store that cannot tear under concurrent rendering
-const width = useSyncExternalStore(
-  (cb) =&gt; { window.addEventListener('resize', cb); return () =&gt; window.removeEventListener('resize', cb); },
-  () =&gt; window.innerWidth,
-  () =&gt; 1024,            // server snapshot
-);
-</code></pre>
+<span class="c1">// 3 — an external store that cannot tear under concurrent rendering</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useSyncExternalStore</span><span class="p">(</span>
+<span class="w">  </span><span class="p">(</span><span class="nx">cb</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'resize'</span><span class="p">,</span><span class="w"> </span><span class="nx">cb</span><span class="p">);</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="s1">'resize'</span><span class="p">,</span><span class="w"> </span><span class="nx">cb</span><span class="p">);</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">innerWidth</span><span class="p">,</span>
+<span class="w">  </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mf">1024</span><span class="p">,</span><span class="w">            </span><span class="c1">// server snapshot</span>
+<span class="p">);</span>
+</code></pre></div>
+
 <details class="q">
 <summary>What is tearing, and why can't a plain module variable be the fix?</summary>
 <div class="inner">
@@ -2504,19 +2569,21 @@ consistent snapshot per render pass.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Idempotency is an API contract, not a client property. Retries without a circuit breaker and jittered backoff turn a blip into a retry storm.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How do you make a POST retry-safe? Where do you put retry policy — the component, the data layer, or the gateway? What does <code>Retry-After</code> do?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-http"># 1 — the same booking submitted twice, deduplicated by the server
-POST /bookings
-Idempotency-Key: 6f3a1c2e-9b7d-4e11-ae02-1d9c4f8b2a77
-# a retry with the same key returns the original response, no second booking
+<div class="codehilite"><pre><span></span><code><span class="err"># 1 — the same booking submitted twice, deduplicated by the server</span>
+<span class="err">POST /bookings</span>
+<span class="err">Idempotency-Key: 6f3a1c2e-9b7d-4e11-ae02-1d9c4f8b2a77</span>
+<span class="err"># a retry with the same key returns the original response, no second booking</span>
 
-# 2 — honour the server's own backoff instruction
-HTTP/1.1 429 Too Many Requests
-Retry-After: 30
-</code></pre>
-<pre><code class="language-javascript">// 3 — retry reads freely, mutations only with a key
-const retryable = (method, hasKey) =&gt;
-  ['GET', 'HEAD', 'PUT', 'DELETE'].includes(method) || hasKey;
-</code></pre>
+<span class="err"># 2 — honour the server's own backoff instruction</span>
+<span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">429</span> <span class="ne">Too Many Requests</span>
+<span class="na">Retry-After</span><span class="o">:</span> <span class="l">30</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c1">// 3 — retry reads freely, mutations only with a key</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">retryable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">method</span><span class="p">,</span><span class="w"> </span><span class="nx">hasKey</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span>
+<span class="w">  </span><span class="p">[</span><span class="s1">'GET'</span><span class="p">,</span><span class="w"> </span><span class="s1">'HEAD'</span><span class="p">,</span><span class="w"> </span><span class="s1">'PUT'</span><span class="p">,</span><span class="w"> </span><span class="s1">'DELETE'</span><span class="p">].</span><span class="nx">includes</span><span class="p">(</span><span class="nx">method</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">hasKey</span><span class="p">;</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Payment request times out. The user sees a spinner. What now?</summary>
 <div class="inner">
@@ -2674,30 +2741,32 @@ provides; the client can only supply the key that makes it possible.</p>
 </tbody>
 </table>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code>GET /app.3f9a1c.js  →  Cache-Control: public, max-age=31536000, immutable
+<div class="codehilite"><pre><span></span><code>GET /app.3f9a1c.js  →  Cache-Control: public, max-age=31536000, immutable
 GET /                →  Cache-Control: no-cache
-                        ETag: &quot;v842&quot;
-   next request:        If-None-Match: &quot;v842&quot;  →  304 Not Modified
-</code></pre>
+                        ETag: "v842"
+   next request:        If-None-Match: "v842"  →  304 Not Modified
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> <code>private</code> vs <code>public</code> is a correctness decision, not a performance one — getting it wrong serves one user's booking page to another. Over-varying (e.g. on <code>User-Agent</code>) destroys hit rate.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What's the difference between <code>no-cache</code> and <code>no-store</code>? What exactly does a 304 save? Strong vs weak ETags? Why must <code>Vary: Accept-Encoding</code> be set?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-http"># 1 — hashed asset: cache hard, forever, never revalidate
-GET /app.3f9a1c.js
-Cache-Control: public, max-age=31536000, immutable
+<div class="codehilite"><pre><span></span><code><span class="err"># 1 — hashed asset: cache hard, forever, never revalidate</span>
+<span class="err">GET /app.3f9a1c.js</span>
+<span class="err">Cache-Control: public, max-age=31536000, immutable</span>
 
-# 2 — the document: always revalidate, cheap when unchanged
-GET /
-Cache-Control: no-cache
-ETag: &quot;v842&quot;
-→ If-None-Match: &quot;v842&quot; → 304 Not Modified   (headers only, no body)
+<span class="err"># 2 — the document: always revalidate, cheap when unchanged</span>
+<span class="err">GET /</span>
+<span class="err">Cache-Control: no-cache</span>
+<span class="err">ETag: "v842"</span>
+<span class="err">→ If-None-Match: "v842" → 304 Not Modified   (headers only, no body)</span>
 
-# 3 — short browser TTL, long edge TTL, instant-but-fresh
-Cache-Control: max-age=0, s-maxage=600, stale-while-revalidate=3600
+<span class="err"># 3 — short browser TTL, long edge TTL, instant-but-fresh</span>
+<span class="err">Cache-Control: max-age=0, s-maxage=600, stale-while-revalidate=3600</span>
 
-# 4 — correctness with compression and locales
-Vary: Accept-Encoding, Accept-Language
-</code></pre>
+<span class="err"># 4 — correctness with compression and locales</span>
+<span class="err">Vary: Accept-Encoding, Accept-Language</span>
+</code></pre></div>
+
 <details class="q">
 <summary>Users report seeing another user's name in the header. One header is wrong.</summary>
 <div class="inner">
@@ -2997,13 +3066,14 @@ one-line cause, and the prevention is a policy rather than a patch.</p>
 </svg><figcaption>A CORS preflight. The browser asks permission before sending the real request.</figcaption></figure>
 <p class="lead-in"><strong>What it is.</strong> An origin is scheme + host + port. The same-origin policy blocks a document from <em>reading</em> cross-origin responses. CORS is the server's mechanism to <strong>relax</strong> that — it is not a defence.</p>
 <p class="lead-in"><strong>Example.</strong> A non-simple request triggers a preflight:</p>
-<pre><code>OPTIONS /api/book          Origin: https://www.example.com
+<div class="codehilite"><pre><span></span><code>OPTIONS /api/book          Origin: https://www.example.com
                            Access-Control-Request-Method: POST
                            Access-Control-Request-Headers: content-type, authorization
 → Access-Control-Allow-Origin: https://www.example.com
   Access-Control-Allow-Credentials: true
   Access-Control-Max-Age: 600
-</code></pre>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> <code>Allow-Credentials: true</code> cannot be combined with <code>Origin: *</code> — you must echo a specific, validated origin. Blindly reflecting <code>Origin</code> is a common vulnerability. A high <code>Max-Age</code> cuts preflights but delays policy changes.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What makes a request "simple" (no preflight)? Does CORS protect your API? (No — curl ignores it; authorization is the server's job.) Why can a <code>&lt;img&gt;</code> or <code>&lt;form&gt;</code> go cross-origin but <code>fetch</code> cannot read the response?</p>
 <h3 id="82-xss">8.2 XSS</h3>
@@ -3038,20 +3108,21 @@ one-line cause, and the prevention is a policy rather than a patch.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Sanitising HTML is a losing arms race compared with not rendering HTML at all; <strong>Trusted Types</strong> converts a code-review problem into a browser-enforced one, at the cost of a migration.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How would you safely render user-authored rich text? Why is <code>encodeURIComponent</code> not enough in an HTML attribute? What does Trusted Types enforce?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-jsx">// 1 — the four real React vectors
-&lt;div dangerouslySetInnerHTML={{ __html: userHtml }} /&gt;   // sink
-&lt;a href={userUrl}&gt;link&lt;/a&gt;                               // javascript: URL
-&lt;Component {...untrustedProps} /&gt;                        // can inject onError etc.
-&lt;script&gt;{`window.__DATA__ = ${JSON.stringify(data)}`}&lt;/script&gt;  // &lt;/script&gt; breakout
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — the four real React vectors</span>
+<span class="p">&lt;</span><span class="nt">div</span><span class="w"> </span><span class="na">dangerouslySetInnerHTML</span><span class="o">=</span><span class="p">{{</span><span class="w"> </span><span class="nx">__html</span><span class="o">:</span><span class="w"> </span><span class="nx">userHtml</span><span class="w"> </span><span class="p">}}</span><span class="w"> </span><span class="p">/&gt;</span><span class="w">   </span><span class="c1">// sink</span>
+<span class="p">&lt;</span><span class="nt">a</span><span class="w"> </span><span class="na">href</span><span class="o">=</span><span class="p">{</span><span class="nx">userUrl</span><span class="p">}&gt;</span><span class="nx">link</span><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span><span class="w">                               </span><span class="c1">// javascript: URL</span>
+<span class="p">&lt;</span><span class="nt">Component</span><span class="w"> </span><span class="p">{</span><span class="na">...untrustedProps</span><span class="p">}</span><span class="w"> </span><span class="p">/&gt;</span><span class="w">                        </span><span class="c1">// can inject onError etc.</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;{</span><span class="sb">`window.__DATA__ = </span><span class="si">${</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span><span class="si">}</span><span class="sb">`</span><span class="p">}&lt;/</span><span class="nt">script</span><span class="p">&gt;</span><span class="w">  </span><span class="c1">// &lt;/script&gt; breakout</span>
 
-// 2 — safe versions
-&lt;a href={/^https?:\/\//.test(userUrl) ? userUrl : '#'}&gt;link&lt;/a&gt;
-const safe = JSON.stringify(data).replace(/&lt;/g, '\\u003c');   // escape the breakout
+<span class="c1">// 2 — safe versions</span>
+<span class="p">&lt;</span><span class="nt">a</span><span class="w"> </span><span class="na">href</span><span class="o">=</span><span class="p">{</span><span class="o">/^</span><span class="nx">https</span><span class="o">?:</span><span class="err">\</span><span class="o">/</span><span class="err">\</span><span class="c1">//.test(userUrl) ? userUrl : '#'}&gt;link&lt;/a&gt;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">safe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/&lt;/g</span><span class="p">,</span><span class="w"> </span><span class="s1">'\\u003c'</span><span class="p">);</span><span class="w">   </span><span class="c1">// escape the breakout</span>
 
-// 3 — when you genuinely must render HTML
-import DOMPurify from 'dompurify';
-&lt;div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userHtml) }} /&gt;
-</code></pre>
+<span class="c1">// 3 — when you genuinely must render HTML</span>
+<span class="k">import</span><span class="w"> </span><span class="nx">DOMPurify</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'dompurify'</span><span class="p">;</span>
+<span class="p">&lt;</span><span class="nt">div</span><span class="w"> </span><span class="na">dangerouslySetInnerHTML</span><span class="o">=</span><span class="p">{{</span><span class="w"> </span><span class="nx">__html</span><span class="o">:</span><span class="w"> </span><span class="nx">DOMPurify</span><span class="p">.</span><span class="nx">sanitize</span><span class="p">(</span><span class="nx">userHtml</span><span class="p">)</span><span class="w"> </span><span class="p">}}</span><span class="w"> </span><span class="p">/&gt;</span>
+</code></pre></div>
+
 <details class="q">
 <summary>A hotel review renders fine but fires an alert. Where did it get in?</summary>
 <div class="inner">
@@ -3074,11 +3145,12 @@ which is the difference between a fix and a control.</p>
 <h3 id="83-content-security-policy">8.3 Content Security Policy</h3>
 <p class="lead-in"><strong>What it is.</strong> A response header restricting which sources of script, style, images and frames may load and execute.</p>
 <p class="lead-in"><strong>Example.</strong> A strict modern policy uses nonces plus <code>strict-dynamic</code>, not a host allowlist:</p>
-<pre><code>Content-Security-Policy:
+<div class="codehilite"><pre><span></span><code>Content-Security-Policy:
   script-src 'nonce-{random}' 'strict-dynamic' https: 'unsafe-inline';
   object-src 'none'; base-uri 'none'; require-trusted-types-for 'script';
   report-uri /csp-report
-</code></pre>
+</code></pre></div>
+
 <p><code>'unsafe-inline'</code> and <code>https:</code> here are <strong>fallbacks for old browsers</strong> that modern browsers ignore once a nonce is present.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Host allowlists are routinely bypassable via JSONP endpoints on allowed CDNs. Nonces are incompatible with full-page CDN caching (each response needs a fresh nonce) — which pushes you to hashes or edge-injected nonces. Inline styles from runtime CSS-in-JS and tag managers are the usual blockers.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How do you roll out CSP without breaking the site? (<code>Content-Security-Policy-Report-Only</code>, collect violations for two weeks, then enforce.) Why is <code>strict-dynamic</code> better than an allowlist? How does CSP interact with a CDN?</p>
@@ -3237,18 +3309,19 @@ which is the difference between a fix and a control.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> <code>localStorage</code> is XSS-readable; cookies are CSRF-exposed but can be <code>HttpOnly</code>. The honest caveat: under XSS you lose either way, because the attacker can simply call your API from the victim's session. That is why CSP and Trusted Types matter more than storage choice.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why is "just use <code>HttpOnly</code> cookies" not a complete answer? What survives a page refresh with in-memory tokens? (Nothing — you silently refresh on load.)</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — access token in memory only, never persisted
-let accessToken = null;                  // dies on refresh, by design
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — access token in memory only, never persisted</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">accessToken</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w">                  </span><span class="c1">// dies on refresh, by design</span>
 
-// 2 — refresh via an HttpOnly cookie, single-flight so N 401s cause one refresh
-let inflight = null;
-const refresh = () =&gt; (inflight ??= fetch('/auth/refresh', { credentials: 'include' })
-  .then(r =&gt; r.json())
-  .finally(() =&gt; { inflight = null; }));
+<span class="c1">// 2 — refresh via an HttpOnly cookie, single-flight so N 401s cause one refresh</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">inflight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">refresh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">(</span><span class="nx">inflight</span><span class="w"> </span><span class="o">??=</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s1">'/auth/refresh'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">credentials</span><span class="o">:</span><span class="w"> </span><span class="s1">'include'</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
+<span class="w">  </span><span class="p">.</span><span class="k">finally</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">inflight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"> </span><span class="p">}));</span>
 
-// 3 — the cookie that carries it
-// Set-Cookie: rt=…; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=1209600
-</code></pre>
+<span class="c1">// 3 — the cookie that carries it</span>
+<span class="c1">// Set-Cookie: rt=…; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=1209600</span>
+</code></pre></div>
+
 <details class="q">
 <summary>&ldquo;Just use HttpOnly cookies, then XSS can&rsquo;t steal the token.&rdquo; Rebut it.</summary>
 <div class="inner">
@@ -3366,21 +3439,22 @@ what separates a considered answer from a memorised one.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> p75 hides the tail — always look at p95 too, and segment by device class and country, because a global average flatters you while low-end Android users suffer.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why did INP replace FID? What's the difference between lab and field data? How do you attribute an INP regression to a specific interaction? (<code>event</code> timing entries and the Long Animation Frames API.)</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — attribute a regression to a deploy, not just a route
-onLCP(m =&gt; beacon({ v: m.value, build: __BUILD_ID__, route, device, country }));
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — attribute a regression to a deploy, not just a route</span>
+<span class="nx">onLCP</span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">beacon</span><span class="p">({</span><span class="w"> </span><span class="nx">v</span><span class="o">:</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span><span class="w"> </span><span class="nx">build</span><span class="o">:</span><span class="w"> </span><span class="nx">__BUILD_ID__</span><span class="p">,</span><span class="w"> </span><span class="nx">route</span><span class="p">,</span><span class="w"> </span><span class="nx">device</span><span class="p">,</span><span class="w"> </span><span class="nx">country</span><span class="w"> </span><span class="p">}));</span>
 
-// 2 — find WHICH element is the LCP, in the field
-new PerformanceObserver((l) =&gt; {
-  const e = l.getEntries().at(-1);
-  beacon({ lcp: e.startTime, el: e.element?.tagName, url: e.url });
-}).observe({ type: 'largest-contentful-paint', buffered: true });
+<span class="c1">// 2 — find WHICH element is the LCP, in the field</span>
+<span class="ow">new</span><span class="w"> </span><span class="nx">PerformanceObserver</span><span class="p">((</span><span class="nx">l</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">l</span><span class="p">.</span><span class="nx">getEntries</span><span class="p">().</span><span class="nx">at</span><span class="p">(</span><span class="o">-</span><span class="mf">1</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">beacon</span><span class="p">({</span><span class="w"> </span><span class="nx">lcp</span><span class="o">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">startTime</span><span class="p">,</span><span class="w"> </span><span class="nx">el</span><span class="o">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">element</span><span class="o">?</span><span class="p">.</span><span class="nx">tagName</span><span class="p">,</span><span class="w"> </span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">url</span><span class="w"> </span><span class="p">});</span>
+<span class="p">}).</span><span class="nx">observe</span><span class="p">({</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s1">'largest-contentful-paint'</span><span class="p">,</span><span class="w"> </span><span class="nx">buffered</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">});</span>
 
-// 3 — attribute INP to the actual interaction
-new PerformanceObserver((l) =&gt; l.getEntries()
-  .filter(e =&gt; e.duration &gt; 200)
-  .forEach(e =&gt; beacon({ inp: e.duration, type: e.name, target: e.target?.id })),
-).observe({ type: 'event', durationThreshold: 200, buffered: true });
-</code></pre>
+<span class="c1">// 3 — attribute INP to the actual interaction</span>
+<span class="ow">new</span><span class="w"> </span><span class="nx">PerformanceObserver</span><span class="p">((</span><span class="nx">l</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">l</span><span class="p">.</span><span class="nx">getEntries</span><span class="p">()</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">duration</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">200</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">beacon</span><span class="p">({</span><span class="w"> </span><span class="nx">inp</span><span class="o">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">duration</span><span class="p">,</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">target</span><span class="o">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="o">?</span><span class="p">.</span><span class="nx">id</span><span class="w"> </span><span class="p">})),</span>
+<span class="p">).</span><span class="nx">observe</span><span class="p">({</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s1">'event'</span><span class="p">,</span><span class="w"> </span><span class="nx">durationThreshold</span><span class="o">:</span><span class="w"> </span><span class="mf">200</span><span class="p">,</span><span class="w"> </span><span class="nx">buffered</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+
 <details class="q">
 <summary>p75 LCP is 2.4s — green. Users still complain. What did you miss?</summary>
 <div class="inner">
@@ -3405,14 +3479,15 @@ ask "green for whom?"</p>
 <h3 id="92-measurement">9.2 Measurement</h3>
 <p class="lead-in"><strong>What it is.</strong> Lab tools give deterministic, repeatable numbers; field tools (RUM) give the truth about real users.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-javascript">import { onLCP, onINP, onCLS } from 'web-vitals';
-const send = m =&gt; navigator.sendBeacon('/rum', JSON.stringify({
-  name: m.name, value: m.value, id: m.id,
-  route: currentRoute(), buildId: __BUILD_ID__,   // attribute regressions to a deploy
-  conn: navigator.connection?.effectiveType,
-}));
-onLCP(send); onINP(send); onCLS(send);
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">onLCP</span><span class="p">,</span><span class="w"> </span><span class="nx">onINP</span><span class="p">,</span><span class="w"> </span><span class="nx">onCLS</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'web-vitals'</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">send</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">navigator</span><span class="p">.</span><span class="nx">sendBeacon</span><span class="p">(</span><span class="s1">'/rum'</span><span class="p">,</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">route</span><span class="o">:</span><span class="w"> </span><span class="nx">currentRoute</span><span class="p">(),</span><span class="w"> </span><span class="nx">buildId</span><span class="o">:</span><span class="w"> </span><span class="nx">__BUILD_ID__</span><span class="p">,</span><span class="w">   </span><span class="c1">// attribute regressions to a deploy</span>
+<span class="w">  </span><span class="nx">conn</span><span class="o">:</span><span class="w"> </span><span class="nx">navigator</span><span class="p">.</span><span class="nx">connection</span><span class="o">?</span><span class="p">.</span><span class="nx">effectiveType</span><span class="p">,</span>
+<span class="p">}));</span>
+<span class="nx">onLCP</span><span class="p">(</span><span class="nx">send</span><span class="p">);</span><span class="w"> </span><span class="nx">onINP</span><span class="p">(</span><span class="nx">send</span><span class="p">);</span><span class="w"> </span><span class="nx">onCLS</span><span class="p">(</span><span class="nx">send</span><span class="p">);</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> Lighthouse CI is good for gating because it is deterministic, and blind to real device and network diversity. RUM is true but noisy and needs volume before a signal appears — hence synthetic monitoring as the early-warning layer.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How do you read a Performance panel trace? (Long tasks, forced reflow warnings, the main-thread flame chart, Recalculate Style and Layout blocks.) What is CrUX? Why beacon on <code>visibilitychange</code> rather than <code>unload</code>?</p>
 <h3 id="93-loading-optimisation">9.3 Loading optimisation</h3>
@@ -3615,25 +3690,27 @@ onLCP(send); onINP(send); onCLS(send);
 </svg><figcaption>A chunk graph. Stable chunks stay cached; route chunks change independently.</figcaption></figure>
 <p class="lead-in"><strong>What it is.</strong> Breaking the graph into chunks loaded on demand.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-javascript">const SearchPage = React.lazy(() =&gt; import('./SearchPage'));          // route level
-const Map = React.lazy(() =&gt; import('./Map'));                        // heavy widget
-onMouseEnter={() =&gt; import('./CheckoutPage')}                          // prefetch on intent
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">SearchPage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">React</span><span class="p">.</span><span class="nx">lazy</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s1">'./SearchPage'</span><span class="p">));</span><span class="w">          </span><span class="c1">// route level</span>
+<span class="kd">const</span><span class="w"> </span><span class="nb">Map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">React</span><span class="p">.</span><span class="nx">lazy</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s1">'./Map'</span><span class="p">));</span><span class="w">                        </span><span class="c1">// heavy widget</span>
+<span class="nx">onMouseEnter</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s1">'./CheckoutPage'</span><span class="p">)}</span><span class="w">                          </span><span class="c1">// prefetch on intent</span>
+</code></pre></div>
+
 <p>Chunk strategy: a <code>framework</code> chunk (react, react-dom) that changes rarely so it stays cached, a <code>commons</code> chunk for modules used by ≥N routes, and per-route chunks.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Over-splitting costs request overhead and deepens the waterfall; under-splitting ships code nobody runs. Splitting also introduces the chunk-404-after-deploy failure, which needs a retry-then-reload handler.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Where do you split first? How do you avoid a loading spinner on every navigation? Why does a shared chunk's hash changing invalidate everything downstream?</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — route split with prefetch on intent, so splitting costs nothing visible
-const Checkout = lazy(() =&gt; import('./Checkout'));
-&lt;Link onMouseEnter={() =&gt; import('./Checkout')} onFocus={() =&gt; import('./Checkout')} /&gt;
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — route split with prefetch on intent, so splitting costs nothing visible</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">Checkout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">lazy</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s1">'./Checkout'</span><span class="p">));</span>
+<span class="o">&lt;</span><span class="nx">Link</span><span class="w"> </span><span class="nx">onMouseEnter</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s1">'./Checkout'</span><span class="p">)}</span><span class="w"> </span><span class="nx">onFocus</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s1">'./Checkout'</span><span class="p">)}</span><span class="w"> </span><span class="o">/&gt;</span>
 
-// 2 — survive a deploy that removed the chunk you are asking for
-window.addEventListener('vite:preloadError', () =&gt; location.reload());
-// webpack equivalent: catch ChunkLoadError, retry with a cache-bust, then reload
+<span class="c1">// 2 — survive a deploy that removed the chunk you are asking for</span>
+<span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'vite:preloadError'</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">location</span><span class="p">.</span><span class="nx">reload</span><span class="p">());</span>
+<span class="c1">// webpack equivalent: catch ChunkLoadError, retry with a cache-bust, then reload</span>
 
-// 3 — keep the framework chunk stable so it stays cached across deploys
-// splitChunks: { cacheGroups: { framework: { test: /[\\/]node_modules[\\/](react|react-dom)/ } } }
-</code></pre>
+<span class="c1">// 3 — keep the framework chunk stable so it stays cached across deploys</span>
+<span class="c1">// splitChunks: { cacheGroups: { framework: { test: /[\\/]node_modules[\\/](react|react-dom)/ } } }</span>
+</code></pre></div>
+
 <details class="q">
 <summary>You split aggressively and it got slower. How?</summary>
 <div class="inner">
@@ -4126,26 +4203,28 @@ chunk — and prefetch on intent so the user never waits for a split you chose.<
 <h3 id="122-testing-behaviour-not-implementation">12.2 Testing behaviour, not implementation</h3>
 <p class="lead-in"><strong>What it is.</strong> Query the DOM the way a user perceives it — by role and accessible name — rather than by class or internal structure.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-javascript">// good — survives refactors, and asserts accessibility as a side effect
-await userEvent.click(screen.getByRole('button', { name: /search/i }));
-expect(await screen.findByRole('list', { name: /results/i })).toBeInTheDocument();
+<div class="codehilite"><pre><span></span><code><span class="c1">// good — survives refactors, and asserts accessibility as a side effect</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">userEvent</span><span class="p">.</span><span class="nx">click</span><span class="p">(</span><span class="nx">screen</span><span class="p">.</span><span class="nx">getByRole</span><span class="p">(</span><span class="s1">'button'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="sr">/search/i</span><span class="w"> </span><span class="p">}));</span>
+<span class="nx">expect</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">screen</span><span class="p">.</span><span class="nx">findByRole</span><span class="p">(</span><span class="s1">'list'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="sr">/results/i</span><span class="w"> </span><span class="p">})).</span><span class="nx">toBeInTheDocument</span><span class="p">();</span>
 
-// bad — couples the test to markup
-wrapper.find('.btn-primary').simulate('click');
-</code></pre>
+<span class="c1">// bad — couples the test to markup</span>
+<span class="nx">wrapper</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">'.btn-primary'</span><span class="p">).</span><span class="nx">simulate</span><span class="p">(</span><span class="s1">'click'</span><span class="p">);</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> Role-based queries are slower to write and occasionally force you to fix the markup first — which is the point. Test ids are a legitimate fallback for things with no accessible identity, used sparingly.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why is <code>getByRole</code> preferred? When is a test id acceptable? Why are large DOM snapshots worse than no test? (They get rubber-stamped on failure.)</p>
 <p class="lead-in"><strong>More examples.</strong></p>
-<pre><code class="language-javascript">// 1 — query the way a user perceives the UI
-await userEvent.click(screen.getByRole('button', { name: /search/i }));
-expect(await screen.findByRole('list', { name: /results/i })).toBeInTheDocument();
+<div class="codehilite"><pre><span></span><code><span class="c1">// 1 — query the way a user perceives the UI</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">userEvent</span><span class="p">.</span><span class="nx">click</span><span class="p">(</span><span class="nx">screen</span><span class="p">.</span><span class="nx">getByRole</span><span class="p">(</span><span class="s1">'button'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="sr">/search/i</span><span class="w"> </span><span class="p">}));</span>
+<span class="nx">expect</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">screen</span><span class="p">.</span><span class="nx">findByRole</span><span class="p">(</span><span class="s1">'list'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="sr">/results/i</span><span class="w"> </span><span class="p">})).</span><span class="nx">toBeInTheDocument</span><span class="p">();</span>
 
-// 2 — assert the absence of a loading state, not an implementation detail
-await waitForElementToBeRemoved(() =&gt; screen.queryByRole('status'));
+<span class="c1">// 2 — assert the absence of a loading state, not an implementation detail</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">waitForElementToBeRemoved</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">screen</span><span class="p">.</span><span class="nx">queryByRole</span><span class="p">(</span><span class="s1">'status'</span><span class="p">));</span>
 
-// 3 — the escape hatch, used sparingly and deliberately
-screen.getByTestId('price-cell');   // only when there is no accessible identity
-</code></pre>
+<span class="c1">// 3 — the escape hatch, used sparingly and deliberately</span>
+<span class="nx">screen</span><span class="p">.</span><span class="nx">getByTestId</span><span class="p">(</span><span class="s1">'price-cell'</span><span class="p">);</span><span class="w">   </span><span class="c1">// only when there is no accessible identity</span>
+</code></pre></div>
+
 <details class="q">
 <summary>The test passes but the feature is broken in production. Classic causes?</summary>
 <div class="inner">
@@ -4170,11 +4249,12 @@ this test fail?</em> A surprising number of green tests cannot answer yes.</p>
 <h3 id="123-mocking-and-msw">12.3 Mocking and MSW</h3>
 <p class="lead-in"><strong>What it is.</strong> Intercepting at the <strong>network</strong> boundary rather than the module boundary, so the component under test runs its real data layer.</p>
 <p class="lead-in"><strong>Example.</strong></p>
-<pre><code class="language-javascript">const server = setupServer(
-  http.get('/api/search', () =&gt; HttpResponse.json({ hotels: [...] })),
-  http.get('/api/prices', () =&gt; new HttpResponse(null, { status: 500 })), // error path
-);
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setupServer</span><span class="p">(</span>
+<span class="w">  </span><span class="nx">http</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/api/search'</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">HttpResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">({</span><span class="w"> </span><span class="nx">hotels</span><span class="o">:</span><span class="w"> </span><span class="p">[...]</span><span class="w"> </span><span class="p">})),</span>
+<span class="w">  </span><span class="nx">http</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'/api/prices'</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">HttpResponse</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="mf">500</span><span class="w"> </span><span class="p">})),</span><span class="w"> </span><span class="c1">// error path</span>
+<span class="p">);</span>
+</code></pre></div>
+
 <p class="lead-in"><strong>Trade-offs.</strong> Mocking the hook instead tests nothing but your mock. MSW handlers are another artefact that can drift from the real API — which is what contract tests are for.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What's the difference between a stub, a mock and a fake? How do you test a loading state deterministically? How do you keep mocks honest?</p>
 <h3 id="124-contract-testing">12.4 Contract testing</h3>
