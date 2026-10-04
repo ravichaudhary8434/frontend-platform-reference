@@ -79,7 +79,7 @@ li>ul,li>ol{margin:5px 0}
 hr{border:0; border-top:1px solid var(--rule); margin:28px 0}
 
 /* paragraph lead-ins: What it is / Example / Trade-offs / Follow-ups */
-p > strong:first-child{
+p.lead-in > strong:first-child{
   color:var(--muted); font-size:11.5px; letter-spacing:.07em; text-transform:uppercase;
   font-weight:700;
 }
@@ -321,7 +321,7 @@ svg.dg .arwA{fill:var(--accent)}
 <p>A reference for the areas a frontend platform engineer is expected to reason about: <strong>web protocols and security</strong>, <strong>core web platform concepts</strong>, <strong>performance and bundling</strong>, and <strong>testing</strong>. Every topic follows the same shape — <em>What it is · Example · Trade-offs · Follow-ups</em> — so it can be used for lookup and revision rather than read front to back.</p>
 <h2 id="1-how-to-use-this-reference">1. How to use this reference</h2>
 <p>Each topic is short on purpose. The definitions are written to survive a follow-up question, and the trade-off line is the part worth memorising — knowing <em>that</em> a technique exists is cheap, knowing <em>what it costs</em> is the part that transfers.</p>
-<p><strong>Three passes.</strong> First pass: read the definitions and examples without memorising. Second pass: explain each topic aloud without looking. Third pass: answer the follow-up questions — they are where the real understanding shows.</p>
+<p class="lead-in"><strong>Three passes.</strong> First pass: read the definitions and examples without memorising. Second pass: explain each topic aloud without looking. Third pass: answer the follow-up questions — they are where the real understanding shows.</p>
 <h3 id="11-the-areas-this-covers">1.1 The areas this covers</h3>
 <table>
 <thead>
@@ -363,13 +363,13 @@ svg.dg .arwA{fill:var(--accent)}
 </ul>
 <h2 id="2-javascript-core">2. JavaScript core</h2>
 <h3 id="21-execution-context-and-the-call-stack">2.1 Execution context and the call stack</h3>
-<p><strong>What it is.</strong> Before code runs the engine creates an execution context holding a variable environment, a lexical environment and a <code>this</code> binding. Contexts stack on the call stack; the engine runs one at a time, LIFO.</p>
-<p><strong>Example.</strong> A stack trace is the call stack printed. <code>RangeError: Maximum call stack size exceeded</code> is that stack overflowing — typically unbounded recursion.</p>
-<p><strong>Trade-offs.</strong> The stack is synchronous and single-threaded. Anything long-running on it blocks rendering and input, which is the root of every INP problem.</p>
-<p><strong>Follow-ups.</strong> What's on the stack when a promise resolves? Why does a stack trace lose frames across an <code>await</code>?</p>
+<p class="lead-in"><strong>What it is.</strong> Before code runs the engine creates an execution context holding a variable environment, a lexical environment and a <code>this</code> binding. Contexts stack on the call stack; the engine runs one at a time, LIFO.</p>
+<p class="lead-in"><strong>Example.</strong> A stack trace is the call stack printed. <code>RangeError: Maximum call stack size exceeded</code> is that stack overflowing — typically unbounded recursion.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> The stack is synchronous and single-threaded. Anything long-running on it blocks rendering and input, which is the root of every INP problem.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What's on the stack when a promise resolves? Why does a stack trace lose frames across an <code>await</code>?</p>
 <h3 id="22-hoisting-and-the-temporal-dead-zone">2.2 Hoisting and the temporal dead zone</h3>
-<p><strong>What it is.</strong> Declarations are registered during the creation phase. <code>var</code> is initialised to <code>undefined</code>; function declarations are initialised fully; <code>let</code>, <code>const</code> and <code>class</code> are registered but uninitialised — reading them before the declaration throws. That window is the temporal dead zone.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Declarations are registered during the creation phase. <code>var</code> is initialised to <code>undefined</code>; function declarations are initialised fully; <code>let</code>, <code>const</code> and <code>class</code> are registered but uninitialised — reading them before the declaration throws. That window is the temporal dead zone.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-javascript">console.log(a); // undefined
 console.log(b); // ReferenceError — TDZ
 var a = 1;
@@ -380,16 +380,16 @@ bar();          // TypeError: bar is not a function
 function foo() {}
 var bar = function () {};
 </code></pre>
-<p><strong>Trade-offs.</strong> The TDZ turns a class of silent <code>undefined</code> bugs into loud errors, at the cost of ordering discipline.</p>
-<p><strong>Follow-ups.</strong> Why does the TDZ exist? Are function declarations hoisted inside blocks? What does <code>typeof b</code> do in the TDZ? (It throws — the one case where <code>typeof</code> is not safe.)</p>
+<p class="lead-in"><strong>Trade-offs.</strong> The TDZ turns a class of silent <code>undefined</code> bugs into loud errors, at the cost of ordering discipline.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why does the TDZ exist? Are function declarations hoisted inside blocks? What does <code>typeof b</code> do in the TDZ? (It throws — the one case where <code>typeof</code> is not safe.)</p>
 <h3 id="23-scope-closures-and-the-scope-chain">2.3 Scope, closures and the scope chain</h3>
-<p><strong>What it is.</strong> A closure is a function plus a reference to the lexical environment it was created in. Lookup walks the scope chain outward to the global scope.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> A closure is a function plus a reference to the lexical environment it was created in. Lookup walks the scope chain outward to the global scope.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-javascript">for (var i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 3 3 3 — one binding
 for (let i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 0 1 2 — per-iteration binding
 </code></pre>
-<p><strong>Trade-offs.</strong> Closures are the most common memory leak in long-lived SPAs: a listener closing over a DOM subtree keeps it alive after unmount. Guard with cleanup functions and <code>AbortController</code>.</p>
-<p><strong>Follow-ups.</strong> How would you implement <code>once</code>, memoise, or a private counter with a closure? How do closures cause detached-DOM leaks?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Closures are the most common memory leak in long-lived SPAs: a listener closing over a DOM subtree keeps it alive after unmount. Guard with cleanup functions and <code>AbortController</code>.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How would you implement <code>once</code>, memoise, or a private counter with a closure? How do closures cause detached-DOM leaks?</p>
 <h3 id="24-the-event-loop">2.4 The event loop</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 348" role="img" aria-label="One turn of the event loop: one macrotask, then all microtasks, then rendering">
   <text class="title" x="16" y="24">Microtasks drain completely before the browser is allowed to paint</text>
@@ -438,12 +438,12 @@ for (let i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 0 1 2 —
   <rect class="box bad" x="16" y="308" width="848" height="30" rx="8"/>
   <text class="s" x="34" y="328">Starvation: Promise.resolve().then(spin) freezes the tab · setTimeout(spin, 0) does not — it yields at step 4 every turn.</text>
 </svg><figcaption>One turn of the event loop. Microtasks drain completely before the browser may paint.</figcaption></figure>
-<p><strong>What it is.</strong> One turn: take one macrotask → run it to completion → drain the <strong>entire</strong> microtask queue → run <code>requestAnimationFrame</code> callbacks → style, layout, paint → <code>requestIdleCallback</code> if time remains.</p>
+<p class="lead-in"><strong>What it is.</strong> One turn: take one macrotask → run it to completion → drain the <strong>entire</strong> microtask queue → run <code>requestAnimationFrame</code> callbacks → style, layout, paint → <code>requestIdleCallback</code> if time remains.</p>
 <ul>
 <li>Macrotasks: <code>setTimeout</code>, <code>setInterval</code>, I/O, DOM events, <code>postMessage</code>, <code>MessageChannel</code>.</li>
 <li>Microtasks: promise continuations, <code>queueMicrotask</code>, <code>MutationObserver</code>.</li>
 </ul>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-javascript">console.log('1 sync');
 setTimeout(() =&gt; console.log('5 macrotask'), 0);
 Promise.resolve().then(() =&gt; console.log('3 microtask'));
@@ -451,11 +451,11 @@ queueMicrotask(() =&gt; console.log('4 microtask'));
 console.log('2 sync');
 // 1 sync, 2 sync, 3 microtask, 4 microtask, 5 macrotask
 </code></pre>
-<p><strong>Trade-offs.</strong> A microtask that queues another microtask starves rendering forever; a <code>setTimeout</code> loop does not (nested timeouts clamp to 4ms after five levels). Microtasks give ordering guarantees at the cost of being unyielding.</p>
-<p><strong>Follow-ups.</strong> Predict the output of a mixed <code>setTimeout</code>/promise/<code>async</code> snippet. Why does <code>Promise.resolve().then(spin)</code> freeze the tab? Where does <code>requestAnimationFrame</code> run relative to microtasks?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> A microtask that queues another microtask starves rendering forever; a <code>setTimeout</code> loop does not (nested timeouts clamp to 4ms after five levels). Microtasks give ordering guarantees at the cost of being unyielding.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Predict the output of a mixed <code>setTimeout</code>/promise/<code>async</code> snippet. Why does <code>Promise.resolve().then(spin)</code> freeze the tab? Where does <code>requestAnimationFrame</code> run relative to microtasks?</p>
 <h3 id="25-promises-and-asyncawait">2.5 Promises and async/await</h3>
-<p><strong>What it is.</strong> <code>await x</code> splits the function: everything after it becomes a microtask continuation. <code>async</code> functions always return a promise.</p>
-<p><strong>Example.</strong> Serial vs parallel vs bounded concurrency:</p>
+<p class="lead-in"><strong>What it is.</strong> <code>await x</code> splits the function: everything after it becomes a microtask continuation. <code>async</code> functions always return a promise.</p>
+<p class="lead-in"><strong>Example.</strong> Serial vs parallel vs bounded concurrency:</p>
 <pre><code class="language-javascript">for (const id of ids) out.push(await fetch(url(id)));        // N × latency
 const out = await Promise.all(ids.map(id =&gt; fetch(url(id)))); // 1 × latency, N sockets
 
@@ -469,23 +469,23 @@ async function mapLimit(items, limit, fn) {                   // bounded
   return Promise.all(out);
 }
 </code></pre>
-<p><strong>Trade-offs.</strong> <code>all</code> fails fast (one rejection discards the rest); <code>allSettled</code> never rejects, right for dashboards and telemetry; <code>any</code> returns the first fulfilled and rejects with <code>AggregateError</code>; <code>race</code> returns the first settled and is the timeout idiom. Unbounded <code>Promise.all</code> over a large list floods the server and the browser's connection pool.</p>
-<p><strong>Follow-ups.</strong> How do you add a timeout to a fetch? How do you cancel in-flight work? What is an unhandled rejection and how do you report it?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> <code>all</code> fails fast (one rejection discards the rest); <code>allSettled</code> never rejects, right for dashboards and telemetry; <code>any</code> returns the first fulfilled and rejects with <code>AggregateError</code>; <code>race</code> returns the first settled and is the timeout idiom. Unbounded <code>Promise.all</code> over a large list floods the server and the browser's connection pool.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you add a timeout to a fetch? How do you cancel in-flight work? What is an unhandled rejection and how do you report it?</p>
 <h3 id="26-this-callapplybind-arrow-functions">2.6 <code>this</code>, call/apply/bind, arrow functions</h3>
-<p><strong>What it is.</strong> <code>this</code> is resolved at call time by four rules in priority order: <code>new</code> → explicit <code>call</code>/<code>apply</code>/<code>bind</code> → method receiver → default (<code>undefined</code> in strict mode and modules, <code>globalThis</code> otherwise). Arrow functions have no <code>this</code> binding and close over the enclosing scope.</p>
-<p><strong>Example.</strong> <code>const f = obj.method; f()</code> loses the receiver; <code>obj.method.bind(obj)</code> or <code>() =&gt; obj.method()</code> keeps it.</p>
-<p><strong>Trade-offs.</strong> Class-field arrows bind per instance — convenient but they cost memory per instance and are not on the prototype, so they cannot be overridden or spied on easily.</p>
-<p><strong>Follow-ups.</strong> What is <code>this</code> in a standalone function in a module? In a <code>setTimeout</code> callback? In an event handler? Implement <code>bind</code> yourself.</p>
+<p class="lead-in"><strong>What it is.</strong> <code>this</code> is resolved at call time by four rules in priority order: <code>new</code> → explicit <code>call</code>/<code>apply</code>/<code>bind</code> → method receiver → default (<code>undefined</code> in strict mode and modules, <code>globalThis</code> otherwise). Arrow functions have no <code>this</code> binding and close over the enclosing scope.</p>
+<p class="lead-in"><strong>Example.</strong> <code>const f = obj.method; f()</code> loses the receiver; <code>obj.method.bind(obj)</code> or <code>() =&gt; obj.method()</code> keeps it.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Class-field arrows bind per instance — convenient but they cost memory per instance and are not on the prototype, so they cannot be overridden or spied on easily.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What is <code>this</code> in a standalone function in a module? In a <code>setTimeout</code> callback? In an event handler? Implement <code>bind</code> yourself.</p>
 <h3 id="27-prototypes-and-classes">2.7 Prototypes and classes</h3>
-<p><strong>What it is.</strong> Every object has an internal prototype link (<code>Object.getPrototypeOf(obj) === Ctor.prototype</code>). Property lookup walks that chain. <code>class</code> is syntax over it: methods land on the prototype, class fields on the instance.</p>
-<p><strong>Example.</strong> <code>Array.prototype.map</code> is found by walking from the array instance to <code>Array.prototype</code>. <code>obj.hasOwnProperty('x')</code> checks only the own object; <code>'x' in obj</code> walks the chain.</p>
-<p><strong>Trade-offs.</strong> Prototype sharing saves memory; prototype mutation at runtime deoptimises V8's hidden classes and should be avoided in hot paths. Monkey-patching built-in prototypes breaks other libraries.</p>
-<p><strong>Follow-ups.</strong> Difference between <code>__proto__</code> and <code>prototype</code>? How does <code>instanceof</code> work? How would you implement inheritance without <code>class</code>?</p>
+<p class="lead-in"><strong>What it is.</strong> Every object has an internal prototype link (<code>Object.getPrototypeOf(obj) === Ctor.prototype</code>). Property lookup walks that chain. <code>class</code> is syntax over it: methods land on the prototype, class fields on the instance.</p>
+<p class="lead-in"><strong>Example.</strong> <code>Array.prototype.map</code> is found by walking from the array instance to <code>Array.prototype</code>. <code>obj.hasOwnProperty('x')</code> checks only the own object; <code>'x' in obj</code> walks the chain.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Prototype sharing saves memory; prototype mutation at runtime deoptimises V8's hidden classes and should be avoided in hot paths. Monkey-patching built-in prototypes breaks other libraries.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Difference between <code>__proto__</code> and <code>prototype</code>? How does <code>instanceof</code> work? How would you implement inheritance without <code>class</code>?</p>
 <h3 id="28-memory-and-garbage-collection">2.8 Memory and garbage collection</h3>
-<p><strong>What it is.</strong> V8 uses generational mark-and-sweep: a scavenged young space plus a mark-compact old space. Objects surviving two scavenges are promoted. Anything reachable from a root is retained.</p>
-<p><strong>Example.</strong> Leak taxonomy: detached DOM nodes, forgotten timers and listeners, unbounded module-level caches, closures over large objects. <code>WeakMap</code>/<code>WeakSet</code> keys do not retain; <code>WeakRef</code> + <code>FinalizationRegistry</code> for caches; <code>AbortController</code> for listener and fetch lifecycle.</p>
-<p><strong>Trade-offs.</strong> Weak collections prevent leaks but make eviction non-deterministic — you cannot rely on a finalizer running.</p>
-<p><strong>Follow-ups.</strong> How do you find a leak in DevTools? (Heap snapshot → interact → second snapshot → "objects allocated between 1 and 2" → sort by retained size → follow the retainer path.) What does a sawtooth memory graph that never returns to baseline mean?</p>
+<p class="lead-in"><strong>What it is.</strong> V8 uses generational mark-and-sweep: a scavenged young space plus a mark-compact old space. Objects surviving two scavenges are promoted. Anything reachable from a root is retained.</p>
+<p class="lead-in"><strong>Example.</strong> Leak taxonomy: detached DOM nodes, forgotten timers and listeners, unbounded module-level caches, closures over large objects. <code>WeakMap</code>/<code>WeakSet</code> keys do not retain; <code>WeakRef</code> + <code>FinalizationRegistry</code> for caches; <code>AbortController</code> for listener and fetch lifecycle.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Weak collections prevent leaks but make eviction non-deterministic — you cannot rely on a finalizer running.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you find a leak in DevTools? (Heap snapshot → interact → second snapshot → "objects allocated between 1 and 2" → sort by retained size → follow the retainer path.) What does a sawtooth memory graph that never returns to baseline mean?</p>
 <h3 id="29-the-patterns-asked-by-name">2.9 The patterns asked by name</h3>
 <table>
 <thead>
@@ -538,21 +538,21 @@ async function mapLimit(items, limit, fn) {                   // bounded
 </tr>
 </tbody>
 </table>
-<p><strong>Follow-ups.</strong> Implement debounce with a leading edge and <code>cancel()</code>. Why does <code>JSON.parse(JSON.stringify(x))</code> lose <code>undefined</code>, <code>Date</code> and cycles? When is <code>stopImmediatePropagation</code> needed over <code>stopPropagation</code>?</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Implement debounce with a leading edge and <code>cancel()</code>. Why does <code>JSON.parse(JSON.stringify(x))</code> lose <code>undefined</code>, <code>Date</code> and cycles? When is <code>stopImmediatePropagation</code> needed over <code>stopPropagation</code>?</p>
 <h2 id="3-typescript">3. TypeScript</h2>
 <h3 id="31-structural-typing-and-branded-types">3.1 Structural typing and branded types</h3>
-<p><strong>What it is.</strong> TypeScript compares types by shape, not by name. Two unrelated types with the same members are interchangeable.</p>
-<p><strong>Example.</strong> To get nominal behaviour for identifiers:</p>
+<p class="lead-in"><strong>What it is.</strong> TypeScript compares types by shape, not by name. Two unrelated types with the same members are interchangeable.</p>
+<p class="lead-in"><strong>Example.</strong> To get nominal behaviour for identifiers:</p>
 <pre><code class="language-typescript">type HotelId = string &amp; { readonly __brand: 'HotelId' };
 type CityId  = string &amp; { readonly __brand: 'CityId' };
 const asHotelId = (s: string) =&gt; s as HotelId;
 // passing a CityId where a HotelId is expected is now a compile error
 </code></pre>
-<p><strong>Trade-offs.</strong> Branding costs a cast at the boundary and slightly noisier types, and buys you a whole class of ID-mixup bugs caught at compile time.</p>
-<p><strong>Follow-ups.</strong> Why does TypeScript use structural typing? Where does structural typing surprise people? (Excess property checks apply to object literals only.)</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Branding costs a cast at the boundary and slightly noisier types, and buys you a whole class of ID-mixup bugs caught at compile time.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why does TypeScript use structural typing? Where does structural typing surprise people? (Excess property checks apply to object literals only.)</p>
 <h3 id="32-any-vs-unknown-vs-never">3.2 <code>any</code> vs <code>unknown</code> vs <code>never</code></h3>
-<p><strong>What it is.</strong> <code>any</code> disables checking and propagates silently. <code>unknown</code> is the safe top type — assignable from anything, assignable to nothing without narrowing. <code>never</code> is the bottom type: no value inhabits it.</p>
-<p><strong>Example.</strong> <code>never</code> gives exhaustiveness for free:</p>
+<p class="lead-in"><strong>What it is.</strong> <code>any</code> disables checking and propagates silently. <code>unknown</code> is the safe top type — assignable from anything, assignable to nothing without narrowing. <code>never</code> is the bottom type: no value inhabits it.</p>
+<p class="lead-in"><strong>Example.</strong> <code>never</code> gives exhaustiveness for free:</p>
 <pre><code class="language-typescript">function render(s: FetchState) {
   switch (s.status) {
     case 'loading': return spinner();
@@ -562,22 +562,22 @@ const asHotelId = (s: string) =&gt; s as HotelId;
   }
 }
 </code></pre>
-<p><strong>Trade-offs.</strong> Banning <code>any</code> outright creates friction at untyped third-party boundaries; the usual policy is <code>unknown</code> plus a parse, with <code>any</code> allowed only behind an explicit lint suppression and a comment.</p>
-<p><strong>Follow-ups.</strong> Why is <code>unknown</code> safer than <code>any</code>? What does <code>never</code> mean as a return type? How do you type a function that always throws?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Banning <code>any</code> outright creates friction at untyped third-party boundaries; the usual policy is <code>unknown</code> plus a parse, with <code>any</code> allowed only behind an explicit lint suppression and a comment.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why is <code>unknown</code> safer than <code>any</code>? What does <code>never</code> mean as a return type? How do you type a function that always throws?</p>
 <h3 id="33-discriminated-unions">3.3 Discriminated unions</h3>
-<p><strong>What it is.</strong> A union of object types sharing a literal-typed discriminant field, which lets the compiler narrow by checking that field.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> A union of object types sharing a literal-typed discriminant field, which lets the compiler narrow by checking that field.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-typescript">type FetchState&lt;T&gt; =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'error'; error: Error }
   | { status: 'success'; data: T };
 </code></pre>
-<p><strong>Trade-offs.</strong> More verbose than <code>{ loading: boolean; error?: Error; data?: T }</code>, but it makes impossible states unrepresentable — you can never have <code>loading: true</code> with <code>data</code> present.</p>
-<p><strong>Follow-ups.</strong> Model a booking flow's states. How does narrowing work with <code>in</code>, <code>typeof</code> and custom type guards (<code>x is Foo</code>)?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> More verbose than <code>{ loading: boolean; error?: Error; data?: T }</code>, but it makes impossible states unrepresentable — you can never have <code>loading: true</code> with <code>data</code> present.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Model a booking flow's states. How does narrowing work with <code>in</code>, <code>typeof</code> and custom type guards (<code>x is Foo</code>)?</p>
 <h3 id="34-generics-conditional-and-mapped-types">3.4 Generics, conditional and mapped types</h3>
-<p><strong>What it is.</strong> Generics parameterise types; conditional types branch on assignability with <code>infer</code>; mapped types transform every key of a type, optionally remapping keys with <code>as</code>.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Generics parameterise types; conditional types branch on assignability with <code>infer</code>; mapped types transform every key of a type, optionally remapping keys with <code>as</code>.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-typescript">type Unwrap&lt;T&gt; = T extends Promise&lt;infer U&gt; ? Unwrap&lt;U&gt; : T;
 type Getters&lt;T&gt; = { [K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K] };
 // Getters&lt;{ name: string }&gt; === { getName: () =&gt; string }
@@ -585,31 +585,31 @@ type Getters&lt;T&gt; = { [K in keyof T as `get${Capitalize&lt;string &amp; K&gt
 type PolymorphicProps&lt;E extends React.ElementType&gt; =
   { as?: E } &amp; Omit&lt;React.ComponentPropsWithoutRef&lt;E&gt;, 'as'&gt;;
 </code></pre>
-<p><strong>Trade-offs.</strong> Deep recursive conditional types are expressive but slow the compiler and produce unreadable errors. A platform rule of thumb: if the type needs a comment to explain it, prefer an explicit overload.</p>
-<p><strong>Follow-ups.</strong> Implement <code>DeepPartial</code>. What are <code>Partial</code>, <code>Required</code>, <code>Pick</code>, <code>Omit</code>, <code>Record</code>, <code>ReturnType</code> built from? Why do large unions blow up compile time?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Deep recursive conditional types are expressive but slow the compiler and produce unreadable errors. A platform rule of thumb: if the type needs a comment to explain it, prefer an explicit overload.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Implement <code>DeepPartial</code>. What are <code>Partial</code>, <code>Required</code>, <code>Pick</code>, <code>Omit</code>, <code>Record</code>, <code>ReturnType</code> built from? Why do large unions blow up compile time?</p>
 <h3 id="35-variance-and-where-typescript-is-unsound">3.5 Variance and where TypeScript is unsound</h3>
-<p><strong>What it is.</strong> Function parameters are contravariant and returns covariant. TypeScript deliberately accepts some unsound patterns for ergonomics.</p>
-<p><strong>Example.</strong> Known unsound spots: arrays are covariant (<code>Dog[]</code> assignable to <code>Animal[]</code>, then you can push a <code>Cat</code>); method parameters are bivariant unless <code>strictFunctionTypes</code> applies; index access without <code>noUncheckedIndexedAccess</code> claims <code>T</code> where <code>T | undefined</code> is true; <code>as</code> assertions bypass everything.</p>
-<p><strong>Trade-offs.</strong> Full soundness would reject large amounts of idiomatic JavaScript. Enabling <code>noUncheckedIndexedAccess</code> is correct but noisy on existing code.</p>
-<p><strong>Follow-ups.</strong> Where is TypeScript deliberately unsound, and why? What does <code>strictFunctionTypes</code> change?</p>
+<p class="lead-in"><strong>What it is.</strong> Function parameters are contravariant and returns covariant. TypeScript deliberately accepts some unsound patterns for ergonomics.</p>
+<p class="lead-in"><strong>Example.</strong> Known unsound spots: arrays are covariant (<code>Dog[]</code> assignable to <code>Animal[]</code>, then you can push a <code>Cat</code>); method parameters are bivariant unless <code>strictFunctionTypes</code> applies; index access without <code>noUncheckedIndexedAccess</code> claims <code>T</code> where <code>T | undefined</code> is true; <code>as</code> assertions bypass everything.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Full soundness would reject large amounts of idiomatic JavaScript. Enabling <code>noUncheckedIndexedAccess</code> is correct but noisy on existing code.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Where is TypeScript deliberately unsound, and why? What does <code>strictFunctionTypes</code> change?</p>
 <h3 id="36-runtime-validation-at-the-boundary">3.6 Runtime validation at the boundary</h3>
-<p><strong>What it is.</strong> Types are erased at compile time, so anything crossing a boundary — API responses, URL params, <code>localStorage</code>, <code>postMessage</code>, feature flags — must be parsed, not asserted.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Types are erased at compile time, so anything crossing a boundary — API responses, URL params, <code>localStorage</code>, <code>postMessage</code>, feature flags — must be parsed, not asserted.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-typescript">const Hotel = z.object({ id: z.string(), price: z.number(), currency: z.string().length(3) });
 type Hotel = z.infer&lt;typeof Hotel&gt;;          // one source of truth
 const hotel = Hotel.parse(await res.json()); // throws on drift, at the edge
 </code></pre>
-<p><strong>Trade-offs.</strong> Zod adds bundle weight (Valibot is lighter, ArkType faster) and runtime cost per parse. Validate at boundaries only, not on every internal call.</p>
-<p><strong>Follow-ups.</strong> Where exactly do you validate? How do you keep frontend types in sync with the backend? (Generate from OpenAPI/GraphQL/protobuf in CI so a breaking change fails the build.)</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Zod adds bundle weight (Valibot is lighter, ArkType faster) and runtime cost per parse. Validate at boundaries only, not on every internal call.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Where exactly do you validate? How do you keep frontend types in sync with the backend? (Generate from OpenAPI/GraphQL/protobuf in CI so a breaking change fails the build.)</p>
 <h3 id="37-declaration-merging-and-module-augmentation">3.7 Declaration merging and module augmentation</h3>
-<p><strong>What it is.</strong> Interfaces with the same name in the same scope merge; <code>declare module</code> extends a third-party library's types.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Interfaces with the same name in the same scope merge; <code>declare module</code> extends a third-party library's types.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-typescript">declare module 'styled-components' {
   export interface DefaultTheme extends AppTheme {}
 }
 </code></pre>
-<p><strong>Trade-offs.</strong> Powerful for design-system theming, but global augmentation is invisible action-at-a-distance and can conflict between packages.</p>
-<p><strong>Follow-ups.</strong> How do you type a library that ships no types? What goes in <code>exports</code> conditions (<code>import</code>, <code>require</code>, <code>types</code>, <code>browser</code>) when publishing a package?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Powerful for design-system theming, but global augmentation is invisible action-at-a-distance and can conflict between packages.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you type a library that ships no types? What goes in <code>exports</code> conditions (<code>import</code>, <code>require</code>, <code>types</code>, <code>browser</code>) when publishing a package?</p>
 <h3 id="38-typescript-at-monorepo-scale">3.8 TypeScript at monorepo scale</h3>
 <table>
 <thead>
@@ -641,8 +641,8 @@ const hotel = Hotel.parse(await res.json()); // throws on drift, at the edge
 </tr>
 </tbody>
 </table>
-<p><strong>Strictness ratchet.</strong> You cannot flip <code>strict: true</code> on a legacy codebase in one PR. Enable one flag at a time (<code>noImplicitAny</code>, then <code>strictNullChecks</code>), write existing failures to a baseline file, fail CI only on new violations, and burn the baseline down.</p>
-<p><strong>Follow-ups.</strong> How would you migrate a 500k-line JS codebase to TypeScript? What do you do about the long tail of <code>@ts-expect-error</code>?</p>
+<p class="lead-in"><strong>Strictness ratchet.</strong> You cannot flip <code>strict: true</code> on a legacy codebase in one PR. Enable one flag at a time (<code>noImplicitAny</code>, then <code>strictNullChecks</code>), write existing failures to a baseline file, fail CI only on new violations, and burn the baseline down.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How would you migrate a 500k-line JS codebase to TypeScript? What do you do about the long tail of <code>@ts-expect-error</code>?</p>
 <h2 id="4-browser-internals">4. Browser internals</h2>
 <h3 id="41-the-critical-rendering-path">4.1 The critical rendering path</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 316" role="img" aria-label="Critical rendering path from bytes to pixels, main thread versus compositor">
@@ -705,12 +705,12 @@ const hotel = Hotel.parse(await res.json()); // throws on drift, at the edge
   <text class="xs" x="651" y="300" text-anchor="middle">PAINT only</text>
   <text class="xs" x="790" y="300" text-anchor="middle">COMPOSITE only — 60 fps safe</text>
 </svg><figcaption>The critical rendering path. Only composite-stage changes stay off the main thread.</figcaption></figure>
-<p><strong>What it is.</strong> The sequence from bytes to pixels: network → HTML parse to DOM → CSS parse to CSSOM → render tree → layout → paint → composite.</p>
-<p><strong>Example.</strong> Script loading changes the path: a classic <code>&lt;script&gt;</code> blocks the parser; <code>defer</code> runs after parsing, before <code>DOMContentLoaded</code>, in document order; <code>async</code> runs whenever it arrives, out of order. CSS is render-blocking by default — the browser will not paint without the CSSOM.</p>
-<p><strong>Trade-offs.</strong> Inlining critical CSS removes a round trip but bloats the HTML and loses caching. Inlining a script can <em>hurt</em>, because the preload scanner can no longer discover and fetch subresources ahead of the blocked parser.</p>
-<p><strong>Follow-ups.</strong> What blocks first paint? Where should <code>&lt;script&gt;</code> go and why? What is the preload scanner? What's the difference between <code>DOMContentLoaded</code> and <code>load</code>?</p>
+<p class="lead-in"><strong>What it is.</strong> The sequence from bytes to pixels: network → HTML parse to DOM → CSS parse to CSSOM → render tree → layout → paint → composite.</p>
+<p class="lead-in"><strong>Example.</strong> Script loading changes the path: a classic <code>&lt;script&gt;</code> blocks the parser; <code>defer</code> runs after parsing, before <code>DOMContentLoaded</code>, in document order; <code>async</code> runs whenever it arrives, out of order. CSS is render-blocking by default — the browser will not paint without the CSSOM.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Inlining critical CSS removes a round trip but bloats the HTML and loses caching. Inlining a script can <em>hurt</em>, because the preload scanner can no longer discover and fetch subresources ahead of the blocked parser.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What blocks first paint? Where should <code>&lt;script&gt;</code> go and why? What is the preload scanner? What's the difference between <code>DOMContentLoaded</code> and <code>load</code>?</p>
 <h3 id="42-layout-paint-composite-what-each-change-costs">4.2 Layout, paint, composite — what each change costs</h3>
-<p><strong>What it is.</strong> A style change re-enters the pipeline at a stage determined by the property changed.</p>
+<p class="lead-in"><strong>What it is.</strong> A style change re-enters the pipeline at a stage determined by the property changed.</p>
 <table>
 <thead>
 <tr>
@@ -737,12 +737,12 @@ const hotel = Hotel.parse(await res.json()); // throws on drift, at the edge
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> Animate <code>transform: translateX()</code> rather than <code>left</code>, and <code>opacity</code> rather than <code>visibility</code>. Promote with <code>will-change: transform</code> immediately before the animation and remove it after.</p>
-<p><strong>Trade-offs.</strong> Each promoted layer costs GPU memory; leaving <code>will-change</code> on many elements causes layer explosion and can make things slower than not promoting at all.</p>
-<p><strong>Follow-ups.</strong> Which properties are cheap to animate and why? What does promoting a layer actually do? How would you debug a janky animation in DevTools? (Rendering panel → paint flashing, layer borders, FPS meter.)</p>
+<p class="lead-in"><strong>Example.</strong> Animate <code>transform: translateX()</code> rather than <code>left</code>, and <code>opacity</code> rather than <code>visibility</code>. Promote with <code>will-change: transform</code> immediately before the animation and remove it after.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Each promoted layer costs GPU memory; leaving <code>will-change</code> on many elements causes layer explosion and can make things slower than not promoting at all.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Which properties are cheap to animate and why? What does promoting a layer actually do? How would you debug a janky animation in DevTools? (Rendering panel → paint flashing, layer borders, FPS meter.)</p>
 <h3 id="43-reflow-and-layout-thrashing">4.3 Reflow and layout thrashing</h3>
-<p><strong>What it is.</strong> Reading a geometry property while style is dirty forces a synchronous layout. Interleaving reads and writes in a loop produces O(n) forced reflows.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Reading a geometry property while style is dirty forces a synchronous layout. Interleaving reads and writes in a loop produces O(n) forced reflows.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-javascript">// BAD — read/write/read/write, n forced synchronous layouts
 boxes.forEach(b =&gt; { b.style.width = b.offsetWidth + 10 + 'px'; });
 
@@ -751,11 +751,11 @@ const widths = boxes.map(b =&gt; b.offsetWidth);
 boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </code></pre>
 <p>Forcing properties: <code>offsetTop/Left/Width/Height</code>, <code>scrollTop/Height</code>, <code>clientWidth/Height</code>, <code>getComputedStyle()</code>, <code>getBoundingClientRect()</code>, <code>focus()</code>, <code>scrollIntoView()</code>.</p>
-<p><strong>Trade-offs.</strong> A read/write scheduler (FastDOM-style) fixes it generically but adds a frame of latency and indirection. <code>ResizeObserver</code>/<code>IntersectionObserver</code> deliver measurements off the critical path and are usually the better answer.</p>
-<p><strong>Follow-ups.</strong> Why is <code>getBoundingClientRect()</code> expensive? How does DevTools surface a forced reflow? Where would you put the fix — the component or the framework?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> A read/write scheduler (FastDOM-style) fixes it generically but adds a frame of latency and indirection. <code>ResizeObserver</code>/<code>IntersectionObserver</code> deliver measurements off the critical path and are usually the better answer.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why is <code>getBoundingClientRect()</code> expensive? How does DevTools surface a forced reflow? Where would you put the fix — the component or the framework?</p>
 <h3 id="44-main-thread-vs-compositor-thread">4.4 Main thread vs compositor thread</h3>
-<p><strong>What it is.</strong> The main thread runs JavaScript, style, layout and paint. The compositor thread assembles layers, often on the GPU, and can scroll and animate independently.</p>
-<p><strong>Example.</strong> Escape hatches from the main thread:</p>
+<p class="lead-in"><strong>What it is.</strong> The main thread runs JavaScript, style, layout and paint. The compositor thread assembles layers, often on the GPU, and can scroll and animate independently.</p>
+<p class="lead-in"><strong>Example.</strong> Escape hatches from the main thread:</p>
 <table>
 <thead>
 <tr>
@@ -790,8 +790,8 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> Workers buy parallelism at the cost of serialisation and a more complex API (Comlink helps). <code>content-visibility</code> can break find-in-page and anchor scrolling if <code>contain-intrinsic-size</code> is wrong.</p>
-<p><strong>Follow-ups.</strong> What is a long task and why does 50ms matter? What can't a worker do? How do you move a 300ms JSON parse off the main thread?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Workers buy parallelism at the cost of serialisation and a more complex API (Comlink helps). <code>content-visibility</code> can break find-in-page and anchor scrolling if <code>contain-intrinsic-size</code> is wrong.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What is a long task and why does 50ms matter? What can't a worker do? How do you move a 300ms JSON parse off the main thread?</p>
 <h3 id="45-observers-and-platform-apis">4.5 Observers and platform APIs</h3>
 <table>
 <thead>
@@ -835,13 +835,13 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> Observers are asynchronous and batched — better for performance, but you cannot read a value synchronously right after a change.</p>
-<p><strong>Follow-ups.</strong> Implement infinite scroll without a scroll listener. How does <code>AbortController</code> clean up both a fetch and its listeners? What are the <code>rootMargin</code> and <code>threshold</code> options for?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Observers are asynchronous and batched — better for performance, but you cannot read a value synchronously right after a change.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Implement infinite scroll without a scroll listener. How does <code>AbortController</code> clean up both a fetch and its listeners? What are the <code>rootMargin</code> and <code>threshold</code> options for?</p>
 <h3 id="46-the-browser-as-a-security-boundary">4.6 The browser as a security boundary</h3>
-<p><strong>What it is.</strong> Site isolation puts each site in its own renderer process, so a compromised renderer cannot read another site's memory.</p>
-<p><strong>Example.</strong> This is why <code>SharedArrayBuffer</code> requires COOP and COEP headers, and why <code>window.opener</code> access from <code>target="_blank"</code> links is restricted (<code>rel="noopener"</code>).</p>
-<p><strong>Trade-offs.</strong> Process-per-site costs memory — a visible issue on low-end devices, which matters for emerging-market traffic.</p>
-<p><strong>Follow-ups.</strong> Why do Spectre mitigations require COOP/COEP? What is the same-origin policy and what does "origin" mean exactly? (scheme + host + port.)</p>
+<p class="lead-in"><strong>What it is.</strong> Site isolation puts each site in its own renderer process, so a compromised renderer cannot read another site's memory.</p>
+<p class="lead-in"><strong>Example.</strong> This is why <code>SharedArrayBuffer</code> requires COOP and COEP headers, and why <code>window.opener</code> access from <code>target="_blank"</code> links is restricted (<code>rel="noopener"</code>).</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Process-per-site costs memory — a visible issue on low-end devices, which matters for emerging-market traffic.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why do Spectre mitigations require COOP/COEP? What is the same-origin policy and what does "origin" mean exactly? (scheme + host + port.)</p>
 <h2 id="5-rendering-architectures-and-react">5. Rendering architectures and React</h2>
 <h3 id="51-csr-ssr-ssg-isr-streaming-islands-edge">5.1 CSR, SSR, SSG, ISR, streaming, islands, edge</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 360" role="img" aria-label="Order of events for each rendering strategy">
@@ -910,7 +910,7 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
   <path class="grid" d="M180 340H856"/>
   <text class="xs" x="856" y="354" text-anchor="end">time →</text>
 </svg><figcaption>Schematic order of events per rendering strategy — relative sequence, not measured timings.</figcaption></figure>
-<p><strong>What it is.</strong> Where the HTML comes from, and when.</p>
+<p class="lead-in"><strong>What it is.</strong> Where the HTML comes from, and when.</p>
 <table>
 <thead>
 <tr>
@@ -981,12 +981,12 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> A hotel search page is best <strong>segmented by volatility</strong>: static marketing pages SSG; hotel detail ISR; search shell streamed from the edge; prices client-fetched because they must never be cached.</p>
-<p><strong>Trade-offs.</strong> One global strategy is almost always wrong for a marketplace. SSR improves LCP and SEO but shifts cost to servers and adds hydration cost; SSG is fastest but cannot personalise.</p>
-<p><strong>Follow-ups.</strong> How would you render a hotel search page and why? What breaks if you cache an SSR page at the CDN? When is CSR the right answer?</p>
+<p class="lead-in"><strong>Example.</strong> A hotel search page is best <strong>segmented by volatility</strong>: static marketing pages SSG; hotel detail ISR; search shell streamed from the edge; prices client-fetched because they must never be cached.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> One global strategy is almost always wrong for a marketplace. SSR improves LCP and SEO but shifts cost to servers and adds hydration cost; SSG is fastest but cannot personalise.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How would you render a hotel search page and why? What breaks if you cache an SSR page at the CDN? When is CSR the right answer?</p>
 <h3 id="52-hydration">5.2 Hydration</h3>
-<p><strong>What it is.</strong> The client re-runs the component tree over server-rendered HTML to attach event listeners and rebuild state.</p>
-<p><strong>Example.</strong> The ladder of fixes, cheapest first:</p>
+<p class="lead-in"><strong>What it is.</strong> The client re-runs the component tree over server-rendered HTML to attach event listeners and rebuild state.</p>
+<p class="lead-in"><strong>Example.</strong> The ladder of fixes, cheapest first:</p>
 <ol>
 <li>Ship less — server-render static parts and don't hydrate them.</li>
 <li>Selective/progressive hydration — hydrate above-the-fold and interactive islands first, the rest on <code>IntersectionObserver</code> or on interaction.</li>
@@ -994,8 +994,8 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 <li>Resumability (Qwik) — serialise listener state into HTML, no hydration pass at all.</li>
 <li>Server Components — whole subtrees never reach the client.</li>
 </ol>
-<p><strong>Trade-offs.</strong> Hydration is why a server-rendered page can <em>look</em> ready and not respond — the "uncanny valley" that wrecks INP. Avoiding it entirely usually means framework lock-in.</p>
-<p><strong>Follow-ups.</strong> What causes a hydration mismatch? (<code>Date.now()</code>, locale formatting, <code>window</code> access during render, random ids, UA-dependent markup.) How do you fix a genuinely client-only value? What does React do when markup doesn't match?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Hydration is why a server-rendered page can <em>look</em> ready and not respond — the "uncanny valley" that wrecks INP. Avoiding it entirely usually means framework lock-in.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What causes a hydration mismatch? (<code>Date.now()</code>, locale formatting, <code>window</code> access during render, random ids, UA-dependent markup.) How do you fix a genuinely client-only value? What does React do when markup doesn't match?</p>
 <h3 id="53-fiber-and-reconciliation">5.3 Fiber and reconciliation</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 334" role="img" aria-label="React render phase versus commit phase across two fiber trees">
   <text class="title" x="16" y="24">Render can be thrown away. Commit cannot.</text>
@@ -1045,12 +1045,12 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
   <rect class="box" x="660" y="294" width="208" height="32" rx="7"/>
   <text class="xs" x="764" y="314" text-anchor="middle">4 · useEffect (after paint)</text>
 </svg><figcaption>React&#x27;s two trees. The render phase is interruptible; commit is one synchronous pass.</figcaption></figure>
-<p><strong>What it is.</strong> A fiber is a plain object describing a unit of work with <code>child</code>, <code>sibling</code> and <code>return</code> pointers. React keeps two trees — current and work-in-progress. The render phase is interruptible; the commit phase is one synchronous pass.</p>
-<p><strong>Example.</strong> Diffing heuristics: different element type → unmount the whole subtree; same type → update props in place; list children matched by <code>key</code>. So index-as-key breaks on reorder — a sorted list of checkboxes keeps the wrong checked state because state attaches to position, not identity.</p>
-<p><strong>Trade-offs.</strong> O(n) heuristic diffing instead of an optimal O(n³) tree diff: fast, but it relies on you giving stable keys and not changing component types.</p>
-<p><strong>Follow-ups.</strong> Why must render be pure? Why does StrictMode double-invoke in dev? What happens in commit vs render? When is <code>useLayoutEffect</code> correct over <code>useEffect</code>?</p>
+<p class="lead-in"><strong>What it is.</strong> A fiber is a plain object describing a unit of work with <code>child</code>, <code>sibling</code> and <code>return</code> pointers. React keeps two trees — current and work-in-progress. The render phase is interruptible; the commit phase is one synchronous pass.</p>
+<p class="lead-in"><strong>Example.</strong> Diffing heuristics: different element type → unmount the whole subtree; same type → update props in place; list children matched by <code>key</code>. So index-as-key breaks on reorder — a sorted list of checkboxes keeps the wrong checked state because state attaches to position, not identity.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> O(n) heuristic diffing instead of an optimal O(n³) tree diff: fast, but it relies on you giving stable keys and not changing component types.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why must render be pure? Why does StrictMode double-invoke in dev? What happens in commit vs render? When is <code>useLayoutEffect</code> correct over <code>useEffect</code>?</p>
 <h3 id="54-hooks">5.4 Hooks</h3>
-<p><strong>What it is.</strong> Hooks are a linked list on the fiber, resolved by call order — which is why they cannot be called conditionally.</p>
+<p class="lead-in"><strong>What it is.</strong> Hooks are a linked list on the fiber, resolved by call order — which is why they cannot be called conditionally.</p>
 <table>
 <thead>
 <tr>
@@ -1097,18 +1097,18 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> Most <code>useEffect</code>s that derive state should be plain computation during render; effects that sync to external systems are the legitimate use.</p>
-<p><strong>Follow-ups.</strong> Why can't hooks be conditional? When does <code>useEffect</code> run relative to paint? Write a <code>useDebounce</code>. What is a stale closure and how do you avoid it?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Most <code>useEffect</code>s that derive state should be plain computation during render; effects that sync to external systems are the legitimate use.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why can't hooks be conditional? When does <code>useEffect</code> run relative to paint? Write a <code>useDebounce</code>. What is a stale closure and how do you avoid it?</p>
 <h3 id="55-concurrent-rendering">5.5 Concurrent rendering</h3>
-<p><strong>What it is.</strong> React 18+ assigns lanes/priorities: discrete input is urgent, transitions are not. Automatic batching now covers promises and timeouts, not just event handlers.</p>
-<p><strong>Example.</strong> <code>startTransition(() =&gt; setFilters(next))</code> keeps the input responsive while a large result list re-filters.</p>
-<p><strong>Trade-offs.</strong> A component can render without committing, so side effects in render became actively dangerous; and <strong>tearing</strong> becomes possible with external mutable stores, which is why <code>useSyncExternalStore</code> exists.</p>
-<p><strong>Follow-ups.</strong> What is tearing? What's the difference between <code>useTransition</code> and <code>useDeferredValue</code>? What does Suspense actually suspend on?</p>
+<p class="lead-in"><strong>What it is.</strong> React 18+ assigns lanes/priorities: discrete input is urgent, transitions are not. Automatic batching now covers promises and timeouts, not just event handlers.</p>
+<p class="lead-in"><strong>Example.</strong> <code>startTransition(() =&gt; setFilters(next))</code> keeps the input responsive while a large result list re-filters.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> A component can render without committing, so side effects in render became actively dangerous; and <strong>tearing</strong> becomes possible with external mutable stores, which is why <code>useSyncExternalStore</code> exists.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What is tearing? What's the difference between <code>useTransition</code> and <code>useDeferredValue</code>? What does Suspense actually suspend on?</p>
 <h3 id="56-server-components">5.6 Server Components</h3>
-<p><strong>What it is.</strong> Components that run only on the server, never ship their code to the client, can read data directly, and serialise their output into an RSC payload (a stream, not HTML). Client Components are marked <code>'use client'</code> and form the boundary.</p>
-<p><strong>Example.</strong> A hotel detail page can fetch and render description, amenities and policies as RSC, with only the date picker and booking widget as Client Components.</p>
-<p><strong>Trade-offs.</strong> Smaller client bundles and no client-side data waterfall, versus a new mental model, a server runtime requirement, harder incremental adoption, and payload size for deeply nested trees.</p>
-<p><strong>Follow-ups.</strong> What can't a Server Component do? How do props cross the boundary? (They must be serialisable.) How does this differ from SSR?</p>
+<p class="lead-in"><strong>What it is.</strong> Components that run only on the server, never ship their code to the client, can read data directly, and serialise their output into an RSC payload (a stream, not HTML). Client Components are marked <code>'use client'</code> and form the boundary.</p>
+<p class="lead-in"><strong>Example.</strong> A hotel detail page can fetch and render description, amenities and policies as RSC, with only the date picker and booking widget as Client Components.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Smaller client bundles and no client-side data waterfall, versus a new mental model, a server runtime requirement, harder incremental adoption, and payload size for deeply nested trees.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What can't a Server Component do? How do props cross the boundary? (They must be serialisable.) How does this differ from SSR?</p>
 <h3 id="57-state-management">5.7 State management</h3>
 <table>
 <thead>
@@ -1146,13 +1146,13 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> Keep server cache separate from client state; pick the narrowest tool; give teams one blessed default so twelve squads don't ship twelve patterns.</p>
-<p><strong>Follow-ups.</strong> Why is Context not a state manager? Where does search-filter state belong and why? How do you prevent a context change re-rendering the whole tree?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Keep server cache separate from client state; pick the narrowest tool; give teams one blessed default so twelve squads don't ship twelve patterns.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why is Context not a state manager? Where does search-filter state belong and why? How do you prevent a context change re-rendering the whole tree?</p>
 <h3 id="58-react-vs-signals">5.8 React vs signals</h3>
-<p><strong>What it is.</strong> React re-renders subtrees and diffs a virtual DOM. Vue 3, Svelte 5 and Solid use fine-grained reactivity (signals) that updates only the bound DOM nodes.</p>
-<p><strong>Example.</strong> In Solid, a component function runs once; the signal read inside a JSX expression creates a direct subscription to that text node.</p>
-<p><strong>Trade-offs.</strong> Signals do less work at runtime but need a compiler or proxy layer and have a smaller ecosystem. React Compiler attacks the same problem from the other direction by auto-memoising. Web Components remain the interop layer when you must ship a widget into partner sites you don't control.</p>
-<p><strong>Follow-ups.</strong> When would you not choose React? What does React Compiler change about how you write components? Why is the virtual DOM not inherently fast?</p>
+<p class="lead-in"><strong>What it is.</strong> React re-renders subtrees and diffs a virtual DOM. Vue 3, Svelte 5 and Solid use fine-grained reactivity (signals) that updates only the bound DOM nodes.</p>
+<p class="lead-in"><strong>Example.</strong> In Solid, a component function runs once; the signal read inside a JSX expression creates a direct subscription to that text node.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Signals do less work at runtime but need a compiler or proxy layer and have a smaller ecosystem. React Compiler attacks the same problem from the other direction by auto-memoising. Web Components remain the interop layer when you must ship a widget into partner sites you don't control.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> When would you not choose React? What does React Compiler change about how you write components? Why is the virtual DOM not inherently fast?</p>
 <h2 id="6-web-protocols">6. Web protocols</h2>
 <h3 id="61-what-happens-when-you-type-a-url">6.1 What happens when you type a URL</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 300" role="img" aria-label="Round trips before the first byte of HTML">
@@ -1204,25 +1204,25 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
   <rect class="box hl" x="180" y="262" width="676" height="28" rx="7"/>
   <text class="s" x="196" y="281">preconnect performs DNS + TCP + TLS early, so the first request starts at block 1 instead of block 4.</text>
 </svg><figcaption>Round trips before the first byte of HTML, cold vs QUIC vs resumed.</figcaption></figure>
-<p><strong>What it is.</strong> URL parse → HSTS check → DNS resolution → TCP handshake (or QUIC's single round trip) → TLS handshake, ALPN negotiating h2/h3 → HTTP request → CDN or origin response → parse and render.</p>
-<p><strong>Example.</strong> Counting round trips is the point: a cold cross-origin image host costs DNS + TCP + TLS before the first byte, which is exactly what <code>preconnect</code> removes.</p>
-<p><strong>Trade-offs.</strong> Every extra origin costs a connection setup; that's why domain sharding stopped being an optimisation and became a cost.</p>
-<p><strong>Follow-ups.</strong> Where does the browser cache fit in this sequence? What does HSTS preload change? Why does <code>preconnect</code> help more on mobile?</p>
+<p class="lead-in"><strong>What it is.</strong> URL parse → HSTS check → DNS resolution → TCP handshake (or QUIC's single round trip) → TLS handshake, ALPN negotiating h2/h3 → HTTP request → CDN or origin response → parse and render.</p>
+<p class="lead-in"><strong>Example.</strong> Counting round trips is the point: a cold cross-origin image host costs DNS + TCP + TLS before the first byte, which is exactly what <code>preconnect</code> removes.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Every extra origin costs a connection setup; that's why domain sharding stopped being an optimisation and became a cost.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Where does the browser cache fit in this sequence? What does HSTS preload change? Why does <code>preconnect</code> help more on mobile?</p>
 <h3 id="62-dns">6.2 DNS</h3>
-<p><strong>What it is.</strong> Hierarchical name resolution: browser cache → OS cache → resolver → root → TLD → authoritative, each hop honouring a TTL.</p>
-<p><strong>Example.</strong> <code>dns-prefetch</code> resolves a third-party hostname early; <code>preconnect</code> goes further and completes TCP + TLS too.</p>
-<p><strong>Trade-offs.</strong> A low TTL buys fast failover and costs more lookups. A CNAME chain to your CDN adds a lookup on cold connections.</p>
-<p><strong>Follow-ups.</strong> What's the difference between <code>dns-prefetch</code> and <code>preconnect</code>? How many <code>preconnect</code> hints should a page have? (A handful — they compete for bandwidth.)</p>
+<p class="lead-in"><strong>What it is.</strong> Hierarchical name resolution: browser cache → OS cache → resolver → root → TLD → authoritative, each hop honouring a TTL.</p>
+<p class="lead-in"><strong>Example.</strong> <code>dns-prefetch</code> resolves a third-party hostname early; <code>preconnect</code> goes further and completes TCP + TLS too.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> A low TTL buys fast failover and costs more lookups. A CNAME chain to your CDN adds a lookup on cold connections.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What's the difference between <code>dns-prefetch</code> and <code>preconnect</code>? How many <code>preconnect</code> hints should a page have? (A handful — they compete for bandwidth.)</p>
 <h3 id="63-tcp-vs-quic">6.3 TCP vs QUIC</h3>
-<p><strong>What it is.</strong> TCP is a reliable, ordered, connection-oriented byte stream with a three-way handshake. QUIC runs over UDP, builds in TLS 1.3, and multiplexes independent streams.</p>
-<p><strong>Example.</strong> On a lossy mobile network, one lost TCP segment stalls <em>every</em> HTTP/2 stream on that connection; with QUIC only the affected stream stalls.</p>
-<p><strong>Trade-offs.</strong> QUIC moves congestion control into userspace (more CPU, faster iteration) and some corporate networks block or throttle UDP.</p>
-<p><strong>Follow-ups.</strong> What is head-of-line blocking, at which layer? Why does connection migration matter when a phone switches from Wi-Fi to cellular?</p>
+<p class="lead-in"><strong>What it is.</strong> TCP is a reliable, ordered, connection-oriented byte stream with a three-way handshake. QUIC runs over UDP, builds in TLS 1.3, and multiplexes independent streams.</p>
+<p class="lead-in"><strong>Example.</strong> On a lossy mobile network, one lost TCP segment stalls <em>every</em> HTTP/2 stream on that connection; with QUIC only the affected stream stalls.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> QUIC moves congestion control into userspace (more CPU, faster iteration) and some corporate networks block or throttle UDP.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What is head-of-line blocking, at which layer? Why does connection migration matter when a phone switches from Wi-Fi to cellular?</p>
 <h3 id="64-tls">6.4 TLS</h3>
-<p><strong>What it is.</strong> The handshake negotiates cipher and protocol version, ALPN selects h2/h3, the server presents a certificate chain validated against a trust store, and session keys are derived.</p>
-<p><strong>Example.</strong> TLS 1.3 completes in one round trip; session resumption and 0-RTT reduce it further.</p>
-<p><strong>Trade-offs.</strong> <strong>0-RTT data is replayable</strong>, so it must only carry idempotent requests. Certificate pinning improves security but causes outages when rotation is mishandled.</p>
-<p><strong>Follow-ups.</strong> What does <code>Strict-Transport-Security</code> do and why does <code>preload</code> matter? What breaks with mixed content? What is ALPN for?</p>
+<p class="lead-in"><strong>What it is.</strong> The handshake negotiates cipher and protocol version, ALPN selects h2/h3, the server presents a certificate chain validated against a trust store, and session keys are derived.</p>
+<p class="lead-in"><strong>Example.</strong> TLS 1.3 completes in one round trip; session resumption and 0-RTT reduce it further.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> <strong>0-RTT data is replayable</strong>, so it must only carry idempotent requests. Certificate pinning improves security but causes outages when rotation is mishandled.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What does <code>Strict-Transport-Security</code> do and why does <code>preload</code> matter? What breaks with mixed content? What is ALPN for?</p>
 <h3 id="65-http-versions">6.5 HTTP versions</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 312" role="img" aria-label="How HTTP 1.1, 2 and 3 handle concurrency and packet loss">
   <text class="title" x="16" y="24">Head-of-line blocking moves down a layer with each HTTP version</text>
@@ -1325,11 +1325,11 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> Under HTTP/1.1, sprite sheets, concatenated bundles and domain sharding were correct. Under HTTP/2 sharding is an anti-pattern and many small cacheable chunks are fine.</p>
-<p><strong>Trade-offs.</strong> H2 Server Push is dead (removed from Chrome) — the replacement is <code>103 Early Hints</code> plus <code>preload</code>.</p>
-<p><strong>Follow-ups.</strong> Does HTTP/2 remove the need for bundling? (No — compression ratio and request overhead still favour reasonable chunk sizes.) Why did Server Push fail?</p>
+<p class="lead-in"><strong>Example.</strong> Under HTTP/1.1, sprite sheets, concatenated bundles and domain sharding were correct. Under HTTP/2 sharding is an anti-pattern and many small cacheable chunks are fine.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> H2 Server Push is dead (removed from Chrome) — the replacement is <code>103 Early Hints</code> plus <code>preload</code>.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Does HTTP/2 remove the need for bundling? (No — compression ratio and request overhead still favour reasonable chunk sizes.) Why did Server Push fail?</p>
 <h3 id="66-http-methods-and-idempotency">6.6 HTTP methods and idempotency</h3>
-<p><strong>What it is.</strong> <em>Safe</em> means no state change; <em>idempotent</em> means repeating has the same end effect as doing it once.</p>
+<p class="lead-in"><strong>What it is.</strong> <em>Safe</em> means no state change; <em>idempotent</em> means repeating has the same end effect as doing it once.</p>
 <table>
 <thead>
 <tr>
@@ -1372,9 +1372,9 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> A booking POST carries a client-generated <code>Idempotency-Key</code>; the server stores key → response for a window, so a retry after a timeout returns the original result instead of double-booking.</p>
-<p><strong>Trade-offs.</strong> Idempotency is an API contract, not a client property. Retries without a circuit breaker and jittered backoff turn a blip into a retry storm.</p>
-<p><strong>Follow-ups.</strong> How do you make a POST retry-safe? Where do you put retry policy — the component, the data layer, or the gateway? What does <code>Retry-After</code> do?</p>
+<p class="lead-in"><strong>Example.</strong> A booking POST carries a client-generated <code>Idempotency-Key</code>; the server stores key → response for a window, so a retry after a timeout returns the original result instead of double-booking.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Idempotency is an API contract, not a client property. Retries without a circuit breaker and jittered backoff turn a blip into a retry storm.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you make a POST retry-safe? Where do you put retry policy — the component, the data layer, or the gateway? What does <code>Retry-After</code> do?</p>
 <h3 id="67-realtime-transports">6.7 Realtime transports</h3>
 <table>
 <thead>
@@ -1418,17 +1418,17 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> Subscribe per visible item rather than per result set — drive subscriptions from <code>IntersectionObserver</code> so offscreen cards unsubscribe; coalesce bursts into one flush per animation frame.</p>
-<p><strong>Trade-offs.</strong> WebSockets are stateful, which complicates load balancing, scaling and deploys; SSE rides normal HTTP infrastructure but is one-way and limited to text.</p>
-<p><strong>Follow-ups.</strong> How do you reconnect without hammering the server? (Exponential backoff with jitter, a sequence number to detect gaps, full refetch after a gap.) How do you scale a WebSocket fleet? How do you handle backpressure?</p>
+<p class="lead-in"><strong>Example.</strong> Subscribe per visible item rather than per result set — drive subscriptions from <code>IntersectionObserver</code> so offscreen cards unsubscribe; coalesce bursts into one flush per animation frame.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> WebSockets are stateful, which complicates load balancing, scaling and deploys; SSE rides normal HTTP infrastructure but is one-way and limited to text.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you reconnect without hammering the server? (Exponential backoff with jitter, a sequence number to detect gaps, full refetch after a gap.) How do you scale a WebSocket fleet? How do you handle backpressure?</p>
 <h3 id="68-api-shapes-rest-graphql-bff">6.8 API shapes: REST, GraphQL, BFF</h3>
-<p><strong>What it is.</strong> REST exposes resources; GraphQL exposes one endpoint with a client-specified query; a BFF is a server owned by the frontend team that aggregates and trims payloads for one surface.</p>
-<p><strong>Example.</strong> For a travel marketplace, a BFF per surface (web, iOS, Android) keeps the mobile payload small without forcing every backend service to change.</p>
-<p><strong>Trade-offs.</strong> GraphQL removes over-fetching and client-side waterfalls, and costs you CDN cacheability (POST by default), N+1 risk on the server, and the need for query-cost limits and persisted queries. REST stays trivially cacheable.</p>
-<p><strong>Follow-ups.</strong> How do you cache a GraphQL response at the edge? Cursor vs offset pagination, and why does offset break on a live inventory? How do you version an API the frontend depends on?</p>
+<p class="lead-in"><strong>What it is.</strong> REST exposes resources; GraphQL exposes one endpoint with a client-specified query; a BFF is a server owned by the frontend team that aggregates and trims payloads for one surface.</p>
+<p class="lead-in"><strong>Example.</strong> For a travel marketplace, a BFF per surface (web, iOS, Android) keeps the mobile payload small without forcing every backend service to change.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> GraphQL removes over-fetching and client-side waterfalls, and costs you CDN cacheability (POST by default), N+1 risk on the server, and the need for query-cost limits and persisted queries. REST stays trivially cacheable.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you cache a GraphQL response at the edge? Cursor vs offset pagination, and why does offset break on a live inventory? How do you version an API the frontend depends on?</p>
 <h2 id="7-caching-storage-and-offline">7. Caching, storage and offline</h2>
 <h3 id="71-http-cache-headers">7.1 HTTP cache headers</h3>
-<p><strong>What it is.</strong> <code>Cache-Control</code> sets the policy; <code>ETag</code>/<code>Last-Modified</code> enable conditional revalidation; <code>Vary</code> defines the cache key's extra dimensions.</p>
+<p class="lead-in"><strong>What it is.</strong> <code>Cache-Control</code> sets the policy; <code>ETag</code>/<code>Last-Modified</code> enable conditional revalidation; <code>Vary</code> defines the cache key's extra dimensions.</p>
 <table>
 <thead>
 <tr>
@@ -1470,19 +1470,19 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code>GET /app.3f9a1c.js  →  Cache-Control: public, max-age=31536000, immutable
 GET /                →  Cache-Control: no-cache
                         ETag: &quot;v842&quot;
    next request:        If-None-Match: &quot;v842&quot;  →  304 Not Modified
 </code></pre>
-<p><strong>Trade-offs.</strong> <code>private</code> vs <code>public</code> is a correctness decision, not a performance one — getting it wrong serves one user's booking page to another. Over-varying (e.g. on <code>User-Agent</code>) destroys hit rate.</p>
-<p><strong>Follow-ups.</strong> What's the difference between <code>no-cache</code> and <code>no-store</code>? What exactly does a 304 save? Strong vs weak ETags? Why must <code>Vary: Accept-Encoding</code> be set?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> <code>private</code> vs <code>public</code> is a correctness decision, not a performance one — getting it wrong serves one user's booking page to another. Over-varying (e.g. on <code>User-Agent</code>) destroys hit rate.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What's the difference between <code>no-cache</code> and <code>no-store</code>? What exactly does a 304 save? Strong vs weak ETags? Why must <code>Vary: Accept-Encoding</code> be set?</p>
 <h3 id="72-the-cache-busting-pattern">7.2 The cache-busting pattern</h3>
-<p><strong>What it is.</strong> Immutable, long-lived, content-hashed assets plus a short-lived or revalidated HTML document that points at them.</p>
-<p><strong>Example.</strong> <code>index.html</code> is <code>no-cache</code>; it references <code>app.3f9a1c.js</code> which is <code>immutable</code>. A deploy changes the hash, so no purge is needed and no user ever gets a mismatched chunk.</p>
-<p><strong>Trade-offs.</strong> You still must handle a chunk 404 for users who loaded old HTML before a deploy — catch <code>ChunkLoadError</code>, retry with a cache-bust, then force a reload.</p>
-<p><strong>Follow-ups.</strong> What happens to a user who's been sitting on a tab for an hour when you deploy? How do you roll back without breaking in-flight sessions? (Keep the previous N builds' assets on the CDN.)</p>
+<p class="lead-in"><strong>What it is.</strong> Immutable, long-lived, content-hashed assets plus a short-lived or revalidated HTML document that points at them.</p>
+<p class="lead-in"><strong>Example.</strong> <code>index.html</code> is <code>no-cache</code>; it references <code>app.3f9a1c.js</code> which is <code>immutable</code>. A deploy changes the hash, so no purge is needed and no user ever gets a mismatched chunk.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> You still must handle a chunk 404 for users who loaded old HTML before a deploy — catch <code>ChunkLoadError</code>, retry with a cache-bust, then force a reload.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What happens to a user who's been sitting on a tab for an hour when you deploy? How do you roll back without breaking in-flight sessions? (Keep the previous N builds' assets on the CDN.)</p>
 <h3 id="73-cdn-and-the-cache-layer-stack">7.3 CDN and the cache layer stack</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 286" role="img" aria-label="Cache layers a response passes through, nearest to the user first">
   <text class="title" x="16" y="24">A request stops at the first layer that can answer it</text>
@@ -1540,10 +1540,10 @@ GET /                →  Cache-Control: no-cache
   <text class="xs" x="466" y="248">Prices, availability, anything personalised · Cache-Control: private</text>
   <text class="xs" x="466" y="264">Get public/private wrong and one user sees another's booking page</text>
 </svg><figcaption>Every layer a response can be served from, nearest to the user first.</figcaption></figure>
-<p><strong>What it is.</strong> A response passes through: browser memory cache → browser disk cache → Service Worker cache → preload cache → CDN edge → CDN shield/regional → origin.</p>
-<p><strong>Example.</strong> A shield tier collapses many edge misses into one origin request, which protects the origin during a cache purge or a traffic spike.</p>
-<p><strong>Trade-offs.</strong> Caching personalised HTML at the edge requires the personalisation to be in the cache key, which fragments the cache. The usual resolution is to cache an anonymous shell and personalise client-side or via an edge function.</p>
-<p><strong>Follow-ups.</strong> What should never be cached at the CDN? How do you invalidate — purge by URL, surrogate key, or just change the hash? What does a cache HIT/MISS/STALE header tell you when debugging?</p>
+<p class="lead-in"><strong>What it is.</strong> A response passes through: browser memory cache → browser disk cache → Service Worker cache → preload cache → CDN edge → CDN shield/regional → origin.</p>
+<p class="lead-in"><strong>Example.</strong> A shield tier collapses many edge misses into one origin request, which protects the origin during a cache purge or a traffic spike.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Caching personalised HTML at the edge requires the personalisation to be in the cache key, which fragments the cache. The usual resolution is to cache an anonymous shell and personalise client-side or via an edge function.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What should never be cached at the CDN? How do you invalidate — purge by URL, surrogate key, or just change the hash? What does a cache HIT/MISS/STALE header tell you when debugging?</p>
 <h3 id="74-browser-storage">7.4 Browser storage</h3>
 <table>
 <thead>
@@ -1600,17 +1600,17 @@ GET /                →  Cache-Control: no-cache
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> Reading <code>localStorage</code> inside a scroll handler is a genuine performance bug — it is synchronous disk I/O on the main thread.</p>
-<p><strong>Trade-offs.</strong> Cookies travel on every request, adding bytes to every call; <code>localStorage</code> is convenient but XSS-readable and synchronous; IndexedDB is the only option at size but has an awkward API (use <code>idb</code>).</p>
-<p><strong>Follow-ups.</strong> Where would you store an auth token and why? What is storage quota and what happens when it's exceeded? How do you sync state between tabs? (<code>BroadcastChannel</code> or a <code>storage</code> event.)</p>
+<p class="lead-in"><strong>Example.</strong> Reading <code>localStorage</code> inside a scroll handler is a genuine performance bug — it is synchronous disk I/O on the main thread.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Cookies travel on every request, adding bytes to every call; <code>localStorage</code> is convenient but XSS-readable and synchronous; IndexedDB is the only option at size but has an awkward API (use <code>idb</code>).</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Where would you store an auth token and why? What is storage quota and what happens when it's exceeded? How do you sync state between tabs? (<code>BroadcastChannel</code> or a <code>storage</code> event.)</p>
 <h3 id="75-cookie-attributes">7.5 Cookie attributes</h3>
-<p><strong>What it is.</strong> <code>HttpOnly</code> blocks JavaScript access; <code>Secure</code> restricts to HTTPS; <code>SameSite</code> controls cross-site sending; <code>Domain</code>/<code>Path</code> set scope; <code>Max-Age</code>/<code>Expires</code> set lifetime.</p>
-<p><strong>Example.</strong> <code>Set-Cookie: sid=...; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=1209600</code></p>
-<p><strong>Trade-offs.</strong> <code>SameSite=Strict</code> is the safest and breaks inbound links from email and partner sites (the user arrives logged out). <code>Lax</code> is the modern default and allows top-level GET navigation. <code>None</code> requires <code>Secure</code> and is needed for genuine third-party contexts.</p>
-<p><strong>Follow-ups.</strong> Why does <code>SameSite=Lax</code> mostly solve CSRF? What is a cookie-prefix (<code>__Host-</code>)? How do cookies behave across subdomains, and what breaks when several apps share an apex domain?</p>
+<p class="lead-in"><strong>What it is.</strong> <code>HttpOnly</code> blocks JavaScript access; <code>Secure</code> restricts to HTTPS; <code>SameSite</code> controls cross-site sending; <code>Domain</code>/<code>Path</code> set scope; <code>Max-Age</code>/<code>Expires</code> set lifetime.</p>
+<p class="lead-in"><strong>Example.</strong> <code>Set-Cookie: sid=...; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=1209600</code></p>
+<p class="lead-in"><strong>Trade-offs.</strong> <code>SameSite=Strict</code> is the safest and breaks inbound links from email and partner sites (the user arrives logged out). <code>Lax</code> is the modern default and allows top-level GET navigation. <code>None</code> requires <code>Secure</code> and is needed for genuine third-party contexts.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why does <code>SameSite=Lax</code> mostly solve CSRF? What is a cookie-prefix (<code>__Host-</code>)? How do cookies behave across subdomains, and what breaks when several apps share an apex domain?</p>
 <h3 id="76-service-workers-and-offline">7.6 Service Workers and offline</h3>
-<p><strong>What it is.</strong> A proxy worker sitting between the page and the network, with its own cache, lifecycle and no DOM access.</p>
-<p><strong>Example.</strong> Lifecycle is install → waiting → activate; <code>skipWaiting</code> and <code>clients.claim</code> take over immediately. Strategy by resource type:</p>
+<p class="lead-in"><strong>What it is.</strong> A proxy worker sitting between the page and the network, with its own cache, lifecycle and no DOM access.</p>
+<p class="lead-in"><strong>Example.</strong> Lifecycle is install → waiting → activate; <code>skipWaiting</code> and <code>clients.claim</code> take over immediately. Strategy by resource type:</p>
 <table>
 <thead>
 <tr>
@@ -1637,8 +1637,8 @@ GET /                →  Cache-Control: no-cache
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> A Service Worker is the most dangerous thing a frontend team deploys — a bad one is sticky and can serve broken assets indefinitely. Always ship a kill switch (remote flag that makes it unregister) and know <code>Clear-Site-Data</code>. <code>skipWaiting</code> risks mixing an old page with a new worker.</p>
-<p><strong>Follow-ups.</strong> How do you update a Service Worker safely? What is Background Sync for? How would you make a booking flow survive a tunnel? (Draft in IndexedDB, queued submit with an idempotency key, explicit offline UI — never an optimistic success.)</p>
+<p class="lead-in"><strong>Trade-offs.</strong> A Service Worker is the most dangerous thing a frontend team deploys — a bad one is sticky and can serve broken assets indefinitely. Always ship a kill switch (remote flag that makes it unregister) and know <code>Clear-Site-Data</code>. <code>skipWaiting</code> risks mixing an old page with a new worker.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you update a Service Worker safely? What is Background Sync for? How would you make a booking flow survive a tunnel? (Draft in IndexedDB, queued submit with an idempotency key, explicit offline UI — never an optimistic success.)</p>
 <h2 id="8-security">8. Security</h2>
 <h3 id="81-same-origin-policy-and-cors">8.1 Same-origin policy and CORS</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 328" role="img" aria-label="CORS preflight sequence between browser and server">
@@ -1674,8 +1674,8 @@ GET /                →  Cache-Control: no-cache
   <text class="xs" x="16" y="320">Allow-Credentials: true cannot be paired with Origin: * — echo a validated origin, never reflect it blindly.</text>
   <text class="xs" x="520" y="320">Simple requests (GET, or POST with a form content-type) skip the preflight.</text>
 </svg><figcaption>A CORS preflight. The browser asks permission before sending the real request.</figcaption></figure>
-<p><strong>What it is.</strong> An origin is scheme + host + port. The same-origin policy blocks a document from <em>reading</em> cross-origin responses. CORS is the server's mechanism to <strong>relax</strong> that — it is not a defence.</p>
-<p><strong>Example.</strong> A non-simple request triggers a preflight:</p>
+<p class="lead-in"><strong>What it is.</strong> An origin is scheme + host + port. The same-origin policy blocks a document from <em>reading</em> cross-origin responses. CORS is the server's mechanism to <strong>relax</strong> that — it is not a defence.</p>
+<p class="lead-in"><strong>Example.</strong> A non-simple request triggers a preflight:</p>
 <pre><code>OPTIONS /api/book          Origin: https://www.example.com
                            Access-Control-Request-Method: POST
                            Access-Control-Request-Headers: content-type, authorization
@@ -1683,10 +1683,10 @@ GET /                →  Cache-Control: no-cache
   Access-Control-Allow-Credentials: true
   Access-Control-Max-Age: 600
 </code></pre>
-<p><strong>Trade-offs.</strong> <code>Allow-Credentials: true</code> cannot be combined with <code>Origin: *</code> — you must echo a specific, validated origin. Blindly reflecting <code>Origin</code> is a common vulnerability. A high <code>Max-Age</code> cuts preflights but delays policy changes.</p>
-<p><strong>Follow-ups.</strong> What makes a request "simple" (no preflight)? Does CORS protect your API? (No — curl ignores it; authorization is the server's job.) Why can a <code>&lt;img&gt;</code> or <code>&lt;form&gt;</code> go cross-origin but <code>fetch</code> cannot read the response?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> <code>Allow-Credentials: true</code> cannot be combined with <code>Origin: *</code> — you must echo a specific, validated origin. Blindly reflecting <code>Origin</code> is a common vulnerability. A high <code>Max-Age</code> cuts preflights but delays policy changes.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What makes a request "simple" (no preflight)? Does CORS protect your API? (No — curl ignores it; authorization is the server's job.) Why can a <code>&lt;img&gt;</code> or <code>&lt;form&gt;</code> go cross-origin but <code>fetch</code> cannot read the response?</p>
 <h3 id="82-xss">8.2 XSS</h3>
-<p><strong>What it is.</strong> Executing attacker-controlled script in your origin.</p>
+<p class="lead-in"><strong>What it is.</strong> Executing attacker-controlled script in your origin.</p>
 <table>
 <thead>
 <tr>
@@ -1713,25 +1713,25 @@ GET /                →  Cache-Control: no-cache
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> React escapes interpolated values, so the real React vectors are exactly four: <code>dangerouslySetInnerHTML</code>, <code>href={userInput}</code> with a <code>javascript:</code> URL, spreading unvalidated props onto an element, and server-rendered JSON injection (an unescaped <code>&lt;/script&gt;</code> inside a serialised payload).</p>
-<p><strong>Trade-offs.</strong> Sanitising HTML is a losing arms race compared with not rendering HTML at all; <strong>Trusted Types</strong> converts a code-review problem into a browser-enforced one, at the cost of a migration.</p>
-<p><strong>Follow-ups.</strong> How would you safely render user-authored rich text? Why is <code>encodeURIComponent</code> not enough in an HTML attribute? What does Trusted Types enforce?</p>
+<p class="lead-in"><strong>Example.</strong> React escapes interpolated values, so the real React vectors are exactly four: <code>dangerouslySetInnerHTML</code>, <code>href={userInput}</code> with a <code>javascript:</code> URL, spreading unvalidated props onto an element, and server-rendered JSON injection (an unescaped <code>&lt;/script&gt;</code> inside a serialised payload).</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Sanitising HTML is a losing arms race compared with not rendering HTML at all; <strong>Trusted Types</strong> converts a code-review problem into a browser-enforced one, at the cost of a migration.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How would you safely render user-authored rich text? Why is <code>encodeURIComponent</code> not enough in an HTML attribute? What does Trusted Types enforce?</p>
 <h3 id="83-content-security-policy">8.3 Content Security Policy</h3>
-<p><strong>What it is.</strong> A response header restricting which sources of script, style, images and frames may load and execute.</p>
-<p><strong>Example.</strong> A strict modern policy uses nonces plus <code>strict-dynamic</code>, not a host allowlist:</p>
+<p class="lead-in"><strong>What it is.</strong> A response header restricting which sources of script, style, images and frames may load and execute.</p>
+<p class="lead-in"><strong>Example.</strong> A strict modern policy uses nonces plus <code>strict-dynamic</code>, not a host allowlist:</p>
 <pre><code>Content-Security-Policy:
   script-src 'nonce-{random}' 'strict-dynamic' https: 'unsafe-inline';
   object-src 'none'; base-uri 'none'; require-trusted-types-for 'script';
   report-uri /csp-report
 </code></pre>
 <p><code>'unsafe-inline'</code> and <code>https:</code> here are <strong>fallbacks for old browsers</strong> that modern browsers ignore once a nonce is present.</p>
-<p><strong>Trade-offs.</strong> Host allowlists are routinely bypassable via JSONP endpoints on allowed CDNs. Nonces are incompatible with full-page CDN caching (each response needs a fresh nonce) — which pushes you to hashes or edge-injected nonces. Inline styles from runtime CSS-in-JS and tag managers are the usual blockers.</p>
-<p><strong>Follow-ups.</strong> How do you roll out CSP without breaking the site? (<code>Content-Security-Policy-Report-Only</code>, collect violations for two weeks, then enforce.) Why is <code>strict-dynamic</code> better than an allowlist? How does CSP interact with a CDN?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Host allowlists are routinely bypassable via JSONP endpoints on allowed CDNs. Nonces are incompatible with full-page CDN caching (each response needs a fresh nonce) — which pushes you to hashes or edge-injected nonces. Inline styles from runtime CSS-in-JS and tag managers are the usual blockers.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you roll out CSP without breaking the site? (<code>Content-Security-Policy-Report-Only</code>, collect violations for two weeks, then enforce.) Why is <code>strict-dynamic</code> better than an allowlist? How does CSP interact with a CDN?</p>
 <h3 id="84-csrf">8.4 CSRF</h3>
-<p><strong>What it is.</strong> An attacker-controlled page causes the victim's browser to make an authenticated <strong>write</strong> using cookies it sends automatically.</p>
-<p><strong>Example.</strong> Defences, in order of preference: <code>SameSite=Lax</code>/<code>Strict</code> cookies, a synchroniser or double-submit token, and checking <code>Origin</code>/<code>Sec-Fetch-Site</code> server-side.</p>
-<p><strong>Trade-offs.</strong> CSRF defences are only needed when you authenticate with cookies — a bearer token in an <code>Authorization</code> header is not sent automatically, so it is not CSRF-exposed (but is XSS-exposed instead).</p>
-<p><strong>Follow-ups.</strong> CORS vs CSRF in one sentence each. Does <code>SameSite=Lax</code> fully solve CSRF? (Not for top-level GET state changes — another reason GET must stay safe.)</p>
+<p class="lead-in"><strong>What it is.</strong> An attacker-controlled page causes the victim's browser to make an authenticated <strong>write</strong> using cookies it sends automatically.</p>
+<p class="lead-in"><strong>Example.</strong> Defences, in order of preference: <code>SameSite=Lax</code>/<code>Strict</code> cookies, a synchroniser or double-submit token, and checking <code>Origin</code>/<code>Sec-Fetch-Site</code> server-side.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> CSRF defences are only needed when you authenticate with cookies — a bearer token in an <code>Authorization</code> header is not sent automatically, so it is not CSRF-exposed (but is XSS-exposed instead).</p>
+<p class="lead-in"><strong>Follow-ups.</strong> CORS vs CSRF in one sentence each. Does <code>SameSite=Lax</code> fully solve CSRF? (Not for top-level GET state changes — another reason GET must stay safe.)</p>
 <h3 id="85-security-headers">8.5 Security headers</h3>
 <table>
 <thead>
@@ -1771,12 +1771,12 @@ GET /                →  Cache-Control: no-cache
 </tr>
 </tbody>
 </table>
-<p><strong>Follow-ups.</strong> Which of these would you set first on a new service, and why? What breaks when you turn on COEP?</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Which of these would you set first on a new service, and why? What breaks when you turn on COEP?</p>
 <h3 id="86-authentication-vs-authorization">8.6 Authentication vs authorization</h3>
-<p><strong>What it is.</strong> Authentication is "who are you"; authorization is "what may you do."</p>
-<p><strong>Example.</strong> Hiding an admin button is a UX affordance. The server must independently enforce the permission on the endpoint.</p>
-<p><strong>Trade-offs.</strong> Fetching a capabilities object lets the UI render correctly without duplicating policy, at the cost of an extra round trip and a cache-invalidation question when roles change.</p>
-<p><strong>Follow-ups.</strong> Where must authorization be enforced? How do you handle a user whose permissions change mid-session?</p>
+<p class="lead-in"><strong>What it is.</strong> Authentication is "who are you"; authorization is "what may you do."</p>
+<p class="lead-in"><strong>Example.</strong> Hiding an admin button is a UX affordance. The server must independently enforce the permission on the endpoint.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Fetching a capabilities object lets the UI render correctly without duplicating policy, at the cost of an extra round trip and a cache-invalidation question when roles change.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Where must authorization be enforced? How do you handle a user whose permissions change mid-session?</p>
 <h3 id="87-oauth-oidc-and-jwt">8.7 OAuth, OIDC and JWT</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 470" role="img" aria-label="OAuth Authorization Code flow with PKCE for a browser app">
   <text class="title" x="16" y="24">Authorization Code + PKCE — the only correct flow for a browser app</text>
@@ -1827,26 +1827,26 @@ GET /                →  Cache-Control: no-cache
   <text class="xs" x="464" y="444">Each refresh issues a new token and kills the old one</text>
   <text class="xs" x="464" y="459">An old one reappearing = theft → revoke the whole family</text>
 </svg><figcaption>Authorization Code with PKCE — the only correct OAuth flow for a browser app.</figcaption></figure>
-<p><strong>What it is.</strong> OAuth 2.0 is a delegated <strong>authorization</strong> framework; OpenID Connect is the <strong>authentication</strong> layer on top of it (the <code>id_token</code>); JWT is merely a <strong>token format</strong>. An OAuth implementation need not use JWTs.</p>
-<p><strong>Example.</strong> For a browser app, use Authorization Code with <strong>PKCE</strong>. The implicit flow is deprecated because it leaked tokens into URL fragments, history and referrers. Validate <code>state</code> (CSRF on the callback) and <code>nonce</code> (id_token replay).</p>
+<p class="lead-in"><strong>What it is.</strong> OAuth 2.0 is a delegated <strong>authorization</strong> framework; OpenID Connect is the <strong>authentication</strong> layer on top of it (the <code>id_token</code>); JWT is merely a <strong>token format</strong>. An OAuth implementation need not use JWTs.</p>
+<p class="lead-in"><strong>Example.</strong> For a browser app, use Authorization Code with <strong>PKCE</strong>. The implicit flow is deprecated because it leaked tokens into URL fragments, history and referrers. Validate <code>state</code> (CSRF on the callback) and <code>nonce</code> (id_token replay).</p>
 <p>A JWT is <code>header.payload.signature</code>, base64url — <strong>encoded, not encrypted</strong>. Server-side validation must check the signature, pin the expected <code>alg</code> (reject <code>none</code> and algorithm confusion), and check <code>iss</code>, <code>aud</code>, <code>exp</code>, <code>nbf</code>.</p>
-<p><strong>Trade-offs.</strong> Stateless JWTs scale well but <strong>cannot be revoked before expiry</strong> — so either keep access-token lifetimes very short or maintain a denylist and give up some statelessness. Opaque tokens with introspection are the opposite trade.</p>
-<p><strong>Follow-ups.</strong> Access vs refresh tokens? How does rotation with reuse detection work? (Each refresh issues a new token and invalidates the old; if an old one reappears, revoke the whole family.) What stops ten parallel 401s triggering ten refreshes? (A single-flight lock.)</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Stateless JWTs scale well but <strong>cannot be revoked before expiry</strong> — so either keep access-token lifetimes very short or maintain a denylist and give up some statelessness. Opaque tokens with introspection are the opposite trade.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Access vs refresh tokens? How does rotation with reuse detection work? (Each refresh issues a new token and invalidates the old; if an old one reappears, revoke the whole family.) What stops ten parallel 401s triggering ten refreshes? (A single-flight lock.)</p>
 <h3 id="88-token-storage">8.8 Token storage</h3>
-<p><strong>What it is.</strong> The choice between <code>localStorage</code>, cookies and memory for auth material.</p>
-<p><strong>Example.</strong> The defensible architecture: short-lived access token <strong>in memory only</strong>, refresh token in an <code>HttpOnly; Secure; SameSite=Strict</code> cookie scoped to the refresh path, silent refresh on 401.</p>
-<p><strong>Trade-offs.</strong> <code>localStorage</code> is XSS-readable; cookies are CSRF-exposed but can be <code>HttpOnly</code>. The honest caveat: under XSS you lose either way, because the attacker can simply call your API from the victim's session. That is why CSP and Trusted Types matter more than storage choice.</p>
-<p><strong>Follow-ups.</strong> Why is "just use <code>HttpOnly</code> cookies" not a complete answer? What survives a page refresh with in-memory tokens? (Nothing — you silently refresh on load.)</p>
+<p class="lead-in"><strong>What it is.</strong> The choice between <code>localStorage</code>, cookies and memory for auth material.</p>
+<p class="lead-in"><strong>Example.</strong> The defensible architecture: short-lived access token <strong>in memory only</strong>, refresh token in an <code>HttpOnly; Secure; SameSite=Strict</code> cookie scoped to the refresh path, silent refresh on 401.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> <code>localStorage</code> is XSS-readable; cookies are CSRF-exposed but can be <code>HttpOnly</code>. The honest caveat: under XSS you lose either way, because the attacker can simply call your API from the victim's session. That is why CSP and Trusted Types matter more than storage choice.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why is "just use <code>HttpOnly</code> cookies" not a complete answer? What survives a page refresh with in-memory tokens? (Nothing — you silently refresh on load.)</p>
 <h3 id="89-supply-chain-and-third-parties">8.9 Supply chain and third parties</h3>
-<p><strong>What it is.</strong> Risk arriving through dependencies and third-party scripts rather than your own code.</p>
-<p><strong>Example.</strong> Controls: committed lockfile, <code>npm ci</code> only, Renovate/Dependabot with grouped patch automerge, <code>npm audit</code>/Socket in CI, <code>ignore-scripts</code> plus a private registry proxy, and provenance/sigstore where available. For third-party tags: Subresource Integrity hashes, <code>crossorigin</code>, sandboxed iframes, and a review gate.</p>
-<p><strong>Trade-offs.</strong> SRI breaks when the vendor updates the file — which is the point, but it means vendor-hosted "always latest" scripts cannot use it. Sandboxing a tag often breaks the feature the business wanted.</p>
-<p><strong>Follow-ups.</strong> What is dependency confusion and how do scoped private packages prevent it? A marketing tag on your checkout page — what's the blast radius? (Full compromise.) How would you audit what third-party scripts are actually on the page?</p>
+<p class="lead-in"><strong>What it is.</strong> Risk arriving through dependencies and third-party scripts rather than your own code.</p>
+<p class="lead-in"><strong>Example.</strong> Controls: committed lockfile, <code>npm ci</code> only, Renovate/Dependabot with grouped patch automerge, <code>npm audit</code>/Socket in CI, <code>ignore-scripts</code> plus a private registry proxy, and provenance/sigstore where available. For third-party tags: Subresource Integrity hashes, <code>crossorigin</code>, sandboxed iframes, and a review gate.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> SRI breaks when the vendor updates the file — which is the point, but it means vendor-hosted "always latest" scripts cannot use it. Sandboxing a tag often breaks the feature the business wanted.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What is dependency confusion and how do scoped private packages prevent it? A marketing tag on your checkout page — what's the blast radius? (Full compromise.) How would you audit what third-party scripts are actually on the page?</p>
 <h3 id="810-privacy-and-compliance-on-the-frontend">8.10 Privacy and compliance on the frontend</h3>
-<p><strong>What it is.</strong> Consent, data minimisation and scope reduction as frontend responsibilities.</p>
-<p><strong>Example.</strong> Consent management must gate analytics <em>before</em> it loads; PII never goes in URLs (they land in logs and <code>Referer</code>); session-replay tools need field masking; and a payment iframe or hosted fields keeps card data out of your DOM, which removes you from most PCI scope.</p>
-<p><strong>Trade-offs.</strong> Hosted payment fields reduce compliance scope and cost you styling control and a slightly worse checkout UX.</p>
-<p><strong>Follow-ups.</strong> How do you keep analytics working under a strict CSP? What would you mask in session replay on a booking form?</p>
+<p class="lead-in"><strong>What it is.</strong> Consent, data minimisation and scope reduction as frontend responsibilities.</p>
+<p class="lead-in"><strong>Example.</strong> Consent management must gate analytics <em>before</em> it loads; PII never goes in URLs (they land in logs and <code>Referer</code>); session-replay tools need field masking; and a payment iframe or hosted fields keeps card data out of your DOM, which removes you from most PCI scope.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Hosted payment fields reduce compliance scope and cost you styling control and a slightly worse checkout UX.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you keep analytics working under a strict CSP? What would you mask in session replay on a booking form?</p>
 <h2 id="9-performance">9. Performance</h2>
 <h3 id="91-core-web-vitals">9.1 Core Web Vitals</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 334" role="img" aria-label="Where each Core Web Vital is measured during a page's life">
@@ -1896,7 +1896,7 @@ GET /                →  Cache-Control: no-cache
   <text class="t" x="32" y="308">CLS — good ≤ 0.1</text>
   <text class="xs" x="32" y="322">measured across the whole session: images without dimensions, late fonts, injected banners</text>
 </svg><figcaption>Where each Core Web Vital is measured during a page&#x27;s life.</figcaption></figure>
-<p><strong>What it is.</strong> Three field metrics, measured at the 75th percentile of real users.</p>
+<p class="lead-in"><strong>What it is.</strong> Three field metrics, measured at the 75th percentile of real users.</p>
 <table>
 <thead>
 <tr>
@@ -1931,12 +1931,12 @@ GET /                →  Cache-Control: no-cache
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> Supporting diagnostics: <strong>TTFB</strong> (server + network), <strong>FCP</strong> (first paint of anything), <strong>TBT</strong> (sum of long-task time over 50ms), <strong>TTI</strong>. TBT is the <em>lab</em> proxy; INP is the <em>field</em> metric.</p>
-<p><strong>Trade-offs.</strong> p75 hides the tail — always look at p95 too, and segment by device class and country, because a global average flatters you while low-end Android users suffer.</p>
-<p><strong>Follow-ups.</strong> Why did INP replace FID? What's the difference between lab and field data? How do you attribute an INP regression to a specific interaction? (<code>event</code> timing entries and the Long Animation Frames API.)</p>
+<p class="lead-in"><strong>Example.</strong> Supporting diagnostics: <strong>TTFB</strong> (server + network), <strong>FCP</strong> (first paint of anything), <strong>TBT</strong> (sum of long-task time over 50ms), <strong>TTI</strong>. TBT is the <em>lab</em> proxy; INP is the <em>field</em> metric.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> p75 hides the tail — always look at p95 too, and segment by device class and country, because a global average flatters you while low-end Android users suffer.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why did INP replace FID? What's the difference between lab and field data? How do you attribute an INP regression to a specific interaction? (<code>event</code> timing entries and the Long Animation Frames API.)</p>
 <h3 id="92-measurement">9.2 Measurement</h3>
-<p><strong>What it is.</strong> Lab tools give deterministic, repeatable numbers; field tools (RUM) give the truth about real users.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Lab tools give deterministic, repeatable numbers; field tools (RUM) give the truth about real users.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-javascript">import { onLCP, onINP, onCLS } from 'web-vitals';
 const send = m =&gt; navigator.sendBeacon('/rum', JSON.stringify({
   name: m.name, value: m.value, id: m.id,
@@ -1945,11 +1945,11 @@ const send = m =&gt; navigator.sendBeacon('/rum', JSON.stringify({
 }));
 onLCP(send); onINP(send); onCLS(send);
 </code></pre>
-<p><strong>Trade-offs.</strong> Lighthouse CI is good for gating because it is deterministic, and blind to real device and network diversity. RUM is true but noisy and needs volume before a signal appears — hence synthetic monitoring as the early-warning layer.</p>
-<p><strong>Follow-ups.</strong> How do you read a Performance panel trace? (Long tasks, forced reflow warnings, the main-thread flame chart, Recalculate Style and Layout blocks.) What is CrUX? Why beacon on <code>visibilitychange</code> rather than <code>unload</code>?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Lighthouse CI is good for gating because it is deterministic, and blind to real device and network diversity. RUM is true but noisy and needs volume before a signal appears — hence synthetic monitoring as the early-warning layer.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you read a Performance panel trace? (Long tasks, forced reflow warnings, the main-thread flame chart, Recalculate Style and Layout blocks.) What is CrUX? Why beacon on <code>visibilitychange</code> rather than <code>unload</code>?</p>
 <h3 id="93-loading-optimisation">9.3 Loading optimisation</h3>
-<p><strong>What it is.</strong> Shortening the critical path from request to largest paint.</p>
-<p><strong>Example.</strong> In rough order of payoff:</p>
+<p class="lead-in"><strong>What it is.</strong> Shortening the critical path from request to largest paint.</p>
+<p class="lead-in"><strong>Example.</strong> In rough order of payoff:</p>
 <ol>
 <li><strong>Critical CSS</strong> inline, rest deferred; per-route CSS extraction.</li>
 <li><strong>Resource hints</strong>: <code>preconnect</code> to the image/API origin, <code>preload</code> the LCP image and the critical font, <code>fetchpriority="high"</code> on the hero and <code>low</code> below the fold, <code>prefetch</code> the next likely route.</li>
@@ -1958,26 +1958,26 @@ onLCP(send); onINP(send); onCLS(send);
 <li><strong>JavaScript</strong>: route-level splitting, then component-level for heavy widgets, then shrink what remains.</li>
 <li><strong>Third parties</strong>: facade pattern (a fake chat button that loads the real widget on click), iframe sandboxing, or Partytown.</li>
 </ol>
-<p><strong>Trade-offs.</strong> Preload competes with itself — more than about three hints and you delay the thing you cared about. <code>loading="lazy"</code> on the LCP image is a classic self-inflicted regression.</p>
-<p><strong>Follow-ups.</strong> What's the difference between <code>preload</code>, <code>prefetch</code> and <code>preconnect</code>? Why can inlining a script hurt? How would you optimise a hotel listing page with forty images?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Preload competes with itself — more than about three hints and you delay the thing you cared about. <code>loading="lazy"</code> on the LCP image is a classic self-inflicted regression.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What's the difference between <code>preload</code>, <code>prefetch</code> and <code>preconnect</code>? Why can inlining a script hurt? How would you optimise a hotel listing page with forty images?</p>
 <h3 id="94-compression">9.4 Compression</h3>
-<p><strong>What it is.</strong> Brotli (<code>br</code>) beats gzip by roughly 15–20% on text assets; gzip is the universal fallback. Negotiated via <code>Accept-Encoding</code>, which makes <code>Vary: Accept-Encoding</code> mandatory.</p>
-<p><strong>Example.</strong> Pre-compress static assets at build time with Brotli quality 11 and serve the <code>.br</code> file; use quality 4–6 for dynamic responses so you don't trade TTFB for bytes.</p>
-<p><strong>Trade-offs.</strong> Never re-compress already-compressed payloads (JPEG, AVIF, WebP, woff2, video) — you burn CPU and can grow the file. Compressing a response containing a secret alongside reflected user input is the BREACH class.</p>
-<p><strong>Follow-ups.</strong> Why state bundle budgets in compressed bytes? How does compression interact with CDN caching? Why not Brotli images?</p>
+<p class="lead-in"><strong>What it is.</strong> Brotli (<code>br</code>) beats gzip by roughly 15–20% on text assets; gzip is the universal fallback. Negotiated via <code>Accept-Encoding</code>, which makes <code>Vary: Accept-Encoding</code> mandatory.</p>
+<p class="lead-in"><strong>Example.</strong> Pre-compress static assets at build time with Brotli quality 11 and serve the <code>.br</code> file; use quality 4–6 for dynamic responses so you don't trade TTFB for bytes.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Never re-compress already-compressed payloads (JPEG, AVIF, WebP, woff2, video) — you burn CPU and can grow the file. Compressing a response containing a secret alongside reflected user input is the BREACH class.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why state bundle budgets in compressed bytes? How does compression interact with CDN caching? Why not Brotli images?</p>
 <h3 id="95-runtime-performance">9.5 Runtime performance</h3>
-<p><strong>What it is.</strong> Keeping interactions under the INP threshold once the page is loaded.</p>
-<p><strong>Example.</strong> The standard levers: virtualise long lists (<code>react-window</code>, TanStack Virtual); <code>useDeferredValue</code>/<code>startTransition</code> for filtering while typing; debounce input and throttle scroll; move big JSON parses to a worker; animate on the compositor via CSS or the Web Animations API; memoise deliberately rather than everywhere.</p>
-<p><strong>Trade-offs.</strong> Memoisation has its own cost (comparison plus retained references) and <code>useMemo</code> everywhere makes code harder to change for no measured gain — prefer state colocation and context splitting first. React Compiler changes this calculus.</p>
-<p><strong>Follow-ups.</strong> A 10,000-row price calendar is janky — what do you do? Why doesn't <code>React.memo</code> help when you pass an inline object or arrow? What is a long task and how do you break one up?</p>
+<p class="lead-in"><strong>What it is.</strong> Keeping interactions under the INP threshold once the page is loaded.</p>
+<p class="lead-in"><strong>Example.</strong> The standard levers: virtualise long lists (<code>react-window</code>, TanStack Virtual); <code>useDeferredValue</code>/<code>startTransition</code> for filtering while typing; debounce input and throttle scroll; move big JSON parses to a worker; animate on the compositor via CSS or the Web Animations API; memoise deliberately rather than everywhere.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Memoisation has its own cost (comparison plus retained references) and <code>useMemo</code> everywhere makes code harder to change for no measured gain — prefer state colocation and context splitting first. React Compiler changes this calculus.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> A 10,000-row price calendar is janky — what do you do? Why doesn't <code>React.memo</code> help when you pass an inline object or arrow? What is a long task and how do you break one up?</p>
 <h3 id="96-budgets-and-enforcement">9.6 Budgets and enforcement</h3>
-<p><strong>What it is.</strong> A per-route limit on transferred bytes and lab metrics, enforced in CI.</p>
-<p><strong>Example.</strong> Search route: 170KB gzip JS, 50KB CSS, LCP image ≤ 150KB, Lighthouse LCP ≤ 2.5s. Enforce with <code>size-limit</code> or <code>bundlesize</code>; fail the PR and post the delta plus a treemap link as a bot comment.</p>
-<p><strong>Trade-offs.</strong> Hard budgets block legitimate features; the usual resolution is a documented exception process with an owner and an expiry, not a silently raised threshold.</p>
-<p><strong>Follow-ups.</strong> Where do you set the budget — total repo or per route? Who owns a budget breach? How do you stop budgets drifting upward over a year?</p>
+<p class="lead-in"><strong>What it is.</strong> A per-route limit on transferred bytes and lab metrics, enforced in CI.</p>
+<p class="lead-in"><strong>Example.</strong> Search route: 170KB gzip JS, 50KB CSS, LCP image ≤ 150KB, Lighthouse LCP ≤ 2.5s. Enforce with <code>size-limit</code> or <code>bundlesize</code>; fail the PR and post the delta plus a treemap link as a bot comment.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Hard budgets block legitimate features; the usual resolution is a documented exception process with an owner and an expiry, not a silently raised threshold.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Where do you set the budget — total repo or per route? Who owns a budget breach? How do you stop budgets drifting upward over a year?</p>
 <h3 id="97-a-performance-debugging-workflow">9.7 A performance debugging workflow</h3>
-<p><strong>What it is.</strong> A repeatable sequence from symptom to systemic fix.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> A repeatable sequence from symptom to systemic fix.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <ol>
 <li><strong>Quantify</strong> in RUM: which metric, which p, which segment, since when.</li>
 <li><strong>Correlate</strong> with build ids and releases to find a candidate cause.</li>
@@ -1987,24 +1987,24 @@ onLCP(send); onINP(send); onCLS(send);
 <li><strong>Fix</strong>, then verify in the lab, then confirm in RUM at p75 and p95.</li>
 <li><strong>Guardrail</strong>: a budget, a lint rule, or a CI check so the class of regression cannot return.</li>
 </ol>
-<p><strong>Trade-offs.</strong> Steps 1–2 are often skipped in favour of jumping to the lab — which finds <em>a</em> problem, rarely <em>the</em> problem.</p>
-<p><strong>Follow-ups.</strong> Walk me through a real regression you diagnosed. How did you know the fix worked? What stops it recurring?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Steps 1–2 are often skipped in favour of jumping to the lab — which finds <em>a</em> problem, rarely <em>the</em> problem.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Walk me through a real regression you diagnosed. How did you know the fix worked? What stops it recurring?</p>
 <h2 id="10-bundling-and-build-systems">10. Bundling and build systems</h2>
 <h3 id="101-module-formats">10.1 Module formats</h3>
-<p><strong>What it is.</strong> CommonJS uses dynamic, synchronous <code>require</code> resolved at runtime. ESM uses static <code>import</code>/<code>export</code>, hoisted, with live bindings, resolved before execution.</p>
-<p><strong>Example.</strong> That static structure is what makes tree shaking, top-level <code>await</code> and import maps possible. CJS cannot be reliably tree-shaken because <code>require('./x')[name]</code> is only knowable at runtime.</p>
-<p><strong>Trade-offs.</strong> Interop is the pain: <code>"type": "module"</code>, dual <code>exports</code> maps, no <code>__dirname</code> in ESM, and packages that ship both. A platform team's job is to publish correct <code>exports</code> conditions (<code>import</code>, <code>require</code>, <code>types</code>, <code>browser</code>, <code>default</code>) and run <code>publint</code>/<code>arethetypeswrong</code> in CI.</p>
-<p><strong>Follow-ups.</strong> Why can't CJS be tree-shaken? What is the dual-package hazard? What does an import map solve?</p>
+<p class="lead-in"><strong>What it is.</strong> CommonJS uses dynamic, synchronous <code>require</code> resolved at runtime. ESM uses static <code>import</code>/<code>export</code>, hoisted, with live bindings, resolved before execution.</p>
+<p class="lead-in"><strong>Example.</strong> That static structure is what makes tree shaking, top-level <code>await</code> and import maps possible. CJS cannot be reliably tree-shaken because <code>require('./x')[name]</code> is only knowable at runtime.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Interop is the pain: <code>"type": "module"</code>, dual <code>exports</code> maps, no <code>__dirname</code> in ESM, and packages that ship both. A platform team's job is to publish correct <code>exports</code> conditions (<code>import</code>, <code>require</code>, <code>types</code>, <code>browser</code>, <code>default</code>) and run <code>publint</code>/<code>arethetypeswrong</code> in CI.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why can't CJS be tree-shaken? What is the dual-package hazard? What does an import map solve?</p>
 <h3 id="102-what-a-bundler-does">10.2 What a bundler does</h3>
-<p><strong>What it is.</strong> Resolve imports from the entry points → load and transform each module → build the module graph → optimise (tree shake, scope hoist, minify, split chunks) → emit content-hashed chunks plus a manifest.</p>
-<p><strong>Example.</strong> The manifest is what the server or HTML uses to map a route to its chunks — and what makes "build once, promote many" possible.</p>
-<p><strong>Trade-offs.</strong> More aggressive optimisation means slower builds; most teams run full optimisation only in production builds and transpile-only in dev.</p>
-<p><strong>Follow-ups.</strong> What is scope hoisting and why does it help? What's in a source map and why <code>hidden-source-map</code> in production?</p>
+<p class="lead-in"><strong>What it is.</strong> Resolve imports from the entry points → load and transform each module → build the module graph → optimise (tree shake, scope hoist, minify, split chunks) → emit content-hashed chunks plus a manifest.</p>
+<p class="lead-in"><strong>Example.</strong> The manifest is what the server or HTML uses to map a route to its chunks — and what makes "build once, promote many" possible.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> More aggressive optimisation means slower builds; most teams run full optimisation only in production builds and transpile-only in dev.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What is scope hoisting and why does it help? What's in a source map and why <code>hidden-source-map</code> in production?</p>
 <h3 id="103-tree-shaking">10.3 Tree shaking</h3>
-<p><strong>What it is.</strong> Dead-code elimination over the ESM module graph.</p>
-<p><strong>Example.</strong> It works only when modules are ESM, the bundler can prove no side effects, and the package declares <code>"sideEffects": false</code> (or lists the files that do have them).</p>
-<p><strong>Trade-offs.</strong> Silent breakers: re-exporting a whole barrel (<code>export * from './everything'</code>), CJS dependencies, class-property mutation at module scope, and transpiling to CJS before bundling. <strong>Barrel files are the number-one cause of bloated frontend bundles</strong> — the fix is to ban deep barrels, import from paths, or generate per-component entry points.</p>
-<p><strong>Follow-ups.</strong> Why did importing one icon pull in 400KB? What does <code>sideEffects</code> actually tell the bundler? How do you prove a dependency is tree-shakeable?</p>
+<p class="lead-in"><strong>What it is.</strong> Dead-code elimination over the ESM module graph.</p>
+<p class="lead-in"><strong>Example.</strong> It works only when modules are ESM, the bundler can prove no side effects, and the package declares <code>"sideEffects": false</code> (or lists the files that do have them).</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Silent breakers: re-exporting a whole barrel (<code>export * from './everything'</code>), CJS dependencies, class-property mutation at module scope, and transpiling to CJS before bundling. <strong>Barrel files are the number-one cause of bloated frontend bundles</strong> — the fix is to ban deep barrels, import from paths, or generate per-component entry points.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why did importing one icon pull in 400KB? What does <code>sideEffects</code> actually tell the bundler? How do you prove a dependency is tree-shakeable?</p>
 <h3 id="104-code-splitting-and-chunking">10.4 Code splitting and chunking</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 320" role="img" aria-label="Chunk graph showing stable vendor chunks and per-route chunks">
   <text class="title" x="16" y="24">Split so the chunks that rarely change stay cached</text>
@@ -2067,15 +2067,15 @@ onLCP(send); onINP(send); onCLS(send);
   <text class="xs" x="466" y="274">After a deploy, a stale tab requests a chunk that no longer exists</text>
   <text class="xs" x="466" y="292">Catch ChunkLoadError → retry cache-busted → force reload</text>
 </svg><figcaption>A chunk graph. Stable chunks stay cached; route chunks change independently.</figcaption></figure>
-<p><strong>What it is.</strong> Breaking the graph into chunks loaded on demand.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Breaking the graph into chunks loaded on demand.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-javascript">const SearchPage = React.lazy(() =&gt; import('./SearchPage'));          // route level
 const Map = React.lazy(() =&gt; import('./Map'));                        // heavy widget
 onMouseEnter={() =&gt; import('./CheckoutPage')}                          // prefetch on intent
 </code></pre>
 <p>Chunk strategy: a <code>framework</code> chunk (react, react-dom) that changes rarely so it stays cached, a <code>commons</code> chunk for modules used by ≥N routes, and per-route chunks.</p>
-<p><strong>Trade-offs.</strong> Over-splitting costs request overhead and deepens the waterfall; under-splitting ships code nobody runs. Splitting also introduces the chunk-404-after-deploy failure, which needs a retry-then-reload handler.</p>
-<p><strong>Follow-ups.</strong> Where do you split first? How do you avoid a loading spinner on every navigation? Why does a shared chunk's hash changing invalidate everything downstream?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Over-splitting costs request overhead and deepens the waterfall; under-splitting ships code nobody runs. Splitting also introduces the chunk-404-after-deploy failure, which needs a retry-then-reload handler.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Where do you split first? How do you avoid a loading spinner on every navigation? Why does a shared chunk's hash changing invalidate everything downstream?</p>
 <h3 id="105-tool-comparison">10.5 Tool comparison</h3>
 <table>
 <thead>
@@ -2125,12 +2125,12 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 </tr>
 </tbody>
 </table>
-<p><strong>Follow-ups.</strong> Why is Vite's dev server fast? (Serves source as native ESM, transforms on demand, pre-bundles deps with esbuild.) Why does Vite still use Rollup for production?</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why is Vite's dev server fast? (Serves source as native ESM, transforms on demand, pre-bundles deps with esbuild.) Why does Vite still use Rollup for production?</p>
 <h3 id="106-hmr">10.6 HMR</h3>
-<p><strong>What it is.</strong> Swapping a module in the running app and propagating the update up the import graph to the nearest boundary that accepts it.</p>
-<p><strong>Example.</strong> If a change to a context provider full-reloads the page, it is because the boundary is effectively the root — usually a module with side effects or a root-level export change.</p>
-<p><strong>Trade-offs.</strong> HMR preserves state, which speeds iteration but can mask bugs that only appear on a fresh mount.</p>
-<p><strong>Follow-ups.</strong> Why does our HMR full-reload every time? What state survives an HMR update and what doesn't?</p>
+<p class="lead-in"><strong>What it is.</strong> Swapping a module in the running app and propagating the update up the import graph to the nearest boundary that accepts it.</p>
+<p class="lead-in"><strong>Example.</strong> If a change to a context provider full-reloads the page, it is because the boundary is effectively the root — usually a module with side effects or a root-level export change.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> HMR preserves state, which speeds iteration but can mask bugs that only appear on a fresh mount.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why does our HMR full-reload every time? What state survives an HMR update and what doesn't?</p>
 <h3 id="107-build-speed-at-scale">10.7 Build speed at scale</h3>
 <table>
 <thead>
@@ -2166,8 +2166,8 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> Remote caching requires deterministic builds — timestamps, absolute paths and non-pinned tool versions all poison the cache.</p>
-<p><strong>Follow-ups.</strong> Our CI is 35 minutes; get it to 10. What makes a build non-deterministic? How would you measure build time as an SLO?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Remote caching requires deterministic builds — timestamps, absolute paths and non-pinned tool versions all poison the cache.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Our CI is 35 minutes; get it to 10. What makes a build non-deterministic? How would you measure build time as an SLO?</p>
 <h2 id="11-platform-architecture">11. Platform architecture</h2>
 <h3 id="111-styling-approaches">11.1 Styling approaches</h3>
 <table>
@@ -2212,16 +2212,16 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> The defensible modern recommendation is <strong>CSS variables for tokens plus a zero-runtime or utility layer</strong>: it survives Server Components, costs nothing at runtime, and makes theming a CSS concern rather than a React concern.</p>
-<p><strong>Follow-ups.</strong> Why does runtime CSS-in-JS hurt INP? How would you theme without re-rendering? What breaks when you use Emotion inside a Server Component?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> The defensible modern recommendation is <strong>CSS variables for tokens plus a zero-runtime or utility layer</strong>: it survives Server Components, costs nothing at runtime, and makes theming a CSS concern rather than a React concern.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why does runtime CSS-in-JS hurt INP? How would you theme without re-rendering? What breaks when you use Emotion inside a Server Component?</p>
 <h3 id="112-design-tokens">11.2 Design tokens</h3>
-<p><strong>What it is.</strong> Three tiers: <strong>primitives</strong> (<code>--blue-500: #1a73e8</code>), <strong>semantic</strong> (<code>--color-action-primary: var(--blue-500)</code>), <strong>component</strong> (<code>--button-bg-primary: var(--color-action-primary)</code>).</p>
-<p><strong>Example.</strong> Components consume only tiers 2 and 3. Themes swap the tier-1→tier-2 mapping via a <code>data-theme</code> attribute, so a theme switch is one DOM attribute and zero React re-renders. Tokens live in one source (JSON / Figma Tokens) and generate CSS, TS types, iOS and Android outputs via Style Dictionary.</p>
-<p><strong>Trade-offs.</strong> Three tiers is more indirection than a small team needs; it pays off the moment you have a second theme, a white-label partner, or a native platform.</p>
-<p><strong>Follow-ups.</strong> How do you add dark mode without touching every component? How do you stop teams using raw hex values? (Lint rule plus a Stylelint config.)</p>
+<p class="lead-in"><strong>What it is.</strong> Three tiers: <strong>primitives</strong> (<code>--blue-500: #1a73e8</code>), <strong>semantic</strong> (<code>--color-action-primary: var(--blue-500)</code>), <strong>component</strong> (<code>--button-bg-primary: var(--color-action-primary)</code>).</p>
+<p class="lead-in"><strong>Example.</strong> Components consume only tiers 2 and 3. Themes swap the tier-1→tier-2 mapping via a <code>data-theme</code> attribute, so a theme switch is one DOM attribute and zero React re-renders. Tokens live in one source (JSON / Figma Tokens) and generate CSS, TS types, iOS and Android outputs via Style Dictionary.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Three tiers is more indirection than a small team needs; it pays off the moment you have a second theme, a white-label partner, or a native platform.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you add dark mode without touching every component? How do you stop teams using raw hex values? (Lint rule plus a Stylelint config.)</p>
 <h3 id="113-component-api-design">11.3 Component API design</h3>
-<p><strong>What it is.</strong> The rules that make a shared library usable by hundreds of engineers without tickets.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> The rules that make a shared library usable by hundreds of engineers without tickets.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <ul>
 <li><strong>Composition over configuration.</strong> A <code>&lt;Select&gt;</code> with 40 props is unmaintainable; compound components (<code>Select.Trigger</code>, <code>Select.Option</code>) let consumers compose. Headless primitives (Radix, React Aria, Ark) give behaviour and a11y while you own styling.</li>
 <li><strong>Support controlled and uncontrolled</strong> — <code>value</code> + <code>onChange</code>, and <code>defaultValue</code>.</li>
@@ -2229,11 +2229,11 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 <li><strong>Accessibility is not a prop</strong> — keyboard interaction, focus management and <code>aria-*</code> live inside the component.</li>
 <li><strong>No business logic</strong> — no fetching, flags or analytics coupling inside a primitive.</li>
 </ul>
-<p><strong>Trade-offs.</strong> Headless libraries save you months of a11y work and add a dependency you must track. Escape hatches improve adoption and make future refactors harder — which is why they should be explicit and documented, not accidental.</p>
-<p><strong>Follow-ups.</strong> Design the API for a date-range picker. How do you handle a team that needs a one-off variant? How do you forward a ref through a polymorphic component?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Headless libraries save you months of a11y work and add a dependency you must track. Escape hatches improve adoption and make future refactors harder — which is why they should be explicit and documented, not accidental.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Design the API for a date-range picker. How do you handle a team that needs a one-off variant? How do you forward a ref through a polymorphic component?</p>
 <h3 id="114-publishing-shared-packages">11.4 Publishing shared packages</h3>
-<p><strong>What it is.</strong> Internal versioned packages as the distribution mechanism for platform code.</p>
-<p><strong>Example.</strong> The breaking-change playbook:</p>
+<p class="lead-in"><strong>What it is.</strong> Internal versioned packages as the distribution mechanism for platform code.</p>
+<p class="lead-in"><strong>Example.</strong> The breaking-change playbook:</p>
 <ol>
 <li>Additive change first — new prop, old behaviour unchanged by default.</li>
 <li>Deprecate with <code>@deprecated</code> JSDoc, a dev-only console warning, and a lint rule.</li>
@@ -2241,8 +2241,8 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 <li>Publish the major with a migration guide and a compatibility layer for one minor cycle.</li>
 <li>Track "packages on latest major" on a dashboard and chase the tail personally.</li>
 </ol>
-<p><strong>Trade-offs.</strong> Semver discipline slows you down and is the only thing that makes a shared library trustworthy. Steps 3 and 5 are the ones most teams skip, and they are where adoption actually happens.</p>
-<p><strong>Follow-ups.</strong> How do you prevent two versions of React in a consumer's bundle? (Peer dependencies plus a duplicate check in CI.) How do you version design tokens?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Semver discipline slows you down and is the only thing that makes a shared library trustworthy. Steps 3 and 5 are the ones most teams skip, and they are where adoption actually happens.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you prevent two versions of React in a consumer's bundle? (Peer dependencies plus a duplicate check in CI.) How do you version design tokens?</p>
 <h3 id="115-monorepo-vs-polyrepo">11.5 Monorepo vs polyrepo</h3>
 <table>
 <thead>
@@ -2285,8 +2285,8 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> Choose by <strong>how often changes cross boundaries</strong>. If a typical feature touches the design system and two apps, monorepo — and you must fund the build tooling. If teams genuinely ship independently against stable contracts, polyrepo plus published packages is cheaper.</p>
-<p><strong>Follow-ups.</strong> How do you keep monorepo CI fast? (pnpm, affected-only, remote cache.) What's the failure mode of each? (Unowned shared code — identical in both.)</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Choose by <strong>how often changes cross boundaries</strong>. If a typical feature touches the design system and two apps, monorepo — and you must fund the build tooling. If teams genuinely ship independently against stable contracts, polyrepo plus published packages is cheaper.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you keep monorepo CI fast? (pnpm, affected-only, remote cache.) What's the failure mode of each? (Unowned shared code — identical in both.)</p>
 <h3 id="116-micro-frontends">11.6 Micro-frontends</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 326" role="img" aria-label="Module Federation host and remotes with a shared singleton scope">
   <text class="title" x="16" y="24">Independent deploys, one page — and one copy of React</text>
@@ -2328,7 +2328,7 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 
   <text class="xs" x="30" y="148">Centralised regardless: design tokens and components, auth, analytics, routing contract, error reporting, performance budget.</text>
 </svg><figcaption>Module Federation at runtime. React must be a shared singleton.</figcaption></figure>
-<p><strong>What it is.</strong> Independently deployable frontend applications composed into one user-facing surface.</p>
+<p class="lead-in"><strong>What it is.</strong> Independently deployable frontend applications composed into one user-facing surface.</p>
 <table>
 <thead>
 <tr>
@@ -2377,12 +2377,12 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> With Module Federation the host declares <code>remotes</code>, the remote declares <code>exposes</code>, and both declare <code>shared</code> with <code>singleton: true</code> and <code>requiredVersion</code> for React — two React copies is the canonical production incident.</p>
-<p><strong>Trade-offs.</strong> Micro-frontends are justified only when teams need <strong>independent deploy cadence</strong> and the org boundary is real. The price: duplicated dependencies, version skew, cross-app inconsistency, harder E2E testing, worse aggregate performance, and a much heavier platform team.</p>
-<p><strong>Follow-ups.</strong> When would you <em>not</em> use micro-frontends? What must stay centralised regardless? (Tokens and components, auth, analytics and experiments, routing contract, error reporting, perf budget.) How do you roll back one remote?</p>
+<p class="lead-in"><strong>Example.</strong> With Module Federation the host declares <code>remotes</code>, the remote declares <code>exposes</code>, and both declare <code>shared</code> with <code>singleton: true</code> and <code>requiredVersion</code> for React — two React copies is the canonical production incident.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Micro-frontends are justified only when teams need <strong>independent deploy cadence</strong> and the org boundary is real. The price: duplicated dependencies, version skew, cross-app inconsistency, harder E2E testing, worse aggregate performance, and a much heavier platform team.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> When would you <em>not</em> use micro-frontends? What must stay centralised regardless? (Tokens and components, auth, analytics and experiments, routing contract, error reporting, perf budget.) How do you roll back one remote?</p>
 <h3 id="117-many-apps-one-domain">11.7 Many apps, one domain</h3>
-<p><strong>What it is.</strong> Several independently deployed apps served under one hostname via path-based routing at the CDN, reverse proxy or edge function.</p>
-<p><strong>Example.</strong> <code>/search/*</code> → origin A, <code>/account/*</code> → origin B, via CloudFront behaviours or an edge function. The details that matter:</p>
+<p class="lead-in"><strong>What it is.</strong> Several independently deployed apps served under one hostname via path-based routing at the CDN, reverse proxy or edge function.</p>
+<p class="lead-in"><strong>Example.</strong> <code>/search/*</code> → origin A, <code>/account/*</code> → origin B, via CloudFront behaviours or an edge function. The details that matter:</p>
 <ul>
 <li><strong>Asset path collisions</strong> — each app emits under its own prefix (<code>/search/_assets/...</code>) or chunk names clash at the edge. Set <code>publicPath</code>/<code>base</code> per app.</li>
 <li><strong>SPA fallback per behaviour</strong> — <code>/account/settings/billing</code> must rewrite to <em>that</em> app's <code>index.html</code>, not a global one.</li>
@@ -2391,18 +2391,18 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 <li><strong>Shared chrome</strong> — a common header either duplicates (drift) or is federated/edge-included (coupling).</li>
 <li><strong>Failure isolation</strong> — if app B's origin is down, app A must still serve.</li>
 </ul>
-<p><strong>Trade-offs.</strong> Edge routing isolates apps and adds infrastructure and routing-rule complexity that someone must own.</p>
-<p><strong>Follow-ups.</strong> How do you deploy one app without touching the others? What happens to a user navigating between two apps — full page load or client-side? What breaks with relative asset paths?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Edge routing isolates apps and adds infrastructure and routing-rule complexity that someone must own.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you deploy one app without touching the others? What happens to a user navigating between two apps — full page load or client-side? What breaks with relative asset paths?</p>
 <h3 id="118-the-frontend-data-layer">11.8 The frontend data layer</h3>
-<p><strong>What it is.</strong> One place that owns request behaviour: auth headers, retries, caching, serialisation, error normalisation and cancellation.</p>
-<p><strong>Example.</strong> Instead of every component calling <code>fetch</code> differently, a query layer standardises cache keys, loading and error states, dedup, and <code>AbortController</code> wiring for stale searches.</p>
-<p><strong>Trade-offs.</strong> Not every request should retry — reads yes, non-idempotent mutations only with an idempotency key. Blanket retry policy is how a blip becomes an outage.</p>
-<p><strong>Follow-ups.</strong> Where should retry policy live? How do you cancel a stale search? How do you normalise errors from three different backends?</p>
+<p class="lead-in"><strong>What it is.</strong> One place that owns request behaviour: auth headers, retries, caching, serialisation, error normalisation and cancellation.</p>
+<p class="lead-in"><strong>Example.</strong> Instead of every component calling <code>fetch</code> differently, a query layer standardises cache keys, loading and error states, dedup, and <code>AbortController</code> wiring for stale searches.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Not every request should retry — reads yes, non-idempotent mutations only with an idempotency key. Blanket retry policy is how a blip becomes an outage.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Where should retry policy live? How do you cancel a stale search? How do you normalise errors from three different backends?</p>
 <h3 id="119-developer-experience">11.9 Developer experience</h3>
-<p><strong>What it is.</strong> Treating the local loop and CI as a product with metrics.</p>
-<p><strong>Example.</strong> The four numbers worth quoting: cold install, dev server start, HMR round-trip, CI wall-clock p95. The five-step adoption playbook for any platform change: prove it on one team with before/after numbers → make it opt-in and trivial → provide the codemod → warn, then enforce (dev warning → CI warning → CI error, with announced dates) → dashboard the tail and close it by pairing.</p>
-<p><strong>Trade-offs.</strong> Enforcement too early creates resentment; too late and you have permanent drift. The dates are the contract.</p>
-<p><strong>Follow-ups.</strong> How do you measure DX? (PR cycle time, first-run CI pass rate, flake rate, time-to-first-PR, cache hit rate, plus a survey.) How do you get 12 teams to adopt something without a mandate?</p>
+<p class="lead-in"><strong>What it is.</strong> Treating the local loop and CI as a product with metrics.</p>
+<p class="lead-in"><strong>Example.</strong> The four numbers worth quoting: cold install, dev server start, HMR round-trip, CI wall-clock p95. The five-step adoption playbook for any platform change: prove it on one team with before/after numbers → make it opt-in and trivial → provide the codemod → warn, then enforce (dev warning → CI warning → CI error, with announced dates) → dashboard the tail and close it by pairing.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Enforcement too early creates resentment; too late and you have permanent drift. The dates are the contract.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you measure DX? (PR cycle time, first-run CI pass rate, flake rate, time-to-first-PR, cache hit rate, plus a survey.) How do you get 12 teams to adopt something without a mandate?</p>
 <h2 id="12-testing">12. Testing</h2>
 <h3 id="121-the-shape-trophy-not-pyramid">12.1 The shape: trophy, not pyramid</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 330" role="img" aria-label="The testing trophy: how many tests belong at each layer">
@@ -2435,7 +2435,7 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
   <rect class="box" x="16" y="302" width="848" height="26" rx="7"/>
   <text class="xs" x="32" y="320">Alongside, not inside, the trophy: contract tests vs the API schema · visual regression per story · axe on every component · Lighthouse CI per route.</text>
 </svg><figcaption>The testing trophy — width is roughly how many tests belong at each layer.</figcaption></figure>
-<p><strong>What it is.</strong> For frontend the useful distribution is a thin base of static analysis, a few unit tests, <strong>the bulk in integration/component tests</strong>, and a small high-value E2E layer.</p>
+<p class="lead-in"><strong>What it is.</strong> For frontend the useful distribution is a thin base of static analysis, a few unit tests, <strong>the bulk in integration/component tests</strong>, and a small high-value E2E layer.</p>
 <table>
 <thead>
 <tr>
@@ -2505,11 +2505,11 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> The classic pyramid came from backend services where unit tests catch most defects. Most frontend bugs are integration bugs — wrong props, wrong state transition, wrong fetch shape — so the mass belongs one layer up.</p>
-<p><strong>Follow-ups.</strong> Why not more E2E? (Slow, flaky, expensive to maintain, and they fail for reasons unrelated to the change.) What would you test at each layer for a booking form?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> The classic pyramid came from backend services where unit tests catch most defects. Most frontend bugs are integration bugs — wrong props, wrong state transition, wrong fetch shape — so the mass belongs one layer up.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why not more E2E? (Slow, flaky, expensive to maintain, and they fail for reasons unrelated to the change.) What would you test at each layer for a booking form?</p>
 <h3 id="122-testing-behaviour-not-implementation">12.2 Testing behaviour, not implementation</h3>
-<p><strong>What it is.</strong> Query the DOM the way a user perceives it — by role and accessible name — rather than by class or internal structure.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Query the DOM the way a user perceives it — by role and accessible name — rather than by class or internal structure.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-javascript">// good — survives refactors, and asserts accessibility as a side effect
 await userEvent.click(screen.getByRole('button', { name: /search/i }));
 expect(await screen.findByRole('list', { name: /results/i })).toBeInTheDocument();
@@ -2517,31 +2517,31 @@ expect(await screen.findByRole('list', { name: /results/i })).toBeInTheDocument(
 // bad — couples the test to markup
 wrapper.find('.btn-primary').simulate('click');
 </code></pre>
-<p><strong>Trade-offs.</strong> Role-based queries are slower to write and occasionally force you to fix the markup first — which is the point. Test ids are a legitimate fallback for things with no accessible identity, used sparingly.</p>
-<p><strong>Follow-ups.</strong> Why is <code>getByRole</code> preferred? When is a test id acceptable? Why are large DOM snapshots worse than no test? (They get rubber-stamped on failure.)</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Role-based queries are slower to write and occasionally force you to fix the markup first — which is the point. Test ids are a legitimate fallback for things with no accessible identity, used sparingly.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why is <code>getByRole</code> preferred? When is a test id acceptable? Why are large DOM snapshots worse than no test? (They get rubber-stamped on failure.)</p>
 <h3 id="123-mocking-and-msw">12.3 Mocking and MSW</h3>
-<p><strong>What it is.</strong> Intercepting at the <strong>network</strong> boundary rather than the module boundary, so the component under test runs its real data layer.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Intercepting at the <strong>network</strong> boundary rather than the module boundary, so the component under test runs its real data layer.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <pre><code class="language-javascript">const server = setupServer(
   http.get('/api/search', () =&gt; HttpResponse.json({ hotels: [...] })),
   http.get('/api/prices', () =&gt; new HttpResponse(null, { status: 500 })), // error path
 );
 </code></pre>
-<p><strong>Trade-offs.</strong> Mocking the hook instead tests nothing but your mock. MSW handlers are another artefact that can drift from the real API — which is what contract tests are for.</p>
-<p><strong>Follow-ups.</strong> What's the difference between a stub, a mock and a fake? How do you test a loading state deterministically? How do you keep mocks honest?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Mocking the hook instead tests nothing but your mock. MSW handlers are another artefact that can drift from the real API — which is what contract tests are for.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What's the difference between a stub, a mock and a fake? How do you test a loading state deterministically? How do you keep mocks honest?</p>
 <h3 id="124-contract-testing">12.4 Contract testing</h3>
-<p><strong>What it is.</strong> Verifying that the shape the frontend expects matches what the backend actually produces, without running both end to end.</p>
-<p><strong>Example.</strong> Consumer-driven contracts (Pact) publish the frontend's expectations; the provider's CI replays them. Alternatively, generate types from OpenAPI/GraphQL in CI so a breaking schema change fails the frontend build.</p>
-<p><strong>Trade-offs.</strong> Pact adds a broker and process overhead; schema-generated types are cheaper but only catch shape changes, not semantic ones.</p>
-<p><strong>Follow-ups.</strong> Who owns a broken contract? How do you ship a backward-incompatible API without breaking the web client?</p>
+<p class="lead-in"><strong>What it is.</strong> Verifying that the shape the frontend expects matches what the backend actually produces, without running both end to end.</p>
+<p class="lead-in"><strong>Example.</strong> Consumer-driven contracts (Pact) publish the frontend's expectations; the provider's CI replays them. Alternatively, generate types from OpenAPI/GraphQL in CI so a breaking schema change fails the frontend build.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Pact adds a broker and process overhead; schema-generated types are cheaper but only catch shape changes, not semantic ones.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Who owns a broken contract? How do you ship a backward-incompatible API without breaking the web client?</p>
 <h3 id="125-visual-regression-and-accessibility-testing">12.5 Visual regression and accessibility testing</h3>
-<p><strong>What it is.</strong> Screenshot diffing per component state, and automated WCAG rule checks.</p>
-<p><strong>Example.</strong> Every design-system component ships a Storybook story per state, which doubles as both the visual-regression fixture and the axe test target — across themes and both text directions.</p>
-<p><strong>Trade-offs.</strong> Visual diffs catch what assertions can't and generate noise from font rendering and animation; you need deterministic rendering (frozen clock, disabled animations, pinned browser). axe catches roughly a third of a11y issues — claiming automation covers accessibility is a red flag.</p>
-<p><strong>Follow-ups.</strong> How do you stop visual tests being flaky? What does axe <em>not</em> catch? (Focus order, meaningful alt text, correct heading structure, keyboard traps in practice.)</p>
+<p class="lead-in"><strong>What it is.</strong> Screenshot diffing per component state, and automated WCAG rule checks.</p>
+<p class="lead-in"><strong>Example.</strong> Every design-system component ships a Storybook story per state, which doubles as both the visual-regression fixture and the axe test target — across themes and both text directions.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Visual diffs catch what assertions can't and generate noise from font rendering and animation; you need deterministic rendering (frozen clock, disabled animations, pinned browser). axe catches roughly a third of a11y issues — claiming automation covers accessibility is a red flag.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you stop visual tests being flaky? What does axe <em>not</em> catch? (Focus order, meaningful alt text, correct heading structure, keyboard traps in practice.)</p>
 <h3 id="126-flaky-tests">12.6 Flaky tests</h3>
-<p><strong>What it is.</strong> Tests that pass and fail on identical code, destroying trust in the suite.</p>
-<p><strong>Example.</strong> A programme that actually works:</p>
+<p class="lead-in"><strong>What it is.</strong> Tests that pass and fail on identical code, destroying trust in the suite.</p>
+<p class="lead-in"><strong>Example.</strong> A programme that actually works:</p>
 <ol>
 <li><strong>Quarantine, don't ignore</strong> — a detected flaky test moves to a suite that still runs but doesn't block, with an auto-filed ticket and an owner from <code>CODEOWNERS</code>.</li>
 <li><strong>Measure flake rate</strong> per test and per suite, and publish it. A test over the threshold is deleted, not retried forever.</li>
@@ -2549,18 +2549,18 @@ wrapper.find('.btn-primary').simulate('click');
 <li><strong>Attack root causes</strong>: auto-waiting locators instead of fixed timeouts, per-test data seeded via API not UI, frozen time and network, containerised environment identical to CI.</li>
 <li><strong>Gate the gate</strong> — if <code>main</code>'s suite pass rate drops below \~99%, the pipeline is the incident.</li>
 </ol>
-<p><strong>Trade-offs.</strong> Deleting a flaky test loses coverage and is often still correct — a test nobody trusts provides zero coverage already while costing wall-clock and attention.</p>
-<p><strong>Follow-ups.</strong> What causes flakiness in E2E specifically? How do you detect a flaky test automatically? (Re-run on <code>main</code> on a schedule and diff outcomes.)</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Deleting a flaky test loses coverage and is often still correct — a test nobody trusts provides zero coverage already while costing wall-clock and attention.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What causes flakiness in E2E specifically? How do you detect a flaky test automatically? (Re-run on <code>main</code> on a schedule and diff outcomes.)</p>
 <h3 id="127-coverage">12.7 Coverage</h3>
-<p><strong>What it is.</strong> The proportion of code executed by the test suite.</p>
-<p><strong>Example.</strong> Enforce coverage on <strong>changed lines</strong> in a PR rather than a global percentage. Use mutation testing (Stryker) on critical modules — pricing, currency, date handling — to check whether the tests actually assert anything.</p>
-<p><strong>Trade-offs.</strong> A global target produces coverage theatre: tests that execute code without asserting. Changed-lines coverage avoids both that and the untested-new-code problem.</p>
-<p><strong>Follow-ups.</strong> Is 100% coverage a good goal? What does mutation testing measure that line coverage doesn't?</p>
+<p class="lead-in"><strong>What it is.</strong> The proportion of code executed by the test suite.</p>
+<p class="lead-in"><strong>Example.</strong> Enforce coverage on <strong>changed lines</strong> in a PR rather than a global percentage. Use mutation testing (Stryker) on critical modules — pricing, currency, date handling — to check whether the tests actually assert anything.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> A global target produces coverage theatre: tests that execute code without asserting. Changed-lines coverage avoids both that and the untested-new-code problem.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Is 100% coverage a good goal? What does mutation testing measure that line coverage doesn't?</p>
 <h3 id="128-a-testing-strategy-for-a-large-frontend">12.8 A testing strategy for a large frontend</h3>
-<p><strong>What it is.</strong> The platform-level answer: own the infrastructure, not the individual tests.</p>
-<p><strong>Example.</strong> Publish the test utilities as a package — a <code>renderWithProviders</code> wrapper carrying theme, i18n, router and query client; MSW handlers generated from the API schema; a Playwright fixture that logs in via API and seeds data. Every team then starts from the right setup, and improvements propagate with a version bump.</p>
-<p><strong>Trade-offs.</strong> A shared harness becomes a bottleneck if the platform team is the only one who can change it — hence a contribution model and clear extension points.</p>
-<p><strong>Follow-ups.</strong> How do you raise testing standards across twelve teams? What do you do about a team that writes no tests? How do you decide what gets an E2E test?</p>
+<p class="lead-in"><strong>What it is.</strong> The platform-level answer: own the infrastructure, not the individual tests.</p>
+<p class="lead-in"><strong>Example.</strong> Publish the test utilities as a package — a <code>renderWithProviders</code> wrapper carrying theme, i18n, router and query client; MSW handlers generated from the API schema; a Playwright fixture that logs in via API and seeds data. Every team then starts from the right setup, and improvements propagate with a version bump.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> A shared harness becomes a bottleneck if the platform team is the only one who can change it — hence a contribution model and clear extension points.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you raise testing standards across twelve teams? What do you do about a team that writes no tests? How do you decide what gets an E2E test?</p>
 <h2 id="13-operations">13. Operations</h2>
 <h3 id="131-pipeline-shape">13.1 Pipeline shape</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 330" role="img" aria-label="Frontend CI/CD pipeline with one artifact promoted through environments">
@@ -2608,10 +2608,10 @@ wrapper.find('.btn-primary').simulate('click');
   <text class="t" x="28" y="290">The frontend-specific catch</text>
   <text class="xs" x="28" y="310">Users mid-session still hold the old HTML and will request old chunks. Keep the previous N builds on the CDN, and handle ChunkLoadError with a cache-busted retry then a reload.</text>
 </svg><figcaption>A frontend pipeline. One artifact is built, then promoted; rollback is a pointer flip.</figcaption></figure>
-<p><strong>What it is.</strong> The sequence of checks on a PR and the promotion path after merge.</p>
-<p><strong>Example.</strong> On every PR: cached install → lint, type-check and unit/component tests in parallel → build affected packages → bundle-size diff comment → Lighthouse CI on key routes → visual regression → a11y checks → a <strong>preview URL</strong> per PR. On merge: build once into an immutable artifact and promote <strong>that same artifact</strong> through environments.</p>
-<p><strong>Trade-offs.</strong> "Build once, promote many" requires runtime configuration rather than build-time inlining, which is slightly more work and is the only way to guarantee that what you tested is what you shipped.</p>
-<p><strong>Follow-ups.</strong> Why not rebuild per environment? What goes in a PR check vs a nightly job? How do preview deploys change code review?</p>
+<p class="lead-in"><strong>What it is.</strong> The sequence of checks on a PR and the promotion path after merge.</p>
+<p class="lead-in"><strong>Example.</strong> On every PR: cached install → lint, type-check and unit/component tests in parallel → build affected packages → bundle-size diff comment → Lighthouse CI on key routes → visual regression → a11y checks → a <strong>preview URL</strong> per PR. On merge: build once into an immutable artifact and promote <strong>that same artifact</strong> through environments.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> "Build once, promote many" requires runtime configuration rather than build-time inlining, which is slightly more work and is the only way to guarantee that what you tested is what you shipped.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Why not rebuild per environment? What goes in a PR check vs a nightly job? How do preview deploys change code review?</p>
 <h3 id="132-progressive-delivery">13.2 Progressive delivery</h3>
 <table>
 <thead>
@@ -2649,56 +2649,56 @@ wrapper.find('.btn-primary').simulate('click');
 </tr>
 </tbody>
 </table>
-<p><strong>Example.</strong> An experiment platform that doesn't regress performance: assign at the edge or in the BFF, pass the assignment into SSR, fire the exposure event only when the component actually renders, add sample-ratio-mismatch alerting, auto-expire experiments, and run a per-experiment performance budget check.</p>
-<p><strong>Trade-offs.</strong> Client-side assignment is far easier to ship and works with static caching, at the cost of flicker, CLS and INP. Server-side is correct and couples experiments to the render path and the cache key.</p>
-<p><strong>Follow-ups.</strong> How do you A/B test without a flash of the wrong variant? How do you stop flags accumulating? How would you roll back a frontend change in 60 seconds?</p>
+<p class="lead-in"><strong>Example.</strong> An experiment platform that doesn't regress performance: assign at the edge or in the BFF, pass the assignment into SSR, fire the exposure event only when the component actually renders, add sample-ratio-mismatch alerting, auto-expire experiments, and run a per-experiment performance budget check.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Client-side assignment is far easier to ship and works with static caching, at the cost of flicker, CLS and INP. Server-side is correct and couples experiments to the render path and the cache key.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you A/B test without a flash of the wrong variant? How do you stop flags accumulating? How would you roll back a frontend change in 60 seconds?</p>
 <h3 id="133-frontend-rollback">13.3 Frontend rollback</h3>
-<p><strong>What it is.</strong> Reverting the served version without breaking users who are mid-session.</p>
-<p><strong>Example.</strong> Users holding old HTML will request old chunks. Keep the previous N builds' assets on the CDN (immutable hashed assets make this free) and handle <code>ChunkLoadError</code> with a cache-busted retry then a reload.</p>
-<p><strong>Trade-offs.</strong> Flipping a feature flag is faster and safer than a deploy rollback, but only covers code that was behind a flag — which is an argument for flagging more than feels necessary.</p>
-<p><strong>Follow-ups.</strong> What's different about rolling back a frontend vs a backend service? What breaks if you purge the CDN on every deploy?</p>
+<p class="lead-in"><strong>What it is.</strong> Reverting the served version without breaking users who are mid-session.</p>
+<p class="lead-in"><strong>Example.</strong> Users holding old HTML will request old chunks. Keep the previous N builds' assets on the CDN (immutable hashed assets make this free) and handle <code>ChunkLoadError</code> with a cache-busted retry then a reload.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Flipping a feature flag is faster and safer than a deploy rollback, but only covers code that was behind a flag — which is an argument for flagging more than feels necessary.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What's different about rolling back a frontend vs a backend service? What breaks if you purge the CDN on every deploy?</p>
 <h3 id="134-observability">13.4 Observability</h3>
-<p><strong>What it is.</strong> Knowing what real users experience, and being able to attribute it.</p>
-<p><strong>Example.</strong></p>
+<p class="lead-in"><strong>What it is.</strong> Knowing what real users experience, and being able to attribute it.</p>
+<p class="lead-in"><strong>Example.</strong></p>
 <ul>
 <li><strong>RUM</strong> — <code>web-vitals</code> plus custom timings (time-to-search-results, time-to-first-price), beaconed with <code>sendBeacon</code>. Segment by route, device class, country, connection and <strong>build id</strong> — the build id is what lets you blame a deploy.</li>
 <li><strong>Error tracking</strong> — Sentry with source maps uploaded in CI, release tagging, grouping rules, and a per-release error-rate gate. Filter browser-extension and third-party noise or the signal drowns.</li>
 <li><strong>Tracing</strong> — propagate a trace header from the browser (OpenTelemetry browser instrumentation) so a slow page can be followed into backend spans. This answers "is it us or the API?"</li>
 <li><strong>Synthetic monitoring</strong> — the booking funnel from several regions, as the early warning before RUM volume accumulates.</li>
 </ul>
-<p><strong>Trade-offs.</strong> RUM is truthful and lagging; synthetic is fast and artificial. You need both, and the cost is two systems to maintain and reconcile.</p>
-<p><strong>Follow-ups.</strong> How do you attribute an LCP regression to a specific release? What do you do about errors from browser extensions? How much RUM do you sample and why?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> RUM is truthful and lagging; synthetic is fast and artificial. You need both, and the cost is two systems to maintain and reconcile.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you attribute an LCP regression to a specific release? What do you do about errors from browser extensions? How much RUM do you sample and why?</p>
 <h3 id="135-slos-and-error-budgets">13.5 SLOs and error budgets</h3>
-<p><strong>What it is.</strong> A target for a user-facing metric over a window, with a budget for failing it.</p>
-<p><strong>Example.</strong> "p75 LCP on search ≤ 2.5s over 28 days"; "JS error rate ≤ 0.5% of sessions"; "booking funnel success ≥ 99.5%". Attach a written policy: burn the budget and feature work pauses for reliability work.</p>
-<p><strong>Trade-offs.</strong> SLOs only work if someone will actually honour the policy; an SLO with no consequence is a dashboard. Setting them too tight produces alert fatigue.</p>
-<p><strong>Follow-ups.</strong> What would you set as the three SLOs for a frontend platform team? What's the difference between alerting on a threshold and on burn rate?</p>
+<p class="lead-in"><strong>What it is.</strong> A target for a user-facing metric over a window, with a budget for failing it.</p>
+<p class="lead-in"><strong>Example.</strong> "p75 LCP on search ≤ 2.5s over 28 days"; "JS error rate ≤ 0.5% of sessions"; "booking funnel success ≥ 99.5%". Attach a written policy: burn the budget and feature work pauses for reliability work.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> SLOs only work if someone will actually honour the policy; an SLO with no consequence is a dashboard. Setting them too tight produces alert fatigue.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What would you set as the three SLOs for a frontend platform team? What's the difference between alerting on a threshold and on burn rate?</p>
 <h3 id="136-incident-handling">13.6 Incident handling</h3>
-<p><strong>What it is.</strong> Detect → mitigate → diagnose → review.</p>
-<p><strong>Example.</strong> Alert on SLO burn rate rather than raw spikes; <strong>mitigate before diagnosing</strong> (flip the flag, roll back the CDN pointer); diagnose afterwards; run a blameless postmortem whose action item removes the <em>class</em> of failure, not just the instance.</p>
-<p><strong>Trade-offs.</strong> Mitigating first sometimes destroys the evidence — so capture the trace, the build id and a HAR before you roll back.</p>
-<p><strong>Follow-ups.</strong> Walk me through a frontend incident you owned. What was the prevention item? How do you know it worked?</p>
+<p class="lead-in"><strong>What it is.</strong> Detect → mitigate → diagnose → review.</p>
+<p class="lead-in"><strong>Example.</strong> Alert on SLO burn rate rather than raw spikes; <strong>mitigate before diagnosing</strong> (flip the flag, roll back the CDN pointer); diagnose afterwards; run a blameless postmortem whose action item removes the <em>class</em> of failure, not just the instance.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Mitigating first sometimes destroys the evidence — so capture the trace, the build id and a HAR before you roll back.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> Walk me through a frontend incident you owned. What was the prevention item? How do you know it worked?</p>
 <h2 id="14-accessibility-and-internationalization">14. Accessibility and internationalization</h2>
 <h3 id="141-wcag-essentials">14.1 WCAG essentials</h3>
-<p><strong>What it is.</strong> POUR — perceivable, operable, understandable, robust — with WCAG 2.2 AA as the usual bar.</p>
-<p><strong>Example.</strong> The concrete AA requirements you'll be asked about: 4.5:1 contrast for body text (3:1 for large text and UI components), a visible focus indicator, 24×24 CSS px minimum target size (44×44 is the stricter AAA/mobile guidance), no information conveyed by colour alone, and 200% zoom without loss of content.</p>
-<p><strong>Trade-offs.</strong> Meeting contrast ratios constrains brand palettes; the resolution is to bake compliant pairs into semantic tokens so product teams cannot pick a failing combination.</p>
-<p><strong>Follow-ups.</strong> What's the difference between AA and AAA? How do you handle a brand colour that fails contrast?</p>
+<p class="lead-in"><strong>What it is.</strong> POUR — perceivable, operable, understandable, robust — with WCAG 2.2 AA as the usual bar.</p>
+<p class="lead-in"><strong>Example.</strong> The concrete AA requirements you'll be asked about: 4.5:1 contrast for body text (3:1 for large text and UI components), a visible focus indicator, 24×24 CSS px minimum target size (44×44 is the stricter AAA/mobile guidance), no information conveyed by colour alone, and 200% zoom without loss of content.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Meeting contrast ratios constrains brand palettes; the resolution is to bake compliant pairs into semantic tokens so product teams cannot pick a failing combination.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What's the difference between AA and AAA? How do you handle a brand colour that fails contrast?</p>
 <h3 id="142-semantic-html-and-aria">14.2 Semantic HTML and ARIA</h3>
-<p><strong>What it is.</strong> Native elements carry role, keyboard behaviour and focus for free. ARIA only adds semantics — it adds no behaviour.</p>
-<p><strong>Example.</strong> <code>&lt;button&gt;</code> gives focusability, Enter/Space activation and the right role; <code>&lt;div onClick&gt;</code> gives a bug report. The first rule of ARIA is don't use ARIA.</p>
-<p><strong>Trade-offs.</strong> Custom components sometimes need ARIA because no native element exists (combobox, tabs, tree) — and then you own every keyboard interaction yourself.</p>
-<p><strong>Follow-ups.</strong> When is <code>aria-label</code> wrong? What does <code>role="presentation"</code> do? Why is <code>aria-hidden</code> on a focusable element a bug?</p>
+<p class="lead-in"><strong>What it is.</strong> Native elements carry role, keyboard behaviour and focus for free. ARIA only adds semantics — it adds no behaviour.</p>
+<p class="lead-in"><strong>Example.</strong> <code>&lt;button&gt;</code> gives focusability, Enter/Space activation and the right role; <code>&lt;div onClick&gt;</code> gives a bug report. The first rule of ARIA is don't use ARIA.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Custom components sometimes need ARIA because no native element exists (combobox, tabs, tree) — and then you own every keyboard interaction yourself.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> When is <code>aria-label</code> wrong? What does <code>role="presentation"</code> do? Why is <code>aria-hidden</code> on a focusable element a bug?</p>
 <h3 id="143-keyboard-and-focus-management">14.3 Keyboard and focus management</h3>
-<p><strong>What it is.</strong> The hard part of accessibility: what has focus, where it goes, and what is announced.</p>
-<p><strong>Example.</strong> Focus trap inside a modal, return focus to the trigger on close, <code>aria-live="polite"</code> region for async results ("24 hotels found"), skip links, logical tab order, and no positive <code>tabindex</code>.</p>
-<p><strong>Trade-offs.</strong> <code>aria-live</code> announcements that fire on every keystroke are worse than none — debounce them and announce results, not progress.</p>
-<p><strong>Follow-ups.</strong> How do you make an autocomplete accessible? (<code>role="combobox"</code>, <code>aria-expanded</code>, <code>aria-controls</code>, <code>aria-activedescendant</code> — the hardest standard pattern.) Where does focus go after deleting a row?</p>
+<p class="lead-in"><strong>What it is.</strong> The hard part of accessibility: what has focus, where it goes, and what is announced.</p>
+<p class="lead-in"><strong>Example.</strong> Focus trap inside a modal, return focus to the trigger on close, <code>aria-live="polite"</code> region for async results ("24 hotels found"), skip links, logical tab order, and no positive <code>tabindex</code>.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> <code>aria-live</code> announcements that fire on every keystroke are worse than none — debounce them and announce results, not progress.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you make an autocomplete accessible? (<code>role="combobox"</code>, <code>aria-expanded</code>, <code>aria-controls</code>, <code>aria-activedescendant</code> — the hardest standard pattern.) Where does focus go after deleting a row?</p>
 <h3 id="144-testing-accessibility">14.4 Testing accessibility</h3>
-<p><strong>What it is.</strong> A layered approach, because no single method is sufficient.</p>
-<p><strong>Example.</strong> axe-core in component tests catches roughly a third of issues; add keyboard-only test runs, a screen-reader pass (VoiceOver/NVDA) on critical flows, and periodic audits with disabled users.</p>
-<p><strong>Trade-offs.</strong> Automation is cheap and shallow; manual testing is expensive and real. The platform play is to enforce axe on every design-system component so product teams inherit compliance.</p>
-<p><strong>Follow-ups.</strong> What can't axe detect? How would you stop accessibility regressing across twelve teams?</p>
+<p class="lead-in"><strong>What it is.</strong> A layered approach, because no single method is sufficient.</p>
+<p class="lead-in"><strong>Example.</strong> axe-core in component tests catches roughly a third of issues; add keyboard-only test runs, a screen-reader pass (VoiceOver/NVDA) on critical flows, and periodic audits with disabled users.</p>
+<p class="lead-in"><strong>Trade-offs.</strong> Automation is cheap and shallow; manual testing is expensive and real. The platform play is to enforce axe on every design-system component so product teams inherit compliance.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> What can't axe detect? How would you stop accessibility regressing across twelve teams?</p>
 <h3 id="145-internationalization-architecture">14.5 Internationalization architecture</h3>
 <table>
 <thead>
@@ -2754,8 +2754,8 @@ wrapper.find('.btn-primary').simulate('click');
 </tr>
 </tbody>
 </table>
-<p><strong>Trade-offs.</strong> ICU is verbose and is the only sane way to handle languages with six plural forms. Server-side locale detection is accurate and fragments the CDN cache; client-side is cacheable and causes a flash.</p>
-<p><strong>Follow-ups.</strong> How do you format a price for 40 markets? Why can't you concatenate "Showing " + n + " results"? How would you support RTL in an existing design system? What breaks when a translator writes a string 60% longer?</p>
+<p class="lead-in"><strong>Trade-offs.</strong> ICU is verbose and is the only sane way to handle languages with six plural forms. Server-side locale detection is accurate and fragments the CDN cache; client-side is cacheable and causes a flash.</p>
+<p class="lead-in"><strong>Follow-ups.</strong> How do you format a price for 40 markets? Why can't you concatenate "Showing " + n + " results"? How would you support RTL in an existing design system? What breaks when a translator writes a string 60% longer?</p>
 <h2 id="15-applying-it">15. Applying it</h2>
 <h3 id="151-a-system-design-framework">15.1 A system-design framework</h3>
 <p>Use the same eight steps every time, and announce them at the start.</p>
@@ -2770,12 +2770,12 @@ wrapper.find('.btn-primary').simulate('click');
 <li><strong>Trade-offs and next steps (5 min).</strong> Two rejected alternatives and why. End with the metric you'd watch after launch.</li>
 </ol>
 <h3 id="152-worked-scenarios">15.2 Worked scenarios</h3>
-<p><strong>Hotel search results page.</strong> Streaming SSR at the edge for shell and first cards; filters, dates and occupancy in the URL; results in a server cache keyed by the normalised filter object; prices fetched separately and never cached; virtualised list with <code>content-visibility: auto</code>; AVIF with fixed aspect ratios; <code>fetchpriority="high"</code> on the first card image; map library loaded on interaction; filter changes in <code>startTransition</code> with <code>AbortController</code> cancellation; cursor pagination because offset breaks on live inventory. <em>Rejected:</em> client-side filtering (only works for small result sets) and a single global rendering strategy.</p>
-<p><strong>Image delivery pipeline.</strong> One high-res master; an image CDN derives variants from URL parameters (<code>?w=800&amp;fm=avif&amp;q=70</code>), cached immutably at the edge; a design-system <code>&lt;Image&gt;</code> component generates <code>srcset</code>/<code>sizes</code> and enforces <code>width</code>/<code>height</code>, <code>loading</code>, <code>decoding</code> and <code>fetchpriority</code>; LQIP inside a fixed <code>aspect-ratio</code> box so CLS stays 0. <em>Guardrails:</em> CI fails any raw <code>&lt;img&gt;</code>, a budget on LCP image bytes, RUM reports the LCP element type.</p>
-<p><strong>Design system rollout to 12 teams.</strong> Phase 0 audit — script the codebase to count distinct button implementations and colour values; that number creates the mandate. Phase 1 tokens only, adopted by codemod. Phase 2 the ten highest-traffic primitives on headless libraries with a11y and visual regression from day one. Phase 3 migration via codemods plus pairing, with a per-team adoption dashboard. Phase 4 enforcement via lint rules. <em>Risks:</em> the library becoming a bottleneck (contribution model, documented escape hatches) and version skew in a federated setup (singleton shared scope, compatibility matrix).</p>
-<p><strong>Offline-capable booking flow.</strong> Service Worker with precached shell, network-first HTML, network-only for prices; funnel state in IndexedDB keyed by a draft booking id; a request queue with Background Sync and a client-generated <strong>idempotency key</strong> so a retry cannot double-book; explicit offline UI rather than optimistic success; on reconnect, re-validate price and availability server-side and show a diff; a remote kill switch for the worker.</p>
-<p><strong>Real-time price updates.</strong> SSE for one-way pushes (simpler, auto-reconnect) or WebSocket if you need client→server too; subscribe per visible card via <code>IntersectionObserver</code> so offscreen items unsubscribe; coalesce bursts into one <code>startTransition</code> flush per animation frame; exponential backoff with jitter plus a sequence number to detect gaps and refetch; animate price changes without moving scroll position, and require confirmation if the price changed between selection and payment.</p>
-<p><strong>Experimentation platform.</strong> Covered in 13.2 — server-side assignment, variant in the cache key, typed variant names generated from the experiment registry, exposure on render, SRM alerting, auto-expiry, per-experiment performance budget.</p>
+<p class="lead-in"><strong>Hotel search results page.</strong> Streaming SSR at the edge for shell and first cards; filters, dates and occupancy in the URL; results in a server cache keyed by the normalised filter object; prices fetched separately and never cached; virtualised list with <code>content-visibility: auto</code>; AVIF with fixed aspect ratios; <code>fetchpriority="high"</code> on the first card image; map library loaded on interaction; filter changes in <code>startTransition</code> with <code>AbortController</code> cancellation; cursor pagination because offset breaks on live inventory. <em>Rejected:</em> client-side filtering (only works for small result sets) and a single global rendering strategy.</p>
+<p class="lead-in"><strong>Image delivery pipeline.</strong> One high-res master; an image CDN derives variants from URL parameters (<code>?w=800&amp;fm=avif&amp;q=70</code>), cached immutably at the edge; a design-system <code>&lt;Image&gt;</code> component generates <code>srcset</code>/<code>sizes</code> and enforces <code>width</code>/<code>height</code>, <code>loading</code>, <code>decoding</code> and <code>fetchpriority</code>; LQIP inside a fixed <code>aspect-ratio</code> box so CLS stays 0. <em>Guardrails:</em> CI fails any raw <code>&lt;img&gt;</code>, a budget on LCP image bytes, RUM reports the LCP element type.</p>
+<p class="lead-in"><strong>Design system rollout to 12 teams.</strong> Phase 0 audit — script the codebase to count distinct button implementations and colour values; that number creates the mandate. Phase 1 tokens only, adopted by codemod. Phase 2 the ten highest-traffic primitives on headless libraries with a11y and visual regression from day one. Phase 3 migration via codemods plus pairing, with a per-team adoption dashboard. Phase 4 enforcement via lint rules. <em>Risks:</em> the library becoming a bottleneck (contribution model, documented escape hatches) and version skew in a federated setup (singleton shared scope, compatibility matrix).</p>
+<p class="lead-in"><strong>Offline-capable booking flow.</strong> Service Worker with precached shell, network-first HTML, network-only for prices; funnel state in IndexedDB keyed by a draft booking id; a request queue with Background Sync and a client-generated <strong>idempotency key</strong> so a retry cannot double-book; explicit offline UI rather than optimistic success; on reconnect, re-validate price and availability server-side and show a diff; a remote kill switch for the worker.</p>
+<p class="lead-in"><strong>Real-time price updates.</strong> SSE for one-way pushes (simpler, auto-reconnect) or WebSocket if you need client→server too; subscribe per visible card via <code>IntersectionObserver</code> so offscreen items unsubscribe; coalesce bursts into one <code>startTransition</code> flush per animation frame; exponential backoff with jitter plus a sequence number to detect gaps and refetch; animate price changes without moving scroll position, and require confirmation if the price changed between selection and payment.</p>
+<p class="lead-in"><strong>Experimentation platform.</strong> Covered in 13.2 — server-side assignment, variant in the cache key, typed variant names generated from the experiment registry, exposure on render, SRM alerting, auto-expiry, per-experiment performance budget.</p>
 <h3 id="153-sources-and-further-reading">15.3 Sources and further reading</h3>
 <p><a href="https://developer.mozilla.org/">MDN Web Docs</a> · <a href="https://web.dev/">web.dev</a> · <a href="https://refactoring.guru/">Refactoring Guru</a> · <a href="https://github.com/binhnguyennus/awesome-scalability">Awesome Scalability</a></p></main>
 </div>
