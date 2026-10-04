@@ -102,6 +102,24 @@ th,td{border:1px solid var(--rule); padding:8px 11px; text-align:left; vertical-
 th{background:var(--tint); font-weight:650; font-size:12.5px; letter-spacing:.01em}
 tbody tr:nth-child(even){background:color-mix(in srgb, var(--tint) 45%, transparent)}
 
+/* ---------- self-test ---------- */
+details.q{
+  margin:0 0 16px; border:1px solid var(--rule); border-radius:10px;
+  background:var(--card); overflow:hidden;
+}
+details.q > summary{
+  cursor:pointer; padding:10px 14px; font-size:13.5px; font-weight:650;
+  list-style:none; color:var(--accent); user-select:none;
+}
+details.q > summary::-webkit-details-marker{display:none}
+details.q > summary::before{content:"\25B8  "; display:inline-block; transition:transform .15s}
+details.q[open] > summary::before{transform:rotate(90deg)}
+details.q > summary:hover{background:var(--tint)}
+details.q[open] > summary{border-bottom:1px solid var(--rule)}
+details.q .inner{padding:12px 14px 2px}
+details.q pre{margin-bottom:12px}
+@media print{ details.q{break-inside:avoid} details.q[open] > summary{border-bottom:1px solid #ccc} }
+
 /* ---------- diagrams ---------- */
 .dgw{margin:18px 0 22px; padding:16px 18px 12px; background:var(--card);
      border:1px solid var(--rule); border-radius:12px}
@@ -429,6 +447,39 @@ svg.dg .arwA{fill:var(--accent)}
 <p class="lead-in"><strong>Example.</strong> A stack trace is the call stack printed. <code>RangeError: Maximum call stack size exceeded</code> is that stack overflowing — typically unbounded recursion.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> The stack is synchronous and single-threaded. Anything long-running on it blocks rendering and input, which is the root of every INP problem.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What's on the stack when a promise resolves? Why does a stack trace lose frames across an <code>await</code>?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — the stack explains why this catch never fires
+try {
+  setTimeout(() =&gt; { throw new Error('boom'); }, 0);
+} catch (e) {
+  // unreachable: the callback runs later, on a fresh, empty stack
+}
+
+// 2 — but this one does, because await resumes the same logical frame
+try {
+  await Promise.reject(new Error('boom'));
+} catch (e) {
+  // caught
+}
+
+// 3 — recursion depth is finite; depth is roughly 10k frames in V8
+const depth = (n = 0) =&gt; depth(n + 1);
+try { depth(); } catch (e) { e.name; } // 'RangeError'
+</code></pre>
+<details class="q">
+<summary>Trace it — what order do the logs print?</summary>
+<div class="inner">
+<pre><code class="language-javascript">function a() { console.log('a'); b(); console.log('a done'); }
+function b() { console.log('b'); c(); console.log('b done'); }
+function c() { console.log('c'); }
+a();
+</code></pre>
+<p class="lead-in"><strong>Answer:</strong> <code>a · b · c · b done · a done</code>.</p>
+<p>Each call pushes a frame and the caller is suspended, not finished. <code>b done</code>
+cannot print until <code>c</code> pops, and <code>a done</code> cannot print until <code>b</code> pops. The
+"done" lines print in reverse call order — that is the unwinding.</p>
+</div>
+</details>
 <h3 id="22-hoisting-and-the-temporal-dead-zone">2.2 Hoisting and the temporal dead zone</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 328" role="img" aria-label="When each kind of declaration becomes usable within a scope">
   <text class="title" x="16" y="24">All four are registered before line one runs — only two are usable</text>
@@ -489,6 +540,35 @@ var bar = function () {};
 </code></pre>
 <p class="lead-in"><strong>Trade-offs.</strong> The TDZ turns a class of silent <code>undefined</code> bugs into loud errors, at the cost of ordering discipline.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why does the TDZ exist? Are function declarations hoisted inside blocks? What does <code>typeof b</code> do in the TDZ? (It throws — the one case where <code>typeof</code> is not safe.)</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — the loop-variable classic
+for (var i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 3 3 3
+for (let i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 0 1 2
+
+// 2 — const protects the binding, not the value
+const user = { name: 'Ada' };
+user.name = 'changed';   // fine — the object is mutable
+// user = {};          // TypeError: assignment to constant variable
+
+// 3 — a function declaration inside a block is block-scoped in modules
+if (true) { function f() {} }
+// f is not reliably visible outside the block — use a const arrow instead
+</code></pre>
+<details class="q">
+<summary>Predict the output</summary>
+<div class="inner">
+<pre><code class="language-javascript">console.log(typeof x);
+console.log(typeof y);
+var x = 1;
+let y = 2;
+</code></pre>
+<p class="lead-in"><strong>Answer:</strong> <code>'undefined'</code>, then a <code>ReferenceError</code>.</p>
+<p><code>typeof</code> is famously safe on undeclared identifiers — but <strong>not</strong> inside the
+temporal dead zone. <code>y</code> is declared, just not yet initialised, so the engine
+throws rather than reporting <code>'undefined'</code>. This is the one case where <code>typeof</code>
+can fail, and it is a common interview trap.</p>
+</div>
+</details>
 <h3 id="23-scope-closures-and-the-scope-chain">2.3 Scope, closures and the scope chain</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 330" role="img" aria-label="A closure keeping its defining scope alive after the outer function returned">
   <text class="title" x="16" y="24">The outer call is gone — its scope is not</text>
@@ -536,6 +616,45 @@ for (let i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i)); // 0 1 2 —
 </code></pre>
 <p class="lead-in"><strong>Trade-offs.</strong> Closures are the most common memory leak in long-lived SPAs: a listener closing over a DOM subtree keeps it alive after unmount. Guard with cleanup functions and <code>AbortController</code>.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How would you implement <code>once</code>, memoise, or a private counter with a closure? How do closures cause detached-DOM leaks?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — private state, no class needed
+function counter() {
+  let n = 0;                       // unreachable from outside
+  return { inc: () =&gt; ++n, value: () =&gt; n };
+}
+
+// 2 — run-once, a closure over a boolean
+const once = fn =&gt; {
+  let done = false, result;
+  return (...args) =&gt; done ? result : (done = true, result = fn(...args));
+};
+
+// 3 — memoise: the cache lives in the closure, not in global scope
+const memo = fn =&gt; {
+  const cache = new Map();
+  return x =&gt; cache.has(x) ? cache.get(x) : (cache.set(x, fn(x)), cache.get(x));
+};
+</code></pre>
+<details class="q">
+<summary>Why does this leak, and what is the one-line fix?</summary>
+<div class="inner">
+<pre><code class="language-javascript">function attach(node) {
+  const bigData = new Array(1e6).fill(node.textContent);
+  node.addEventListener('click', () =&gt; console.log(bigData.length));
+}
+</code></pre>
+<p class="lead-in"><strong>Answer:</strong> the listener closes over <code>bigData</code> <em>and</em> over <code>node</code>. Even after the
+node is removed from the DOM, the listener keeps both alive — a detached DOM node
+plus a million-element array, retained for the life of the page.</p>
+<p>The fix is to tie the subscription to a lifetime:</p>
+<pre><code class="language-javascript">const ac = new AbortController();
+node.addEventListener('click', handler, { signal: ac.signal });
+// later: ac.abort();  — removes the listener and releases the closure
+</code></pre>
+<p>Note the cause is not "closures are leaky" — it is that nothing ever removed the
+subscription. The closure is just what made the retention large.</p>
+</div>
+</details>
 <h3 id="24-the-event-loop">2.4 The event loop</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 348" role="img" aria-label="One turn of the event loop: one macrotask, then all microtasks, then rendering">
   <text class="title" x="16" y="24">Microtasks drain completely before the browser is allowed to paint</text>
@@ -599,6 +718,46 @@ console.log('2 sync');
 </code></pre>
 <p class="lead-in"><strong>Trade-offs.</strong> A microtask that queues another microtask starves rendering forever; a <code>setTimeout</code> loop does not (nested timeouts clamp to 4ms after five levels). Microtasks give ordering guarantees at the cost of being unyielding.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Predict the output of a mixed <code>setTimeout</code>/promise/<code>async</code> snippet. Why does <code>Promise.resolve().then(spin)</code> freeze the tab? Where does <code>requestAnimationFrame</code> run relative to microtasks?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — await is microtask scheduling, so this prints 1 4 2 3
+async function f() { console.log(2); await null; console.log(3); }
+console.log(1); f(); console.log(4);
+// 1 · 2 · 4 · 3  — the body runs synchronously up to the first await
+
+// 2 — rAF runs after microtasks, before paint
+Promise.resolve().then(() =&gt; console.log('micro'));
+requestAnimationFrame(() =&gt; console.log('frame'));
+// micro · frame
+
+// 3 — yielding so input can be handled between chunks
+async function process(items) {
+  for (const [i, item] of items.entries()) {
+    work(item);
+    if (i % 100 === 0) await new Promise(r =&gt; setTimeout(r, 0));
+  }
+}
+</code></pre>
+<details class="q">
+<summary>Order these eight logs</summary>
+<div class="inner">
+<pre><code class="language-javascript">console.log('1');
+setTimeout(() =&gt; console.log('2'), 0);
+Promise.resolve().then(() =&gt; { console.log('3'); return Promise.resolve(); })
+                 .then(() =&gt; console.log('4'));
+queueMicrotask(() =&gt; console.log('5'));
+(async () =&gt; { console.log('6'); await null; console.log('7'); })();
+console.log('8');
+</code></pre>
+<p class="lead-in"><strong>Answer:</strong> <code>1 · 6 · 8 · 3 · 5 · 7 · 4 · 2</code></p>
+<ul>
+<li><code>1</code>, <code>6</code>, <code>8</code> are synchronous. The async IIFE body runs immediately up to its <code>await</code>.</li>
+<li>The microtask queue then drains <strong>in the order things were queued</strong>: <code>3</code>, then <code>5</code>, then <code>7</code>.</li>
+<li><code>4</code> is late because returning a promise from <code>.then</code> costs <em>two</em> extra microtask
+  ticks to unwrap — this is the detail almost everyone misses.</li>
+<li><code>2</code> is a macrotask, so it runs on the next turn, last.</li>
+</ul>
+</div>
+</details>
 <h3 id="25-promises-and-asyncawait">2.5 Promises and async/await</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 334" role="img" aria-label="Serial await versus Promise.all versus bounded concurrency">
   <text class="title" x="16" y="24">await in a loop serialises what could have run together</text>
@@ -674,6 +833,50 @@ async function mapLimit(items, limit, fn) {                   // bounded
 </code></pre>
 <p class="lead-in"><strong>Trade-offs.</strong> <code>all</code> fails fast (one rejection discards the rest); <code>allSettled</code> never rejects, right for dashboards and telemetry; <code>any</code> returns the first fulfilled and rejects with <code>AggregateError</code>; <code>race</code> returns the first settled and is the timeout idiom. Unbounded <code>Promise.all</code> over a large list floods the server and the browser's connection pool.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How do you add a timeout to a fetch? How do you cancel in-flight work? What is an unhandled rejection and how do you report it?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — timeout any promise, using race
+const withTimeout = (p, ms) =&gt; Promise.race([
+  p,
+  new Promise((_, rej) =&gt; setTimeout(() =&gt; rej(new Error('timeout')), ms)),
+]);
+
+// 2 — retry with exponential backoff and jitter
+async function retry(fn, tries = 3) {
+  for (let i = 0; i &lt; tries; i++) {
+    try { return await fn(); }
+    catch (e) {
+      if (i === tries - 1) throw e;
+      const wait = 2 ** i * 100 + Math.random() * 100;   // jitter avoids a thundering herd
+      await new Promise(r =&gt; setTimeout(r, wait));
+    }
+  }
+}
+
+// 3 — genuinely sequential, when each step needs the previous result
+const result = await steps.reduce(
+  (acc, step) =&gt; acc.then(step),
+  Promise.resolve(initial),
+);
+</code></pre>
+<details class="q">
+<summary>What does this log, and why is it a bug?</summary>
+<div class="inner">
+<pre><code class="language-javascript">const results = [];
+[1, 2, 3].forEach(async (n) =&gt; {
+  results.push(await double(n));
+});
+console.log(results.length);
+</code></pre>
+<p class="lead-in"><strong>Answer:</strong> <code>0</code>.</p>
+<p><code>forEach</code> ignores the returned promise, so all three callbacks are started and
+abandoned — <code>console.log</code> runs before any of them resume. <code>await</code> inside a
+callback does not make the <em>outer</em> function wait.</p>
+<pre><code class="language-javascript">const results = await Promise.all([1, 2, 3].map(double));   // 3
+</code></pre>
+<p>The general rule: <code>forEach</code> is not async-aware. Use <code>map</code> + <code>Promise.all</code>, or a
+<code>for…of</code> loop if you genuinely need them sequential.</p>
+</div>
+</details>
 <h3 id="26-this-callapplybind-arrow-functions">2.6 <code>this</code>, call/apply/bind, arrow functions</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 322" role="img" aria-label="Decision tree for resolving this at call time">
   <text class="title" x="16" y="24">`this` is decided by the call, not by where the function was written</text>
@@ -726,6 +929,46 @@ async function mapLimit(items, limit, fn) {                   // bounded
 <p class="lead-in"><strong>Example.</strong> <code>const f = obj.method; f()</code> loses the receiver; <code>obj.method.bind(obj)</code> or <code>() =&gt; obj.method()</code> keeps it.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Class-field arrows bind per instance — convenient but they cost memory per instance and are not on the prototype, so they cannot be overridden or spied on easily.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What is <code>this</code> in a standalone function in a module? In a <code>setTimeout</code> callback? In an event handler? Implement <code>bind</code> yourself.</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — the receiver is lost the moment you detach the method
+const obj = { n: 1, get() { return this.n; } };
+const f = obj.get;
+obj.get(); // 1      — rule 3, receiver is obj
+f();       // throws — rule 4, this is undefined in a module
+
+// 2 — array callbacks take an explicit thisArg
+[1, 2].map(function () { return this.k; }, { k: 9 }); // [9, 9]
+
+// 3 — prototype method vs class field, and what each costs
+class A {
+  onClick() {}            // on A.prototype — one copy, needs binding
+  onTap = () =&gt; {};       // per instance — pre-bound, costs memory per object
+}
+</code></pre>
+<details class="q">
+<summary>Which of these four log 10?</summary>
+<div class="inner">
+<pre><code class="language-javascript">const o = {
+  n: 10,
+  regular() { return this.n; },
+  arrow: () =&gt; this?.n,
+  nested() { return [1].map(function () { return this?.n; })[0]; },
+  nestedArrow() { return [1].map(() =&gt; this.n)[0]; },
+};
+</code></pre>
+<p class="lead-in"><strong>Answer:</strong> <code>regular()</code> and <code>nestedArrow()</code> return <code>10</code>.</p>
+<ul>
+<li><code>regular</code> — rule 3, the receiver is <code>o</code>.</li>
+<li><code>arrow</code> — defined at module top level, so it closed over module scope, where
+  <code>this</code> is <code>undefined</code>. The object literal creates no scope.</li>
+<li><code>nested</code> — the inner <code>function</code> is called by <code>map</code> with no receiver, so rule 4
+  applies and <code>this</code> is <code>undefined</code>.</li>
+<li><code>nestedArrow</code> — the arrow closes over <code>nestedArrow</code>'s <code>this</code>, which is <code>o</code>.</li>
+</ul>
+<p>The takeaway: an arrow is only useful for <code>this</code> when it is <strong>nested inside</strong> a
+function that already has the <code>this</code> you want.</p>
+</div>
+</details>
 <h3 id="27-prototypes-and-classes">2.7 Prototypes and classes</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 300" role="img" aria-label="Property lookup walking the prototype chain">
   <text class="title" x="16" y="24">A property miss walks up the chain until it hits null</text>
@@ -782,6 +1025,40 @@ async function mapLimit(items, limit, fn) {                   // bounded
 <p class="lead-in"><strong>Example.</strong> <code>Array.prototype.map</code> is found by walking from the array instance to <code>Array.prototype</code>. <code>obj.hasOwnProperty('x')</code> checks only the own object; <code>'x' in obj</code> walks the chain.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Prototype sharing saves memory; prototype mutation at runtime deoptimises V8's hidden classes and should be avoided in hot paths. Monkey-patching built-in prototypes breaks other libraries.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Difference between <code>__proto__</code> and <code>prototype</code>? How does <code>instanceof</code> work? How would you implement inheritance without <code>class</code>?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — instanceof is a walk, not a type tag
+class A {} class B extends A {}
+const b = new B();
+b instanceof A;                              // true — A.prototype is on the chain
+Object.getPrototypeOf(B.prototype) === A.prototype; // true
+
+// 2 — own vs inherited
+const o = Object.create({ inherited: 1 });
+o.own = 2;
+'inherited' in o;                  // true  — `in` walks the chain
+o.hasOwnProperty('inherited');     // false — own properties only
+Object.keys(o);                    // ['own'] — own and enumerable
+
+// 3 — a null-prototype object has no inherited methods at all
+const dict = Object.create(null);
+dict.toString;                     // undefined — safe as a plain string map
+</code></pre>
+<details class="q">
+<summary>Why does this break, and what is the safer check?</summary>
+<div class="inner">
+<pre><code class="language-javascript">const data = JSON.parse('{&quot;hasOwnProperty&quot;: 1}');
+data.hasOwnProperty('x');   // TypeError: not a function
+</code></pre>
+<p class="lead-in"><strong>Answer:</strong> the parsed object <strong>shadows</strong> the inherited method with a number, so
+calling it fails. Any object built from untrusted input can do this.</p>
+<p>Safe forms, in order of preference:</p>
+<pre><code class="language-javascript">Object.hasOwn(data, 'x');                          // modern, clearest
+Object.prototype.hasOwnProperty.call(data, 'x');   // the classic borrow
+</code></pre>
+<p>The same reasoning is why <code>Object.create(null)</code> is the right choice for a
+lookup map — there is nothing on the chain to shadow or to collide with.</p>
+</div>
+</details>
 <h3 id="28-memory-and-garbage-collection">2.8 Memory and garbage collection</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 332" role="img" aria-label="Reachability from GC roots and a retainer path causing a leak">
   <text class="title" x="16" y="24">Nothing is freed because it is "unused" — only because it is unreachable</text>
@@ -830,6 +1107,40 @@ async function mapLimit(items, limit, fn) {                   // bounded
 <p class="lead-in"><strong>Example.</strong> Leak taxonomy: detached DOM nodes, forgotten timers and listeners, unbounded module-level caches, closures over large objects. <code>WeakMap</code>/<code>WeakSet</code> keys do not retain; <code>WeakRef</code> + <code>FinalizationRegistry</code> for caches; <code>AbortController</code> for listener and fetch lifecycle.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Weak collections prevent leaks but make eviction non-deterministic — you cannot rely on a finalizer running.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How do you find a leak in DevTools? (Heap snapshot → interact → second snapshot → "objects allocated between 1 and 2" → sort by retained size → follow the retainer path.) What does a sawtooth memory graph that never returns to baseline mean?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — a WeakMap lets the key be collected; a Map does not
+const meta = new WeakMap();
+meta.set(node, { seen: true });   // when `node` dies, the entry dies with it
+
+// 2 — the three subscriptions that outlive a component
+const id = setInterval(tick, 1000);          // must clearInterval
+window.addEventListener('resize', onResize); // must removeEventListener
+const sub = store.subscribe(onChange);       // must unsubscribe
+// one controller can cover the listeners:
+const ac = new AbortController();
+window.addEventListener('resize', onResize, { signal: ac.signal });
+
+// 3 — an unbounded module-level cache is a leak with good intentions
+const cache = new Map();                    // grows forever
+const bounded = new Map();                  // evict by size or time instead
+</code></pre>
+<details class="q">
+<summary>Two snapshots, same page, 40 MB apart. What do you look at first?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> the <strong>Comparison</strong> view, filtered to objects allocated between
+snapshot 1 and snapshot 2, sorted by <strong>retained</strong> size — not shallow size.</p>
+<p>Shallow size is the object itself; retained size is everything that would be
+freed if it went away. A leak is usually a small object retaining a large graph,
+so sorting by shallow size hides it.</p>
+<p>Then follow the <strong>retainer path</strong> from the suspect up to a GC root. That path is
+the answer: it names the exact reference that must be released. A path ending in
+a module-level <code>Map</code>, an array of handlers, or a detached DOM node is the
+overwhelmingly common shape.</p>
+<p>Quick sanity check before any of that: in the Performance panel, record an
+interaction loop and look for a sawtooth that never returns to its starting
+baseline. If memory does return to baseline, you have churn, not a leak.</p>
+</div>
+</details>
 <h3 id="29-the-patterns-asked-by-name">2.9 The patterns asked by name</h3>
 <table>
 <thead>
@@ -884,6 +1195,51 @@ async function mapLimit(items, limit, fn) {                   // bounded
 </table>
 <p class="lead-in"><strong>Follow-ups.</strong> Implement debounce with a leading edge and <code>cancel()</code>. Why does <code>JSON.parse(JSON.stringify(x))</code> lose <code>undefined</code>, <code>Date</code> and cycles? When is <code>stopImmediatePropagation</code> needed over <code>stopPropagation</code>?</p>
 <h2 id="3-typescript">3. TypeScript</h2>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — debounce with a cancel, the version worth memorising
+function debounce(fn, ms) {
+  let t;
+  const wrapped = (...a) =&gt; { clearTimeout(t); t = setTimeout(() =&gt; fn(...a), ms); };
+  wrapped.cancel = () =&gt; clearTimeout(t);
+  return wrapped;
+}
+
+// 2 — throttle: trailing edge preserved
+function throttle(fn, ms) {
+  let last = 0, timer;
+  return (...a) =&gt; {
+    const now = Date.now(), wait = ms - (now - last);
+    if (wait &lt;= 0) { last = now; fn(...a); }
+    else { clearTimeout(timer); timer = setTimeout(() =&gt; { last = Date.now(); fn(...a); }, wait); }
+  };
+}
+
+// 3 — event delegation: one listener for any number of rows
+table.addEventListener('click', (e) =&gt; {
+  const row = e.target.closest('[data-hotel-id]');
+  if (row &amp;&amp; table.contains(row)) select(row.dataset.hotelId);
+});
+</code></pre>
+<details class="q">
+<summary>Search-as-you-type: debounce or throttle, and what else?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> <strong>debounce</strong> — you want one request after the user stops typing, not
+a steady stream while they type. Throttle is for continuous streams you must
+sample (scroll, resize, pointermove).</p>
+<p>But debounce alone is not enough. Three more things belong in a real
+implementation:</p>
+<ol>
+<li><strong>Cancel the in-flight request</strong> when a newer keystroke supersedes it —
+   <code>AbortController</code> — otherwise a slow early response can overwrite a fast later one.</li>
+<li><strong>Guard against out-of-order responses</strong> even so: tag each request and drop
+   any response that is not the latest.</li>
+<li><strong>Mark the update as non-urgent</strong> with <code>useDeferredValue</code> or <code>startTransition</code>,
+   so re-filtering a large list never blocks the keystroke itself.</li>
+</ol>
+<p>The race condition in point 2 is the one candidates usually miss, and it is a real
+bug class: the user sees results for a query they already edited away.</p>
+</div>
+</details>
 <h3 id="31-structural-typing-and-branded-types">3.1 Structural typing and branded types</h3>
 <p class="lead-in"><strong>What it is.</strong> TypeScript compares types by shape, not by name. Two unrelated types with the same members are interchangeable.</p>
 <p class="lead-in"><strong>Example.</strong> To get nominal behaviour for identifiers:</p>
@@ -919,6 +1275,40 @@ const asHotelId = (s: string) =&gt; s as HotelId;
 </code></pre>
 <p class="lead-in"><strong>Trade-offs.</strong> More verbose than <code>{ loading: boolean; error?: Error; data?: T }</code>, but it makes impossible states unrepresentable — you can never have <code>loading: true</code> with <code>data</code> present.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Model a booking flow's states. How does narrowing work with <code>in</code>, <code>typeof</code> and custom type guards (<code>x is Foo</code>)?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-typescript">// 1 — the discriminant does not have to be called &quot;status&quot;
+type Shape =
+  | { kind: 'circle'; r: number }
+  | { kind: 'rect'; w: number; h: number };
+const area = (s: Shape) =&gt; s.kind === 'circle' ? Math.PI * s.r ** 2 : s.w * s.h;
+
+// 2 — a custom type guard narrows across function boundaries
+function isError&lt;T&gt;(s: FetchState&lt;T&gt;): s is Extract&lt;FetchState&lt;T&gt;, { status: 'error' }&gt; {
+  return s.status === 'error';
+}
+
+// 3 — a booking funnel where impossible states cannot be constructed
+type Booking =
+  | { step: 'dates' }
+  | { step: 'rooms'; dates: DateRange }
+  | { step: 'pay';   dates: DateRange; room: Room }
+  | { step: 'done';  confirmation: string };
+// you cannot reach 'pay' without a room — the type enforces the order
+</code></pre>
+<details class="q">
+<summary>Why is the boolean version worse?</summary>
+<div class="inner">
+<pre><code class="language-typescript">interface State&lt;T&gt; { loading: boolean; error?: Error; data?: T }
+</code></pre>
+<p class="lead-in"><strong>Answer:</strong> it permits combinations that cannot happen, and forces every reader to
+defend against them. <code>{ loading: true, error: e, data: d }</code> type-checks perfectly,
+so each consumer invents its own precedence rule — and they disagree.</p>
+<p>A discriminated union makes illegal combinations unrepresentable, and gives you
+exhaustiveness for free: add a <code>'refetching'</code> variant and every <code>switch</code> that
+forgot it fails to compile. With the boolean shape, adding a state means hunting
+down every <code>if (loading)</code> by hand and hoping you found them all.</p>
+</div>
+</details>
 <h3 id="34-generics-conditional-and-mapped-types">3.4 Generics, conditional and mapped types</h3>
 <p class="lead-in"><strong>What it is.</strong> Generics parameterise types; conditional types branch on assignability with <code>infer</code>; mapped types transform every key of a type, optionally remapping keys with <code>as</code>.</p>
 <p class="lead-in"><strong>Example.</strong></p>
@@ -945,6 +1335,41 @@ const hotel = Hotel.parse(await res.json()); // throws on drift, at the edge
 </code></pre>
 <p class="lead-in"><strong>Trade-offs.</strong> Zod adds bundle weight (Valibot is lighter, ArkType faster) and runtime cost per parse. Validate at boundaries only, not on every internal call.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Where exactly do you validate? How do you keep frontend types in sync with the backend? (Generate from OpenAPI/GraphQL/protobuf in CI so a breaking change fails the build.)</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-typescript">// 1 — one schema, one type, parsed once at the edge
+const Hotel = z.object({ id: z.string(), price: z.number() });
+type Hotel = z.infer&lt;typeof Hotel&gt;;
+const hotel = Hotel.parse(await res.json());
+
+// 2 — safeParse when a bad payload should degrade, not crash
+const r = Hotel.safeParse(raw);
+if (!r.success) { report(r.error); return fallback; }
+
+// 3 — the boundaries people forget
+const flags  = Flags.parse(JSON.parse(localStorage.getItem('flags') ?? '{}'));
+const params = Search.parse(Object.fromEntries(new URLSearchParams(location.search)));
+window.addEventListener('message', (e) =&gt; Msg.parse(e.data));  // postMessage is a boundary too
+</code></pre>
+<details class="q">
+<summary>The backend renames a field. Where should that break?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> at <strong>build time in CI</strong>, not at runtime in a user's browser.</p>
+<p>Three layers, and a mature setup has all three:</p>
+<ol>
+<li><strong>Generated types</strong> — derive frontend types from the backend's OpenAPI or
+   GraphQL schema in CI. A rename now fails the frontend build, before merge.</li>
+<li><strong>Runtime parsing at the boundary</strong> — because generated types still assume the
+   deployed server matches the schema you generated from. It may not, during a
+   rollout.</li>
+<li><strong>Contract tests</strong> — the consumer publishes what it expects; the provider's CI
+   replays it. This catches the change in the <em>backend's</em> pipeline, which is where
+   it is cheapest to fix.</li>
+</ol>
+<p>Types alone are not enough: they vanish at runtime and describe what you were
+promised, not what arrived. Parsing alone is not enough either: it finds the
+problem in production. You want the schema to be the shared artifact.</p>
+</div>
+</details>
 <h3 id="37-declaration-merging-and-module-augmentation">3.7 Declaration merging and module augmentation</h3>
 <p class="lead-in"><strong>What it is.</strong> Interfaces with the same name in the same scope merge; <code>declare module</code> extends a third-party library's types.</p>
 <p class="lead-in"><strong>Example.</strong></p>
@@ -1084,6 +1509,38 @@ const hotel = Hotel.parse(await res.json()); // throws on drift, at the edge
 <p class="lead-in"><strong>Example.</strong> Animate <code>transform: translateX()</code> rather than <code>left</code>, and <code>opacity</code> rather than <code>visibility</code>. Promote with <code>will-change: transform</code> immediately before the animation and remove it after.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Each promoted layer costs GPU memory; leaving <code>will-change</code> on many elements causes layer explosion and can make things slower than not promoting at all.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Which properties are cheap to animate and why? What does promoting a layer actually do? How would you debug a janky animation in DevTools? (Rendering panel → paint flashing, layer borders, FPS meter.)</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-css">/* 1 — same visual motion, three very different costs */
+.a { left: 100px; }                  /* layout → paint → composite */
+.b { background-color: red; }        /* paint → composite */
+.c { transform: translateX(100px); } /* composite only */
+
+/* 2 — promote only for the duration of the animation, then release */
+.card.animating { will-change: transform; }
+
+/* 3 — stop a widget's reflows escaping into the host page */
+.widget { contain: layout paint; content-visibility: auto;
+          contain-intrinsic-size: 0 420px; }
+</code></pre>
+<details class="q">
+<summary>It animates smoothly in isolation but janks in the real page. Why?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> three candidates, in the order worth checking.</p>
+<ol>
+<li><strong>Layer explosion</strong> — <code>will-change</code> left permanently on many elements. Each
+   layer costs GPU memory, and past a threshold the compositor spends more time
+   managing layers than it saves. Check Rendering → Layer borders.</li>
+<li><strong>It is not actually composited</strong> — something in the real page forces it back
+   to the main thread: an ancestor filter, a <code>box-shadow</code> animating alongside, or
+   a property you assumed was cheap.</li>
+<li><strong>Main-thread contention</strong> — the animation is fine, but long tasks elsewhere
+   starve the frame budget.</li>
+</ol>
+<p>The test that separates them: deliberately block the main thread with a long task
+while the animation runs. If it keeps going, it is genuinely composited and your
+problem is elsewhere. If it freezes, it never was.</p>
+</div>
+</details>
 <h3 id="43-reflow-and-layout-thrashing">4.3 Reflow and layout thrashing</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 334" role="img" aria-label="Layout thrashing versus batched reads and writes">
   <text class="title" x="16" y="24">Interleaving reads and writes forces one synchronous layout per iteration</text>
@@ -1279,6 +1736,39 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </table>
 <p class="lead-in"><strong>Trade-offs.</strong> Observers are asynchronous and batched — better for performance, but you cannot read a value synchronously right after a change.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Implement infinite scroll without a scroll listener. How does <code>AbortController</code> clean up both a fetch and its listeners? What are the <code>rootMargin</code> and <code>threshold</code> options for?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — infinite scroll with no scroll listener at all
+const io = new IntersectionObserver(([e]) =&gt; e.isIntersecting &amp;&amp; loadMore(),
+                                    { rootMargin: '400px' });   // prefetch before it is visible
+io.observe(sentinel);
+
+// 2 — impression tracking: fire once, when half the card has been seen
+new IntersectionObserver((es) =&gt; es.forEach((e) =&gt; {
+  if (e.isIntersecting) { track(e.target.dataset.id); io2.unobserve(e.target); }
+}), { threshold: 0.5 });
+
+// 3 — one controller cancels a fetch and its listeners together
+const ac = new AbortController();
+fetch(url, { signal: ac.signal });
+el.addEventListener('click', onClick, { signal: ac.signal });
+ac.abort();   // both gone
+</code></pre>
+<details class="q">
+<summary>Why is IntersectionObserver faster than a scroll handler?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> a scroll handler runs <strong>on the main thread, on every scroll event</strong>,
+and almost always calls <code>getBoundingClientRect()</code> — which forces a synchronous
+layout. Scrolling is exactly when you can least afford that.</p>
+<p><code>IntersectionObserver</code> computes intersections <strong>off the main thread</strong>, in the
+compositor, and only calls you when a threshold is actually crossed. Your callback
+runs a handful of times rather than hundreds, and it receives already-computed
+geometry, so there is no forced reflow.</p>
+<p>The same argument applies to <code>ResizeObserver</code> versus a <code>window.resize</code> handler,
+and it is why <code>{ passive: true }</code> exists for the scroll listeners you genuinely
+cannot avoid: it promises not to <code>preventDefault</code>, so the compositor need not wait
+for your handler before scrolling.</p>
+</div>
+</details>
 <h3 id="46-the-browser-as-a-security-boundary">4.6 The browser as a security boundary</h3>
 <p class="lead-in"><strong>What it is.</strong> Site isolation puts each site in its own renderer process, so a compromised renderer cannot read another site's memory.</p>
 <p class="lead-in"><strong>Example.</strong> This is why <code>SharedArrayBuffer</code> requires COOP and COEP headers, and why <code>window.opener</code> access from <code>target="_blank"</code> links is restricted (<code>rel="noopener"</code>).</p>
@@ -1438,6 +1928,39 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 </ol>
 <p class="lead-in"><strong>Trade-offs.</strong> Hydration is why a server-rendered page can <em>look</em> ready and not respond — the "uncanny valley" that wrecks INP. Avoiding it entirely usually means framework lock-in.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What causes a hydration mismatch? (<code>Date.now()</code>, locale formatting, <code>window</code> access during render, random ids, UA-dependent markup.) How do you fix a genuinely client-only value? What does React do when markup doesn't match?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-jsx">// 1 — the mismatch nobody expects: locale and clock differ server vs client
+&lt;span&gt;{new Date().toLocaleDateString()}&lt;/span&gt;
+
+// 2 — the two-pass escape hatch for genuinely client-only values
+const [mounted, setMounted] = useState(false);
+useEffect(() =&gt; setMounted(true), []);
+return &lt;span&gt;{mounted ? localTime() : null}&lt;/span&gt;;
+
+// 3 — hydrate a heavy island only once it is visible
+const Map = lazy(() =&gt; import('./Map'));
+&lt;Suspense fallback={&lt;MapSkeleton /&gt;}&gt;{visible &amp;&amp; &lt;Map /&gt;}&lt;/Suspense&gt;
+</code></pre>
+<details class="q">
+<summary>LCP is 1.8s but INP is 500ms on a server-rendered page. Diagnose it.</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> the hydration uncanny valley. The HTML painted fast — hence the good
+LCP — but the page is not yet interactive, so taps queue behind hydration.</p>
+<p>Confirm it: in the field, check whether bad INP clusters in the first seconds
+after load. In the lab, look for one long task immediately after FCP.</p>
+<p>Fixes, cheapest first:</p>
+<ol>
+<li><strong>Ship less</strong> — server-render static regions and never hydrate them.</li>
+<li><strong>Break the single long task</strong> — Suspense boundaries hydrate in chunks instead
+   of one uninterruptible pass.</li>
+<li><strong>Defer non-critical islands</strong> to <code>IntersectionObserver</code> or first interaction.</li>
+<li><strong>Move subtrees to Server Components</strong> so their code never reaches the client.</li>
+</ol>
+<p>What will <em>not</em> help: optimising LCP further. The failing metric is caused by
+JavaScript execution, not resource loading — saying that distinction out loud is
+most of the answer.</p>
+</div>
+</details>
 <h3 id="53-fiber-and-reconciliation">5.3 Fiber and reconciliation</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 334" role="img" aria-label="React render phase versus commit phase across two fiber trees">
   <text class="title" x="16" y="24">Render can be thrown away. Commit cannot.</text>
@@ -1491,6 +2014,32 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 <p class="lead-in"><strong>Example.</strong> Diffing heuristics: different element type → unmount the whole subtree; same type → update props in place; list children matched by <code>key</code>. So index-as-key breaks on reorder — a sorted list of checkboxes keeps the wrong checked state because state attaches to position, not identity.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> O(n) heuristic diffing instead of an optimal O(n³) tree diff: fast, but it relies on you giving stable keys and not changing component types.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why must render be pure? Why does StrictMode double-invoke in dev? What happens in commit vs render? When is <code>useLayoutEffect</code> correct over <code>useEffect</code>?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-jsx">// 1 — index keys attach state to a slot, not to an item
+{items.map((it, i) =&gt; &lt;Row key={i} /&gt;)}     // sort → checkbox state stays behind
+{items.map((it)    =&gt; &lt;Row key={it.id} /&gt;)} // sort → state travels with the row
+
+// 2 — changing the element type unmounts the whole subtree
+{editing ? &lt;input value={v} /&gt; : &lt;Input value={v} /&gt;}   // remounts, focus lost
+
+// 3 — a key change is the deliberate way to reset state
+&lt;Form key={userId} /&gt;   // switching user clears every field inside
+</code></pre>
+<details class="q">
+<summary>A sorted table keeps the wrong rows checked. Walk through it.</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> the rows are keyed by array index.</p>
+<p>Before the sort React holds fibers keyed <code>0,1,2</code>, and fiber <code>1</code> carries
+<code>checked: true</code>. After sorting, the data at index <code>1</code> is a different hotel — but
+the key is still <code>1</code>, so React matches the old fiber to the new data and
+<strong>reuses its state</strong>. The box stays checked, now for the wrong hotel.</p>
+<p>With <code>key={hotel.id}</code> React matches by identity: it reorders the existing fibers
+rather than reusing them positionally, and the checked state travels with its row.</p>
+<p>The rule generalises: index keys are safe only when a list is append-only and
+never reordered, filtered or sorted. Since that is a claim about <em>future</em> code as
+well as current code, most teams simply ban them.</p>
+</div>
+</details>
 <h3 id="54-hooks">5.4 Hooks</h3>
 <figure class="dgw"><svg class="dg" viewBox="0 0 880 342" role="img" aria-label="Hooks stored as an ordered list on the fiber, and what a conditional hook breaks">
   <text class="title" x="16" y="24">Hooks are matched by call order, not by name</text>
@@ -1607,6 +2156,41 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 <p class="lead-in"><strong>Example.</strong> <code>startTransition(() =&gt; setFilters(next))</code> keeps the input responsive while a large result list re-filters.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> A component can render without committing, so side effects in render became actively dangerous; and <strong>tearing</strong> becomes possible with external mutable stores, which is why <code>useSyncExternalStore</code> exists.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What is tearing? What's the difference between <code>useTransition</code> and <code>useDeferredValue</code>? What does Suspense actually suspend on?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-jsx">// 1 — keep typing responsive while a large list re-filters
+const [q, setQ] = useState('');
+const deferred = useDeferredValue(q);         // list renders from the stale value
+const rows = useMemo(() =&gt; filter(all, deferred), [all, deferred]);
+
+// 2 — mark a navigation as interruptible and show pending state
+const [isPending, startTransition] = useTransition();
+startTransition(() =&gt; setRoute(next));
+
+// 3 — an external store that cannot tear under concurrent rendering
+const width = useSyncExternalStore(
+  (cb) =&gt; { window.addEventListener('resize', cb); return () =&gt; window.removeEventListener('resize', cb); },
+  () =&gt; window.innerWidth,
+  () =&gt; 1024,            // server snapshot
+);
+</code></pre>
+<details class="q">
+<summary>What is tearing, and why can't a plain module variable be the fix?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> <strong>tearing</strong> is one commit showing two different values of the same
+external state — the top half of the screen rendered before a change, the bottom
+half after.</p>
+<p>It became possible with concurrent rendering because React can now <strong>pause</strong>
+mid-render, let other work run, and resume. If a module variable or an external
+store mutates during that pause, components rendered before and after the pause
+read different values, and React commits the inconsistent mix.</p>
+<p>A plain module variable has no way to tell React it changed mid-render, so React
+cannot detect the inconsistency or restart. <code>useSyncExternalStore</code> exists exactly
+for this: it gives React a <code>getSnapshot</code> to re-read and compare, so React can
+notice the store moved during the render pass and redo the work consistently.</p>
+<p>Component state (<code>useState</code>) is immune, because React controls it and keeps a
+consistent snapshot per render pass.</p>
+</div>
+</details>
 <h3 id="56-server-components">5.6 Server Components</h3>
 <p class="lead-in"><strong>What it is.</strong> Components that run only on the server, never ship their code to the client, can read data directly, and serialise their output into an RSC payload (a stream, not HTML). Client Components are marked <code>'use client'</code> and form the boundary.</p>
 <p class="lead-in"><strong>Example.</strong> A hotel detail page can fetch and render description, amenities and policies as RSC, with only the date picker and booking widget as Client Components.</p>
@@ -1919,6 +2503,41 @@ boxes.forEach((b, i) =&gt; { b.style.width = widths[i] + 10 + 'px'; });
 <p class="lead-in"><strong>Example.</strong> A booking POST carries a client-generated <code>Idempotency-Key</code>; the server stores key → response for a window, so a retry after a timeout returns the original result instead of double-booking.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Idempotency is an API contract, not a client property. Retries without a circuit breaker and jittered backoff turn a blip into a retry storm.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How do you make a POST retry-safe? Where do you put retry policy — the component, the data layer, or the gateway? What does <code>Retry-After</code> do?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-http"># 1 — the same booking submitted twice, deduplicated by the server
+POST /bookings
+Idempotency-Key: 6f3a1c2e-9b7d-4e11-ae02-1d9c4f8b2a77
+# a retry with the same key returns the original response, no second booking
+
+# 2 — honour the server's own backoff instruction
+HTTP/1.1 429 Too Many Requests
+Retry-After: 30
+</code></pre>
+<pre><code class="language-javascript">// 3 — retry reads freely, mutations only with a key
+const retryable = (method, hasKey) =&gt;
+  ['GET', 'HEAD', 'PUT', 'DELETE'].includes(method) || hasKey;
+</code></pre>
+<details class="q">
+<summary>Payment request times out. The user sees a spinner. What now?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> a timeout tells you the <strong>response</strong> was lost — not that the request
+was. The charge may well have succeeded. So the one thing you must not do is
+blindly retry a bare POST.</p>
+<p>The correct sequence:</p>
+<ol>
+<li><strong>Retry the same request with the same idempotency key.</strong> The server either
+   replays the original response (it did complete) or processes it for the first
+   time (it did not). Either way you end up with exactly one charge.</li>
+<li><strong>If retries are exhausted, reconcile rather than guess</strong> — poll
+   <code>GET /bookings?idempotencyKey=…</code> to discover the true state.</li>
+<li><strong>Never show "failed" on a timeout.</strong> Show "we're confirming this" and resolve
+   it from the server's answer, because a false failure causes the user to try
+   again manually, which is the worst outcome.</li>
+</ol>
+<p>The general principle worth stating: idempotency is a property the <strong>server</strong>
+provides; the client can only supply the key that makes it possible.</p>
+</div>
+</details>
 <h3 id="67-realtime-transports">6.7 Realtime transports</h3>
 <table>
 <thead>
@@ -2062,6 +2681,43 @@ GET /                →  Cache-Control: no-cache
 </code></pre>
 <p class="lead-in"><strong>Trade-offs.</strong> <code>private</code> vs <code>public</code> is a correctness decision, not a performance one — getting it wrong serves one user's booking page to another. Over-varying (e.g. on <code>User-Agent</code>) destroys hit rate.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> What's the difference between <code>no-cache</code> and <code>no-store</code>? What exactly does a 304 save? Strong vs weak ETags? Why must <code>Vary: Accept-Encoding</code> be set?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-http"># 1 — hashed asset: cache hard, forever, never revalidate
+GET /app.3f9a1c.js
+Cache-Control: public, max-age=31536000, immutable
+
+# 2 — the document: always revalidate, cheap when unchanged
+GET /
+Cache-Control: no-cache
+ETag: &quot;v842&quot;
+→ If-None-Match: &quot;v842&quot; → 304 Not Modified   (headers only, no body)
+
+# 3 — short browser TTL, long edge TTL, instant-but-fresh
+Cache-Control: max-age=0, s-maxage=600, stale-while-revalidate=3600
+
+# 4 — correctness with compression and locales
+Vary: Accept-Encoding, Accept-Language
+</code></pre>
+<details class="q">
+<summary>Users report seeing another user's name in the header. One header is wrong.</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> a personalised response was served with <code>Cache-Control: public</code> (or
+simply no <code>private</code>), so a shared cache — the CDN, or a corporate proxy — stored
+one user's HTML and served it to the next.</p>
+<p>The fix is <code>Cache-Control: private, no-store</code> on anything user-specific, but the
+more useful answer is the architecture that makes this impossible:</p>
+<ul>
+<li>Keep the cached document <strong>anonymous</strong>. Cache the shell publicly and fill in
+  personalisation client-side, or at the edge from the session cookie.</li>
+<li>If you must vary at the edge, put the discriminator <strong>in the cache key</strong>
+  explicitly rather than relying on <code>Vary</code> with a cookie, which is easy to get
+  subtly wrong and destroys hit rate.</li>
+<li>Treat <code>public</code> as something you opt into deliberately, never a default.</li>
+</ul>
+<p>This is worth rehearsing as an incident story: it is high-severity, it is a
+one-line cause, and the prevention is a policy rather than a patch.</p>
+</div>
+</details>
 <h3 id="72-the-cache-busting-pattern">7.2 The cache-busting pattern</h3>
 <p class="lead-in"><strong>What it is.</strong> Immutable, long-lived, content-hashed assets plus a short-lived or revalidated HTML document that points at them.</p>
 <p class="lead-in"><strong>Example.</strong> <code>index.html</code> is <code>no-cache</code>; it references <code>app.3f9a1c.js</code> which is <code>immutable</code>. A deploy changes the hash, so no purge is needed and no user ever gets a mismatched chunk.</p>
@@ -2381,6 +3037,40 @@ GET /                →  Cache-Control: no-cache
 <p class="lead-in"><strong>Example.</strong> React escapes interpolated values, so the real React vectors are exactly four: <code>dangerouslySetInnerHTML</code>, <code>href={userInput}</code> with a <code>javascript:</code> URL, spreading unvalidated props onto an element, and server-rendered JSON injection (an unescaped <code>&lt;/script&gt;</code> inside a serialised payload).</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Sanitising HTML is a losing arms race compared with not rendering HTML at all; <strong>Trusted Types</strong> converts a code-review problem into a browser-enforced one, at the cost of a migration.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> How would you safely render user-authored rich text? Why is <code>encodeURIComponent</code> not enough in an HTML attribute? What does Trusted Types enforce?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-jsx">// 1 — the four real React vectors
+&lt;div dangerouslySetInnerHTML={{ __html: userHtml }} /&gt;   // sink
+&lt;a href={userUrl}&gt;link&lt;/a&gt;                               // javascript: URL
+&lt;Component {...untrustedProps} /&gt;                        // can inject onError etc.
+&lt;script&gt;{`window.__DATA__ = ${JSON.stringify(data)}`}&lt;/script&gt;  // &lt;/script&gt; breakout
+
+// 2 — safe versions
+&lt;a href={/^https?:\/\//.test(userUrl) ? userUrl : '#'}&gt;link&lt;/a&gt;
+const safe = JSON.stringify(data).replace(/&lt;/g, '\\u003c');   // escape the breakout
+
+// 3 — when you genuinely must render HTML
+import DOMPurify from 'dompurify';
+&lt;div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userHtml) }} /&gt;
+</code></pre>
+<details class="q">
+<summary>A hotel review renders fine but fires an alert. Where did it get in?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> it is stored XSS, and the review text reached a sink somewhere that
+bypasses React's escaping. The three places to look, in order:</p>
+<ol>
+<li><strong><code>dangerouslySetInnerHTML</code></strong> — because the product wanted bold text in reviews.</li>
+<li><strong>Server-rendered JSON</strong> — the review was interpolated into a <code>&lt;script&gt;</code> tag
+   and contained <code>&lt;/script&gt;</code>, which closes the tag early and starts markup.</li>
+<li><strong>A third-party widget</strong> given the raw string and writing it with <code>innerHTML</code>.</li>
+</ol>
+<p>Note what is <em>not</em> the cause: <code>{review.text}</code> in JSX. React escapes that.</p>
+<p>The systemic fix is not "sanitise harder" — sanitisers are an arms race. It is
+<strong>Trusted Types</strong> (<code>require-trusted-types-for 'script'</code>), which makes the browser
+throw on any assignment to a dangerous sink unless the value passed through a
+registered policy. That converts a code-review problem into a runtime guarantee,
+which is the difference between a fix and a control.</p>
+</div>
+</details>
 <h3 id="83-content-security-policy">8.3 Content Security Policy</h3>
 <p class="lead-in"><strong>What it is.</strong> A response header restricting which sources of script, style, images and frames may load and execute.</p>
 <p class="lead-in"><strong>Example.</strong> A strict modern policy uses nonces plus <code>strict-dynamic</code>, not a host allowlist:</p>
@@ -2546,6 +3236,38 @@ GET /                →  Cache-Control: no-cache
 <p class="lead-in"><strong>Example.</strong> The defensible architecture: short-lived access token <strong>in memory only</strong>, refresh token in an <code>HttpOnly; Secure; SameSite=Strict</code> cookie scoped to the refresh path, silent refresh on 401.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> <code>localStorage</code> is XSS-readable; cookies are CSRF-exposed but can be <code>HttpOnly</code>. The honest caveat: under XSS you lose either way, because the attacker can simply call your API from the victim's session. That is why CSP and Trusted Types matter more than storage choice.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why is "just use <code>HttpOnly</code> cookies" not a complete answer? What survives a page refresh with in-memory tokens? (Nothing — you silently refresh on load.)</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — access token in memory only, never persisted
+let accessToken = null;                  // dies on refresh, by design
+
+// 2 — refresh via an HttpOnly cookie, single-flight so N 401s cause one refresh
+let inflight = null;
+const refresh = () =&gt; (inflight ??= fetch('/auth/refresh', { credentials: 'include' })
+  .then(r =&gt; r.json())
+  .finally(() =&gt; { inflight = null; }));
+
+// 3 — the cookie that carries it
+// Set-Cookie: rt=…; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=1209600
+</code></pre>
+<details class="q">
+<summary>&ldquo;Just use HttpOnly cookies, then XSS can&rsquo;t steal the token.&rdquo; Rebut it.</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> <code>HttpOnly</code> stops the attacker <strong>reading</strong> the token. It does not stop
+them <strong>using</strong> it.</p>
+<p>With script execution in your origin, the attacker simply calls your API from the
+victim's own session. The browser attaches the cookie automatically, same-origin
+checks pass, and every request looks legitimate. They do not need the token's
+value — they have something better: the ability to act as the user, from the
+user's browser, for as long as the page is open.</p>
+<p>So <code>HttpOnly</code> is worth having (it prevents exfiltration, which enables <em>offline</em>
+and <em>later</em> abuse), but it is a mitigation, not a boundary.</p>
+<p>The honest framing: <strong>under XSS you have lost, whatever the storage choice.</strong>
+Storage decisions trade one exposure for another — <code>localStorage</code> is XSS-readable,
+cookies are CSRF-exposed. Neither is a defence against script injection. That is
+why CSP and Trusted Types matter more than the storage debate, and saying so is
+what separates a considered answer from a memorised one.</p>
+</div>
+</details>
 <h3 id="89-supply-chain-and-third-parties">8.9 Supply chain and third parties</h3>
 <p class="lead-in"><strong>What it is.</strong> Risk arriving through dependencies and third-party scripts rather than your own code.</p>
 <p class="lead-in"><strong>Example.</strong> Controls: committed lockfile, <code>npm ci</code> only, Renovate/Dependabot with grouped patch automerge, <code>npm audit</code>/Socket in CI, <code>ignore-scripts</code> plus a private registry proxy, and provenance/sigstore where available. For third-party tags: Subresource Integrity hashes, <code>crossorigin</code>, sandboxed iframes, and a review gate.</p>
@@ -2643,6 +3365,43 @@ GET /                →  Cache-Control: no-cache
 <p class="lead-in"><strong>Example.</strong> Supporting diagnostics: <strong>TTFB</strong> (server + network), <strong>FCP</strong> (first paint of anything), <strong>TBT</strong> (sum of long-task time over 50ms), <strong>TTI</strong>. TBT is the <em>lab</em> proxy; INP is the <em>field</em> metric.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> p75 hides the tail — always look at p95 too, and segment by device class and country, because a global average flatters you while low-end Android users suffer.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why did INP replace FID? What's the difference between lab and field data? How do you attribute an INP regression to a specific interaction? (<code>event</code> timing entries and the Long Animation Frames API.)</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — attribute a regression to a deploy, not just a route
+onLCP(m =&gt; beacon({ v: m.value, build: __BUILD_ID__, route, device, country }));
+
+// 2 — find WHICH element is the LCP, in the field
+new PerformanceObserver((l) =&gt; {
+  const e = l.getEntries().at(-1);
+  beacon({ lcp: e.startTime, el: e.element?.tagName, url: e.url });
+}).observe({ type: 'largest-contentful-paint', buffered: true });
+
+// 3 — attribute INP to the actual interaction
+new PerformanceObserver((l) =&gt; l.getEntries()
+  .filter(e =&gt; e.duration &gt; 200)
+  .forEach(e =&gt; beacon({ inp: e.duration, type: e.name, target: e.target?.id })),
+).observe({ type: 'event', durationThreshold: 200, buffered: true });
+</code></pre>
+<details class="q">
+<summary>p75 LCP is 2.4s — green. Users still complain. What did you miss?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> p75 globally is an average of populations, and it hides the segments
+that are actually suffering.</p>
+<p>Slice the same data four ways before believing it:</p>
+<ol>
+<li><strong>Device class</strong> — a mid-range Android may sit at p75 of 5s while desktop drags
+   the aggregate down. Most travel traffic in emerging markets is low-end Android.</li>
+<li><strong>Country / network</strong> — a distant origin or a 3G tail behaves nothing like the
+   office.</li>
+<li><strong>Route</strong> — the home page may be fine while search, where the money is, is not.</li>
+<li><strong>p95, not just p75</strong> — the complaining users are, by definition, in the tail.</li>
+</ol>
+<p>Then check you are measuring the right thing at all: if complaints are about
+<em>responsiveness</em> rather than <em>loading</em>, LCP is simply the wrong metric and INP is
+where to look.</p>
+<p>The general lesson: a green aggregate is a hypothesis, not a conclusion. Always
+ask "green for whom?"</p>
+</div>
+</details>
 <h3 id="92-measurement">9.2 Measurement</h3>
 <p class="lead-in"><strong>What it is.</strong> Lab tools give deterministic, repeatable numbers; field tools (RUM) give the truth about real users.</p>
 <p class="lead-in"><strong>Example.</strong></p>
@@ -2863,6 +3622,39 @@ onMouseEnter={() =&gt; import('./CheckoutPage')}                          // pre
 <p>Chunk strategy: a <code>framework</code> chunk (react, react-dom) that changes rarely so it stays cached, a <code>commons</code> chunk for modules used by ≥N routes, and per-route chunks.</p>
 <p class="lead-in"><strong>Trade-offs.</strong> Over-splitting costs request overhead and deepens the waterfall; under-splitting ships code nobody runs. Splitting also introduces the chunk-404-after-deploy failure, which needs a retry-then-reload handler.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Where do you split first? How do you avoid a loading spinner on every navigation? Why does a shared chunk's hash changing invalidate everything downstream?</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — route split with prefetch on intent, so splitting costs nothing visible
+const Checkout = lazy(() =&gt; import('./Checkout'));
+&lt;Link onMouseEnter={() =&gt; import('./Checkout')} onFocus={() =&gt; import('./Checkout')} /&gt;
+
+// 2 — survive a deploy that removed the chunk you are asking for
+window.addEventListener('vite:preloadError', () =&gt; location.reload());
+// webpack equivalent: catch ChunkLoadError, retry with a cache-bust, then reload
+
+// 3 — keep the framework chunk stable so it stays cached across deploys
+// splitChunks: { cacheGroups: { framework: { test: /[\\/]node_modules[\\/](react|react-dom)/ } } }
+</code></pre>
+<details class="q">
+<summary>You split aggressively and it got slower. How?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> several ways, and they compound.</p>
+<ol>
+<li><strong>Waterfall depth.</strong> Chunk A imports B imports C. Each level costs a round
+   trip, and the browser cannot discover C until B has arrived. Splitting trades
+   bytes for round trips, and on high-latency mobile that trade can lose.</li>
+<li><strong>Lost compression ratio.</strong> Many tiny chunks compress worse than one larger
+   one — shared dictionary, per-response overhead. Below roughly 20KB a chunk
+   often is not worth its own request.</li>
+<li><strong>Duplicated shared code.</strong> Without a sensible <code>commons</code> group, the same
+   module gets inlined into several route chunks.</li>
+<li><strong>Spinner-per-navigation.</strong> Technically faster first load, worse <em>felt</em>
+   performance, because now every click waits.</li>
+</ol>
+<p>The fix is not "split less" but "split along the right seams": route level first,
+then genuinely heavy conditional widgets, with the framework in its own long-lived
+chunk — and prefetch on intent so the user never waits for a split you chose.</p>
+</div>
+</details>
 <h3 id="105-tool-comparison">10.5 Tool comparison</h3>
 <table>
 <thead>
@@ -3343,6 +4135,38 @@ wrapper.find('.btn-primary').simulate('click');
 </code></pre>
 <p class="lead-in"><strong>Trade-offs.</strong> Role-based queries are slower to write and occasionally force you to fix the markup first — which is the point. Test ids are a legitimate fallback for things with no accessible identity, used sparingly.</p>
 <p class="lead-in"><strong>Follow-ups.</strong> Why is <code>getByRole</code> preferred? When is a test id acceptable? Why are large DOM snapshots worse than no test? (They get rubber-stamped on failure.)</p>
+<p class="lead-in"><strong>More examples.</strong></p>
+<pre><code class="language-javascript">// 1 — query the way a user perceives the UI
+await userEvent.click(screen.getByRole('button', { name: /search/i }));
+expect(await screen.findByRole('list', { name: /results/i })).toBeInTheDocument();
+
+// 2 — assert the absence of a loading state, not an implementation detail
+await waitForElementToBeRemoved(() =&gt; screen.queryByRole('status'));
+
+// 3 — the escape hatch, used sparingly and deliberately
+screen.getByTestId('price-cell');   // only when there is no accessible identity
+</code></pre>
+<details class="q">
+<summary>The test passes but the feature is broken in production. Classic causes?</summary>
+<div class="inner">
+<p class="lead-in"><strong>Answer:</strong> the test asserted the implementation rather than the behaviour.</p>
+<p>The usual shapes:</p>
+<ol>
+<li><strong>Mocked at the module boundary.</strong> <code>jest.mock('./useSearch')</code> means the real
+   data layer — the part that broke — never ran. Mock at the <em>network</em> boundary
+   with MSW so the component exercises its real hooks, cache and error handling.</li>
+<li><strong>Queried by test id.</strong> The element exists but is <code>aria-hidden</code>, covered, or
+   disabled. A real user could not click it; <code>getByRole</code> would have failed.</li>
+<li><strong>No assertion on the async settled state.</strong> The test asserted the spinner,
+   which always appears, then finished before the failure surfaced.</li>
+<li><strong>The bug is in integration.</strong> Both units pass in isolation; the contract
+   between them changed. This is precisely why the mass of frontend tests belongs
+   at the integration layer rather than the unit layer.</li>
+</ol>
+<p>The diagnostic question worth asking of any test: <em>if the feature broke, would
+this test fail?</em> A surprising number of green tests cannot answer yes.</p>
+</div>
+</details>
 <h3 id="123-mocking-and-msw">12.3 Mocking and MSW</h3>
 <p class="lead-in"><strong>What it is.</strong> Intercepting at the <strong>network</strong> boundary rather than the module boundary, so the component under test runs its real data layer.</p>
 <p class="lead-in"><strong>Example.</strong></p>
