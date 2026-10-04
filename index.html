@@ -3646,6 +3646,15 @@ wrapper.find('.btn-primary').simulate('click');
   }, {rootMargin:'-10% 0px -75% 0px', threshold:0});
   heads.forEach(function(h){ obs.observe(h); });
 
+  // A nav click jumps instantly; the observer may not fire, so set active now.
+  links.forEach(function(a){
+    a.addEventListener('click', function(){
+      if(current) current.classList.remove('active');
+      a.classList.add('active');
+      current = a;
+    });
+  });
+
   var top = document.getElementById('top');
   top.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
   window.addEventListener('scroll', function(){
